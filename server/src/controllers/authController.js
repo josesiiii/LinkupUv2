@@ -41,15 +41,14 @@ export const registrarUsuario = async (req, res) => {
 
     // Generar token
     const token = jwt.sign(
-      {
-        id: nuevoUsuario._id
-      },
-      "secretkey",
-      {
-        expiresIn: "7d"
-      }
-    );
-
+  {
+    id: nuevoUsuario._id
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "7d"
+  }
+);
     // Respuesta
     res.status(201).json({
       message: "Usuario creado correctamente",
@@ -105,14 +104,14 @@ export const iniciarSesion = async (req, res) => {
 
     // Generar token
     const token = jwt.sign(
-      {
-        id: usuario._id
-      },
-      "secretkey",
-      {
-        expiresIn: "7d"
-      }
-    );
+  {
+    id: usuario._id
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "7d"
+  }
+);
 
     // Respuesta
     res.status(200).json({

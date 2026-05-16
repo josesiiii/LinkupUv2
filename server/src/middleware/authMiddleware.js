@@ -17,8 +17,10 @@ const protegerRuta = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       // Verificar token
-      const decoded = jwt.verify(token, "secretkey");
-
+const decoded = jwt.verify(
+  token,
+  process.env.JWT_SECRET
+);
       // Buscar usuario
       req.usuario = await User.findById(decoded.id).select("-password");
 
