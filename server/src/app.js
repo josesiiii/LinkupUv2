@@ -8,6 +8,12 @@ import userRoutes from "./routes/userRoutes.js";
 
 import connectionRoutes from "./routes/connectionRoutes.js";
 
+import institutionRoutes from "./routes/institutionRoutes.js";
+
+import conversationRoutes from "./routes/conversationRoutes.js";
+
+
+
 const app = express();
 
 app.use(cors());
@@ -25,6 +31,10 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/connections", connectionRoutes);
+
+app.use("/api/institutions", institutionRoutes);
+
+app.use("/api/conversations", conversationRoutes);
 
 export default app;
 
