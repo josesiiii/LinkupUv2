@@ -6,37 +6,58 @@ import authRoutes from "./routes/authRoutes.js";
 
 import userRoutes from "./routes/userRoutes.js";
 
-import connectionRoutes from "./routes/connectionRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
-import institutionRoutes from "./routes/institutionRoutes.js";
+import savedProfileRoutes from "./routes/savedProfileRoutes.js";
 
-import conversationRoutes from "./routes/conversationRoutes.js";
-
-
+import campusRoutes from "./routes/campusRoutes.js";
 
 const app = express();
 
+
+
+// MIDDLEWARES
 app.use(cors());
 
 app.use(express.json());
 
-// Auth
-app.use("/api/auth", authRoutes);
 
-// Users
-app.use("/api/users", userRoutes);
 
+// ROUTES
+app.use(
+  "/api/auth",
+  authRoutes
+);
+
+app.use(
+  "/api/users",
+  userRoutes
+);
+
+app.use(
+  "/api/messages",
+  messageRoutes
+);
+
+app.use(
+  "/api/savedprofiles",
+  savedProfileRoutes
+);
+
+app.use(
+  "/api/campus",
+  campusRoutes
+);
+
+
+
+// TEST
 app.get("/", (req, res) => {
-  res.send("API funcionando");
+
+  res.send(
+    "API funcionando 🚀"
+  );
+
 });
 
-app.use("/api/connections", connectionRoutes);
-
-app.use("/api/institutions", institutionRoutes);
-
-app.use("/api/conversations", conversationRoutes);
-
 export default app;
-
-
-

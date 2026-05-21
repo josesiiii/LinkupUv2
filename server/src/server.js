@@ -8,33 +8,10 @@ import app from "./app.js";
 
 import connectDB from "./config/db.js";
 
-import messageRoutes from "./routes/messageRoutes.js";
-
-import savedProfileRoutes from "./routes/savedProfileRoutes.js";
-
-import campusRoutes from "./routes/campusRoutes.js";
-
 dotenv.config();
 
 connectDB();
 
-
-
-// ROUTES
-app.use(
-  "/api/messages",
-  messageRoutes
-);
-
-app.use(
-  "/api/savedprofiles",
-  savedProfileRoutes
-);
-
-app.use(
-  "/api/campus",
-  campusRoutes
-);
 
 
 // HTTP SERVER
@@ -43,10 +20,13 @@ const server = http.createServer(app);
 
 
 // SOCKET.IO
-const io = new Server(server, {
+export const io = new Server(server, {
+
   cors: {
-    origin: "*"
+    origin: "*",
+    methods: ["GET", "POST"]
   }
+
 });
 
 
@@ -56,7 +36,7 @@ const onlineUsers = {};
 
 
 
-// CONEXIÓN SOCKET
+// SOCKET CONNECTION
 io.on("connection", (socket) => {
 
   console.log(
@@ -67,77 +47,107 @@ io.on("connection", (socket) => {
 
 
   // REGISTRAR USUARIO
-  socket.on("registerUser", (userId) => {
+  socket.on(
+    "registerUser",
+    (userId) => {
 
-    onlineUsers[userId] = socket.id;
+      onlineUsers[userId] =
+        socket.id;
 
-    console.log("Usuarios online:");
-    console.log(onlineUsers);
+      console.log(
+        "Usuarios online:"
+      );
 
-  });
+      console.log(
+        onlineUsers
+      );
 
-
-
-  // UNIRSE A ROOM
-  socket.on("joinRoom", (roomId) => {
-
-    socket.join(roomId);
-
-    console.log(
-      `Socket ${socket.id} unido a room ${roomId}`
-    );
-
-  });
+    }
+  );
 
 
 
-  // ENVIAR MENSAJE REALTIME
-  socket.on("sendMessage", (data) => {
+  // JOIN ROOM
+  socket.on(
+    "joinRoom",
+    (roomId) => {
 
-    io.to(data.roomId).emit(
-      "receiveMessage",
-      data
-    );
+      socket.join(roomId);
 
-  });
+      console.log(
+        `Socket ${socket.id} unido a room ${roomId}`
+      );
+
+    }
+  );
 
 
 
-  // DESCONECTAR
-  socket.on("disconnect", () => {
+  // SEND MESSAGE
+  socket.on(
+    "sendMessage",
+    (data) => {
 
-    console.log(
-      "Usuario desconectado:",
-      socket.id
-    );
+      io.to(data.roomId).emit(
+        "receiveMessage",
+        data
+      );
 
-    // eliminar usuario online
-    for (const userId in onlineUsers) {
+    }
+  );
 
-      if (
-        onlineUsers[userId] === socket.id
-      ) {
 
-        delete onlineUsers[userId];
+
+  // DISCONNECT
+  socket.on(
+    "disconnect",
+    () => {
+
+      console.log(
+        "Usuario desconectado:",
+        socket.id
+      );
+
+      for (const userId in onlineUsers) {
+
+        if (
+          onlineUsers[userId] ===
+          socket.id
+        ) {
+
+          delete onlineUsers[userId];
+
+        }
 
       }
 
+      console.log(
+        "Usuarios online:"
+      );
+
+      console.log(
+        onlineUsers
+      );
+
     }
-
-  });
-
-});
-
-
-
-const PORT = process.env.PORT || 5000;
-
-
-
-server.listen(PORT, () => {
-
-  console.log(
-    `Servidor corriendo en puerto ${PORT}`
   );
 
 });
+
+
+
+const PORT =
+  process.env.PORT || 5000;
+
+
+
+server.listen(
+  PORT,
+  () => {
+
+    console.log(
+      `Servidor corriendo en puerto ${PORT}`
+    );
+
+  }
+);
