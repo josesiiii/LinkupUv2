@@ -12,6 +12,8 @@ import messageRoutes from "./routes/messageRoutes.js";
 
 import savedProfileRoutes from "./routes/savedProfileRoutes.js";
 
+import campusRoutes from "./routes/campusRoutes.js";
+
 dotenv.config();
 
 connectDB();
@@ -29,6 +31,10 @@ app.use(
   savedProfileRoutes
 );
 
+app.use(
+  "/api/campus",
+  campusRoutes
+);
 
 
 // HTTP SERVER

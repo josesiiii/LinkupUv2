@@ -1,87 +1,179 @@
 import bcrypt from "bcryptjs";
+
 import jwt from "jsonwebtoken";
+
 import User from "../models/User.js";
+
 import { INSTITUTIONS } from "../config/institutions.js";
 
-export const registrarUsuario = async (req, res) => {
+
+
+// REGISTER
+export const registrarUsuario = async (
+  req,
+  res
+) => {
 
   try {
 
     const {
+
       fullName,
+
       email,
+
       password,
+
       interests,
+
       objectives,
+
       career,
+
       faculty,
+
       semester,
+
       bio,
-      campus,
+
+      currentCampus,
+
       city,
+
       department
+
     } = req.body;
 
-    // 1. Validar dominio institucional
-    const domain = email.split("@")[1];
-    const institution = INSTITUTIONS[domain];
+    // 1. VALIDAR DOMAIN
+    const domain =
+      email.split("@")[1];
+
+    const institution =
+      INSTITUTIONS[domain];
 
     if (!institution) {
+
       return res.status(400).json({
-        message: "Debes usar tu correo institucional (.edu.co)"
+        message:
+          "Debes usar tu correo institucional"
       });
+
     }
 
-    // 2. Validar que el campus pertenezca a la institución
-    const validCampus = institution.campuses.find(c => c.id === campus);
+    // 2. VALIDAR CAMPUS
+    const validCampus =
+      institution.campuses.find(
+        c =>
+          c.id === currentCampus
+      );
+
     if (!validCampus) {
+
       return res.status(400).json({
-        message: "El campus no corresponde a tu institución"
+        message:
+          "Campus inválido para la institución"
       });
+
     }
 
-    // 3. Verificar usuario existente
-    const usuarioExistente = await User.findOne({ email });
+    // 3. VERIFICAR EXISTENCIA
+    const usuarioExistente =
+      await User.findOne({
+        email
+      });
+
     if (usuarioExistente) {
+
       return res.status(400).json({
-        message: "El usuario ya existe"
+        message:
+          "El usuario ya existe"
       });
+
     }
 
-    // 4. Encriptar password
-    const passwordHash = await bcrypt.hash(password, 10);
+    // 4. HASH PASSWORD
+    const passwordHash =
+      await bcrypt.hash(
+        password,
+        10
+      );
 
-    // 5. Crear usuario — institution se asigna automáticamente
-    const nuevoUsuario = await User.create({
-      fullName,
-      email,
-      password: passwordHash,
-      interests:   interests   || [],
-      objectives:  objectives  || [],
-      career:      career      || "",
-      faculty:     faculty     || "",
-      semester:    semester    || 1,
-      bio:         bio         || "",
-      institution: institution.name, // ← automático por dominio
-      campus,
-      city:        city        || validCampus.city,
-      department:  department  || validCampus.department
-    });
+    // 5. CREAR USUARIO
+    const nuevoUsuario =
+      await User.create({
 
-    // 6. Generar token
+        fullName,
+
+        email,
+
+        password:
+          passwordHash,
+
+        interests:
+          interests || [],
+
+        objectives:
+          objectives || [],
+
+        career:
+          career || "",
+
+        faculty:
+          faculty || "",
+
+        semester:
+          semester || 1,
+
+        bio:
+          bio || "",
+
+        institution: institution.name,
+
+        currentCampus,
+
+        city:
+          city ||
+          validCampus.city,
+
+        department:
+          department ||
+          validCampus.department
+
+      });
+
+    // 6. TOKEN
     const token = jwt.sign(
-      { id: nuevoUsuario._id },
+
+      {
+        id:
+          nuevoUsuario._id
+      },
+
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+
+      {
+        expiresIn: "7d"
+      }
+
     );
 
-    // 7. Respuesta sin password
-    const { password: _, ...usuarioSinPassword } = nuevoUsuario.toObject();
+    // 7. RESPONSE
+    const {
+      password: _,
+      ...usuarioSinPassword
+    } =
+      nuevoUsuario.toObject();
 
     res.status(201).json({
-      message: "Usuario creado correctamente",
+
+      message:
+        "Usuario creado correctamente",
+
       token,
-      usuario: usuarioSinPassword
+
+      usuario:
+        usuarioSinPassword
+
     });
 
   } catch (error) {
@@ -94,40 +186,81 @@ export const registrarUsuario = async (req, res) => {
 
 };
 
-export const iniciarSesion = async (req, res) => {
+
+
+// LOGIN
+export const iniciarSesion = async (
+  req,
+  res
+) => {
 
   try {
 
-    const { email, password } = req.body;
+    const {
+      email,
+      password
+    } = req.body;
 
-    const usuario = await User.findOne({ email });
+    const usuario =
+      await User.findOne({
+        email
+      });
 
     if (!usuario) {
+
       return res.status(400).json({
-        message: "Usuario no encontrado"
+        message:
+          "Usuario no encontrado"
       });
+
     }
 
-    const passwordCorrecto = await bcrypt.compare(password, usuario.password);
+    const passwordCorrecto =
+      await bcrypt.compare(
+        password,
+        usuario.password
+      );
 
     if (!passwordCorrecto) {
+
       return res.status(400).json({
-        message: "Password incorrecto"
+        message:
+          "Password incorrecto"
       });
+
     }
 
     const token = jwt.sign(
-      { id: usuario._id },
+
+      {
+        id:
+          usuario._id
+      },
+
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+
+      {
+        expiresIn: "7d"
+      }
+
     );
 
-    const { password: _, ...usuarioSinPassword } = usuario.toObject();
+    const {
+      password: _,
+      ...usuarioSinPassword
+    } =
+      usuario.toObject();
 
     res.status(200).json({
-      message: "Login exitoso",
+
+      message:
+        "Login exitoso",
+
       token,
-      usuario: usuarioSinPassword
+
+      usuario:
+        usuarioSinPassword
+
     });
 
   } catch (error) {
@@ -140,6 +273,16 @@ export const iniciarSesion = async (req, res) => {
 
 };
 
-export const obtenerPerfil = async (req, res) => {
-  res.status(200).json(req.usuario);
+
+
+// PERFIL
+export const obtenerPerfil = async (
+  req,
+  res
+) => {
+
+  res.status(200).json(
+    req.usuario
+  );
+
 };
