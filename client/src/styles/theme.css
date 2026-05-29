@@ -1,0 +1,150 @@
+/* src/styles/theme.css */
+@import "tailwindcss";
+
+:root {
+  --login-bg-elevated:    #1E2433;
+  --login-border-subtle:  #2A3142;
+  --login-border-focus:   #4F8EF7;
+  --login-text-primary:   #F0F2F7;
+  --login-text-muted:     #8B92A8;
+  --login-accent-primary: #4F8EF7;
+  --login-accent-glow:    rgba(79, 142, 247, 0.12);
+  --login-error:          #EF4444;
+}
+
+/* ── Animaciones ────────────────────────────────── */
+
+@keyframes form-entrance {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes input-entrance {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float-particle {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-20px); }
+}
+
+@keyframes blob-float {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(30px, 30px) scale(1.05); }
+}
+
+@keyframes line-pulse {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.7; }
+}
+
+/* ── Clases de animación ────────────────────────── */
+
+.animate-form-entrance {
+  animation: form-entrance 600ms ease-out 200ms both;
+}
+
+.animate-blob {
+  animation: blob-float 6s ease-in-out infinite alternate;
+}
+
+.animate-blob-delay {
+  animation: blob-float 8s ease-in-out 2s infinite alternate-reverse;
+}
+
+.input-delay-1 { animation: input-entrance 400ms ease-out 250ms both; }
+.input-delay-2 { animation: input-entrance 400ms ease-out 300ms both; }
+.input-delay-3 { animation: input-entrance 400ms ease-out 350ms both; }
+.input-delay-4 { animation: input-entrance 400ms ease-out 400ms both; }
+.input-delay-5 { animation: input-entrance 400ms ease-out 450ms both; }
+.input-delay-6 { animation: input-entrance 400ms ease-out 500ms both; }
+
+/* ── Input focus glow ───────────────────────────── */
+
+.input-field {
+  background: var(--login-bg-elevated);
+  border: 1px solid var(--login-border-subtle);
+  color: var(--login-text-primary);
+  height: 48px;
+  border-radius: 12px;
+  padding: 0 16px;
+  width: 100%;
+  font-size: 14px;
+  transition: border-color 200ms, box-shadow 200ms;
+  outline: none;
+}
+
+.input-field::placeholder {
+  color: var(--login-text-muted);
+}
+
+.input-field:focus {
+  border-color: var(--login-border-focus);
+  box-shadow: 0 0 0 3px var(--login-accent-glow);
+}
+
+/* ── Botones sociales ───────────────────────────── */
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--login-bg-elevated);
+  border: 1px solid var(--login-border-subtle);
+  color: var(--login-text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 200ms, background 200ms;
+  width: 100%;
+}
+
+.btn-social:hover {
+  border-color: var(--login-border-focus);
+  background: #252d3f;
+}
+
+/* ── Botón submit ───────────────────────────────── */
+
+.btn-submit {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4F8EF7 0%, #6B7CF0 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(79, 142, 247, 0.2);
+  transition: transform 150ms, box-shadow 150ms;
+}
+
+.btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(79, 142, 247, 0.35);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Grid pattern ───────────────────────────────── */
+
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(30, 36, 51, 0.8) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 36, 51, 0.8) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.3;
+}
