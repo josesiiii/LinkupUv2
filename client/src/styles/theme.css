@@ -1,150 +1,317 @@
-/* src/styles/theme.css */
-@import "tailwindcss";
+/* ══════════════════════════════════════════════
+  RESEND / VERCEL STYLE LOGIN
+   ══════════════════════════════════════════════ */
 
 :root {
-  --login-bg-elevated:    #1E2433;
-  --login-border-subtle:  #2A3142;
-  --login-border-focus:   #4F8EF7;
-  --login-text-primary:   #F0F2F7;
-  --login-text-muted:     #8B92A8;
-  --login-accent-primary: #4F8EF7;
-  --login-accent-glow:    rgba(79, 142, 247, 0.12);
-  --login-error:          #EF4444;
+  --bg-primary: #080808;
+  --bg-secondary: #111111;
+  --bg-hover: #ffffff;
+
+  --border-primary: #222222;
+  --border-hover: #3a3a3a;
+  --border-focus: #444444;
+
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #666666;
+  --text-placeholder: #555555;
+
+  --danger: #ef4444;
+
+  --shadow-soft:
+    0 8px 20px rgba(0,0,0,0.35);
+
+  --transition-premium:
+    all 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Animaciones ────────────────────────────────── */
+/* ══════════════════════════════════════════════
+  ANIMACIONES
+   ══════════════════════════════════════════════ */
 
-@keyframes form-entrance {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes login-form-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 16px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }
 
-@keyframes input-entrance {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes login-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-@keyframes float-particle {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-20px); }
+@keyframes login-section-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes blob-float {
-  from { transform: translate(0, 0) scale(1); }
-  to   { transform: translate(30px, 30px) scale(1.05); }
+@keyframes blob-float-left {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
-@keyframes line-pulse {
-  0%, 100% { opacity: 0.3; }
-  50%       { opacity: 0.7; }
+@keyframes blob-float-right {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
-/* ── Clases de animación ────────────────────────── */
+@keyframes blob-fade-in {
+  from {
+    opacity: 0;
+  }
 
-.animate-form-entrance {
-  animation: form-entrance 600ms ease-out 200ms both;
+  to {
+    opacity: 1;
+  }
 }
 
-.animate-blob {
-  animation: blob-float 6s ease-in-out infinite alternate;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.animate-blob-delay {
-  animation: blob-float 8s ease-in-out 2s infinite alternate-reverse;
+/* ══════════════════════════════════════════════
+  ENTRANCE
+   ══════════════════════════════════════════════ */
+
+.login-form-container {
+  animation:
+    login-form-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.input-delay-1 { animation: input-entrance 400ms ease-out 250ms both; }
-.input-delay-2 { animation: input-entrance 400ms ease-out 300ms both; }
-.input-delay-3 { animation: input-entrance 400ms ease-out 350ms both; }
-.input-delay-4 { animation: input-entrance 400ms ease-out 400ms both; }
-.input-delay-5 { animation: input-entrance 400ms ease-out 450ms both; }
-.input-delay-6 { animation: input-entrance 400ms ease-out 500ms both; }
-
-/* ── Input focus glow ───────────────────────────── */
-
-.input-field {
-  background: var(--login-bg-elevated);
-  border: 1px solid var(--login-border-subtle);
-  color: var(--login-text-primary);
-  height: 48px;
-  border-radius: 12px;
-  padding: 0 16px;
-  width: 100%;
-  font-size: 14px;
-  transition: border-color 200ms, box-shadow 200ms;
-  outline: none;
+.login-logo {
+  animation:
+    login-logo-in 0.4s ease-out 0.1s both;
 }
 
-.input-field::placeholder {
-  color: var(--login-text-muted);
+.login-section {
+  animation:
+    login-section-in 0.35s ease-out var(--delay, 0.15s) both;
 }
 
-.input-field:focus {
-  border-color: var(--login-border-focus);
-  box-shadow: 0 0 0 3px var(--login-accent-glow);
+/* ══════════════════════════════════════════════
+  BLOBS
+   ══════════════════════════════════════════════ */
+
+.blob-left {
+  animation:
+    blob-fade-in 1.2s ease-out both,
+    blob-float-left 6s ease-in-out infinite;
 }
 
-/* ── Botones sociales ───────────────────────────── */
-
-.btn-social {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  height: 48px;
-  border-radius: 12px;
-  background: var(--login-bg-elevated);
-  border: 1px solid var(--login-border-subtle);
-  color: var(--login-text-primary);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color 200ms, background 200ms;
-  width: 100%;
+.blob-right {
+  animation:
+    blob-fade-in 1.2s ease-out both,
+    blob-float-right 6s ease-in-out 1.5s infinite;
 }
 
-.btn-social:hover {
-  border-color: var(--login-border-focus);
-  background: #252d3f;
+/* ══════════════════════════════════════════════
+  NAV
+   ══════════════════════════════════════════════ */
+
+.nav-home-link {
+  transition:
+    color 180ms ease;
 }
 
-/* ── Botón submit ───────────────────────────────── */
-
-.btn-submit {
-  width: 100%;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #4F8EF7 0%, #6B7CF0 100%);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 15px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(79, 142, 247, 0.2);
-  transition: transform 150ms, box-shadow 150ms;
+.nav-home-link:hover {
+  color: #aaaaaa !important;
 }
 
-.btn-submit:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(79, 142, 247, 0.35);
+/* ══════════════════════════════════════════════
+  INPUT
+   ══════════════════════════════════════════════ */
+
+.resend-input {
+  background: var(--bg-secondary) !important;
+
+  border: 1px solid var(--border-primary) !important;
+
+  color: var(--text-secondary) !important;
+
+  transition:
+    var(--transition-premium);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.02);
 }
 
-.btn-submit:active {
+.resend-input:hover {
+  border-color: #2e2e2e !important;
+
+  background: #141414 !important;
+}
+
+.resend-input:focus {
+  border-color: var(--border-focus) !important;
+
+  background: #161616 !important;
+
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.resend-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* ══════════════════════════════════════════════
+  OAUTH BUTTONS
+   ══════════════════════════════════════════════ */
+
+.oauth-btn {
+  position: relative;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(28,28,28,1) 0%,
+      rgba(18,18,18,1) 100%
+    ) !important;
+
+  border: 1px solid var(--border-primary) !important;
+
+  transition:
+    var(--transition-premium);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04);
+
   transform: translateY(0);
 }
 
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+/* Glow superior */
+.oauth-btn::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.04) 0%,
+      transparent 60%
+    );
+
+  opacity: 0;
+
+  transition:
+    opacity 180ms ease;
+
+  pointer-events: none;
 }
 
-/* ── Grid pattern ───────────────────────────────── */
+/* Hover */
+.oauth-btn:hover {
+  background:
+    linear-gradient(
+      180deg,
+      rgb(154, 7, 7) 0%,
+      rgb(203, 9, 9) 100%
+    ) !important;
 
-.grid-pattern {
-  background-image:
-    linear-gradient(rgba(30, 36, 51, 0.8) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(30, 36, 51, 0.8) 1px, transparent 1px);
-  background-size: 40px 40px;
-  opacity: 0.3;
+  border-color: var(--border-hover) !important;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    var(--shadow-soft);
+}
+
+.oauth-btn:hover::before {
+  opacity: 1;
+}
+
+/* Active */
+.oauth-btn:active {
+  transform: translateY(0);
+
+  box-shadow:
+    inset 0 1px 0 rgba(240, 7, 7, 0.03),
+    0 2px 6px rgba(192, 12, 12, 0.25);
+}
+
+/* ══════════════════════════════════════════════
+  LOGIN BUTTON
+   ══════════════════════════════════════════════ */
+
+.login-btn {
+  transition:
+    var(--transition-premium);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04);
+
+  transform: translateY(0);
+}
+
+.login-btn:not(:disabled):hover {
+  background: #222222 !important;
+
+  border-color: #333333 !important;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    var(--shadow-soft);
+}
+
+.login-btn:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* Disabled */
+.login-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════════
+  LEGAL LINKS
+   ══════════════════════════════════════════════ */
+
+.legal-link {
+  transition:
+    color 180ms ease;
+}
+
+.legal-link:hover {
+  color: #888888 !important;
 }
