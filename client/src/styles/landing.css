@@ -1,0 +1,110 @@
+:root {
+  --primary: #f1adc2;
+  --secondary: #dccef8;
+  --cream: #fff8f5;
+
+  --glass-bg: rgba(255,255,255,.55);
+
+  --text: #2d2d2d;
+}
+
+.landing {
+  background:
+    linear-gradient(
+      135deg,
+      #fff8f5,
+      #f8d4e0,
+      #dccef8
+    );
+
+  min-height: 100vh;
+}
+
+.navbar {
+  position: fixed;
+
+  top: 20px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  width: 90%;
+  max-width: 1200px;
+
+  backdrop-filter: blur(20px);
+
+  background: rgba(255,255,255,.4);
+
+  border: 1px solid rgba(255,255,255,.3);
+
+  border-radius: 24px;
+
+  padding: 18px 28px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  z-index: 100;
+}
+
+.hero {
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+}
+
+.hero-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+}
+
+.hero-glow-1 {
+  width: 500px;
+  height: 500px;
+
+  background: #f1adc2;
+
+  top: -100px;
+  right: -100px;
+
+  opacity: .35;
+}
+
+.hero-glow-2 {
+  width: 450px;
+  height: 450px;
+
+  background: #dccef8;
+
+  bottom: -100px;
+  left: -100px;
+
+  opacity: .3;
+}
+
+.card {
+  backdrop-filter: blur(20px);
+
+  background: rgba(255,255,255,.45);
+
+  border: 1px solid rgba(255,255,255,.4);
+
+  border-radius: 32px;
+
+  padding: 32px;
+
+  transition: .3s;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+
+  box-shadow:
+    0 0 40px rgba(241,173,194,.25);
+}
