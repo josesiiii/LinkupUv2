@@ -1,9 +1,7 @@
 import mongoose from "mongoose";
 
 const usuarioSchema = new mongoose.Schema(
-
   {
-
     fullName: {
       type: String,
       required: true,
@@ -23,10 +21,7 @@ const usuarioSchema = new mongoose.Schema(
       required: true
     },
 
-
-
     // ── Campos académicos ──────────────────
-
     career: {
       type: String,
       trim: true,
@@ -46,30 +41,33 @@ const usuarioSchema = new mongoose.Schema(
       default: 1
     },
 
-
-
     // ── Perfil ─────────────────────────────
-
     bio: {
       type: String,
       maxlength: 300,
       default: ""
     },
 
+    // Foto de perfil — avatar independiente
     profilePicture: {
       type: String,
       default: ""
     },
 
-
+    // Galería personal — carrusel del perfil público (máx 6)
+    photos: [
+      {
+        url:   { type: String, required: true },
+        order: { type: Number, default: 0 }
+      }
+    ],
 
     // ── Institución y contexto ─────────────
-
-institution: {
-  type: String,
-  trim: true,
-  default: ""
-},
+    institution: {
+      type: String,
+      trim: true,
+      default: ""
+    },
 
     currentCampus: {
       type: String,
@@ -89,10 +87,7 @@ institution: {
       default: ""
     },
 
-
-
     // ── Intereses y objetivos ──────────────
-
     interests: {
       type: [String],
       default: []
@@ -103,44 +98,20 @@ institution: {
       default: []
     },
 
-
-
     // ── Estado ─────────────────────────────
-
     isActive: {
       type: Boolean,
       default: true
     }
-
   },
-
   {
     timestamps: true
   }
-
 );
-
-
 
 // ── Índices ───────────────────────────────
+usuarioSchema.index({ institution: 1, currentCampus: 1 });
+usuarioSchema.index({ interests: 1 });
 
-// Búsqueda rápida por institución y campus
-usuarioSchema.index({
-  institution: 1,
-  currentCampus: 1
-});
-
-// Búsqueda rápida por intereses
-usuarioSchema.index({
-  interests: 1
-});
-
-
-
-
-const User = mongoose.model(
-  "User",
-  usuarioSchema
-);
-
+const User = mongoose.model("User", usuarioSchema);
 export default User;

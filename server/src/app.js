@@ -12,6 +12,12 @@ import savedProfileRoutes from "./routes/savedProfileRoutes.js";
 
 import campusRoutes from "./routes/campusRoutes.js";
 
+import dotenv from "dotenv";
+
+dotenv.config();
+process.env.Linkup;
+
+
 const app = express();
 
 
@@ -48,6 +54,7 @@ app.use(
   "/api/campus",
   campusRoutes
 );
+
 
 
 
