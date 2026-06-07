@@ -146,3 +146,58 @@ export const iniciarSesion = async (req, res) => {
 export const obtenerPerfil = async (req, res) => {
   res.status(200).json(req.usuario);
 };
+// CAMBIAR PASSWORD
+export const cambiarPassword = async (req, res) => {
+  try {
+    const { passwordActual, passwordNuevo } = req.body;
+
+    // 1. VALIDAR QUE LLEGARON LOS DOS CAMPOS
+    if (!passwordActual || !passwordNuevo) {
+      return res.status(400).json({
+        message: "Debes enviar passwordActual y passwordNuevo"
+      });
+    }
+
+    // 2. VALIDAR LONGITUD MÍNIMA
+    if (passwordNuevo.length < 8) {
+      return res.status(400).json({
+        message: "La nueva contraseña debe tener al menos 8 caracteres"
+      });
+    }
+
+    // 3. BUSCAR USUARIO CON PASSWORD (select lo excluye por defecto)
+    const usuario = await User.findById(req.usuario._id).select("+password");
+
+    // 4. VERIFICAR PASSWORD ACTUAL
+    const passwordCorrecto = await bcrypt.compare(
+      passwordActual,
+      usuario.password
+    );
+
+    if (!passwordCorrecto) {
+      return res.status(400).json({
+        message: "La contraseña actual es incorrecta"
+      });
+    }
+
+    // 5. VERIFICAR QUE LA NUEVA SEA DIFERENTE
+    const esIgual = await bcrypt.compare(passwordNuevo, usuario.password);
+
+    if (esIgual) {
+      return res.status(400).json({
+        message: "La nueva contraseña debe ser diferente a la actual"
+      });
+    }
+
+    // 6. HASHEAR Y GUARDAR
+    usuario.password = await bcrypt.hash(passwordNuevo, 10);
+    await usuario.save();
+
+    res.status(200).json({
+      message: "Contraseña actualizada correctamente"
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
