@@ -51,6 +51,16 @@ export const INSTITUTIONS = {
       { id: "uniminuto-bogota", label: "Sede Principal Bogotá", city: "Bogotá",  department: "Cundinamarca" },
       { id: "uniminuto-cali",   label: "Seccional Cali",        city: "Cali",    department: "Valle del Cauca" },
     ]
+  },"admin.linkup.dev": {
+    name: "LinkUp",
+    campuses: [
+      {
+        id: "linkup-hq",
+        label: "LinkUp HQ",
+        city: "Medellín",
+        department: "Antioquia"
+      }
+    ]
   },
 };
 

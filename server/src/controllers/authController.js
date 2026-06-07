@@ -16,8 +16,8 @@ export const registrarUsuario = async (req, res) => {
       faculty,
       semester,
       bio,
-      campus,         // ← acepta "campus"
-      currentCampus,  // ← y también "currentCampus"
+      campus,
+      currentCampus,
       city,
       department
     } = req.body;
@@ -33,8 +33,6 @@ export const registrarUsuario = async (req, res) => {
     }
 
     // 2. VALIDAR CAMPUS
-    // Acepta cualquiera de los dos nombres de campo que envíe el frontend
-    // y también acepta el label por si el frontend envía el texto visible
     const campusRecibido = currentCampus || campus;
 
     const validCampus = institution.campuses.find(
@@ -42,8 +40,6 @@ export const registrarUsuario = async (req, res) => {
     );
 
     if (!validCampus) {
-      console.log("Campus recibido:", campusRecibido);
-      console.log("Campus válidos:", institution.campuses.map(c => c.id));
       return res.status(400).json({
         message: "Campus inválido para la institución",
         campusRecibido,
@@ -70,23 +66,23 @@ export const registrarUsuario = async (req, res) => {
     const nuevoUsuario = await User.create({
       fullName,
       email,
-      password:    passwordHash,
-      interests:   interests  || [],
-      objectives:  objectives || [],
-      career:      career     || "",
-      faculty:     faculty    || "",
-      semester:    semester   || 1,
-      bio:         bio        || "",
-      institution: institution.name,
-      campus:      validCampus.id,  // ← siempre guarda el id limpio
+      password:     passwordHash,
+      interests:    interests  || [],
+      objectives:   objectives || [],
+      career:       career     || "",
+      faculty:      faculty    || "",
+      semester:     semester   || 1,
+      bio:          bio        || "",
+      institution:  institution.name,
+      campus:       validCampus.id,
       currentCampus: validCampus.id,
-      city:        city       || validCampus.city,
-      department:  department || validCampus.department
+      city:         city       || validCampus.city,
+      department:   department || validCampus.department
     });
 
     // 6. TOKEN
     const token = jwt.sign(
-      { id: nuevoUsuario._id },
+      { id: nuevoUsuario._id, role: nuevoUsuario.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -95,7 +91,7 @@ export const registrarUsuario = async (req, res) => {
     const { password: _, ...usuarioSinPassword } = nuevoUsuario.toObject();
 
     res.status(201).json({
-      message: "Usuario creado correctamente",
+      message: "Registro exitoso",
       token,
       usuario: usuarioSinPassword
     });
@@ -126,8 +122,9 @@ export const iniciarSesion = async (req, res) => {
       });
     }
 
+    // TOKEN — con role
     const token = jwt.sign(
-      { id: usuario._id },
+      { id: usuario._id, role: usuario.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );

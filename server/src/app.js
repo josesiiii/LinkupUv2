@@ -14,6 +14,8 @@ import campusRoutes from "./routes/campusRoutes.js";
 
 import dotenv from "dotenv";
 
+import adminRoutes       from "./routes/adminRoutes.js"
+
 dotenv.config();
 process.env.Linkup;
 
@@ -55,7 +57,10 @@ app.use(
   campusRoutes
 );
 
-
+app.use(
+  "/api/admin",
+   adminRoutes
+);
 
 
 // TEST
