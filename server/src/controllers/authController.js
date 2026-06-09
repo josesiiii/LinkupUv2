@@ -16,7 +16,6 @@ export const registrarUsuario = async (req, res) => {
       faculty,
       semester,
       bio,
-      campus,
       currentCampus,
       city,
       department
@@ -33,7 +32,7 @@ export const registrarUsuario = async (req, res) => {
     }
 
     // 2. VALIDAR CAMPUS
-    const campusRecibido = currentCampus || campus;
+    const campusRecibido = currentCampus;
 
     const validCampus = institution.campuses.find(
       c => c.id === campusRecibido || c.label === campusRecibido
@@ -66,18 +65,17 @@ export const registrarUsuario = async (req, res) => {
     const nuevoUsuario = await User.create({
       fullName,
       email,
-      password:     passwordHash,
-      interests:    interests  || [],
-      objectives:   objectives || [],
-      career:       career     || "",
-      faculty:      faculty    || "",
-      semester:     semester   || 1,
-      bio:          bio        || "",
-      institution:  institution.name,
-      campus:       validCampus.id,
+      password:      passwordHash,
+      interests:     interests  || [],
+      objectives:    objectives || [],
+      career:        career     || "",
+      faculty:       faculty    || "",
+      semester:      semester   || 1,
+      bio:           bio        || "",
+      institution:   institution.name,
       currentCampus: validCampus.id,
-      city:         city       || validCampus.city,
-      department:   department || validCampus.department
+      city:          city       || validCampus.city,
+      department:    department || validCampus.department
     });
 
     // 6. TOKEN
