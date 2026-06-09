@@ -1,28 +1,53 @@
 import User from "../models/User.js";
+import Connection from "../models/Connection.js";
+import SavedProfile from "../models/SavedProfile.js";
 import cloudinary from "../config/cloudinary.js";
 
-// ALGORITMO DE COMPATIBILIDAD
+// ALGORITMO DE COMPATIBILIDAD CON BREAKDOWN
 const calcCompatibility = (userA, userB) => {
   let score = 0;
+  const breakdown = {
+    interests: 0,
+    objectives: 0,
+    faculty: 0,
+    semester: 0,
+    sharedInterests: [],
+    sharedObjectives: []
+  };
 
-  if (userA.institution?.toString() !== userB.institution?.toString()) return 0;
+  if (userA.institution?.toString() !== userB.institution?.toString()) return { score: 0, breakdown };
 
   const campusA = userA.currentCampus || userA.campus;
   const campusB = userB.currentCampus || userB.campus;
-  if (campusA !== campusB) return 0;
+  if (campusA !== campusB) return { score: 0, breakdown };
 
+  // Intereses (40%)
   const sharedInterests = userA.interests.filter(i => userB.interests.includes(i));
   const maxInt = Math.max(userA.interests.length, userB.interests.length, 1);
-  score += (sharedInterests.length / maxInt) * 40;
+  breakdown.interests = Math.round((sharedInterests.length / maxInt) * 40);
+  breakdown.sharedInterests = sharedInterests;
+  score += breakdown.interests;
 
+  // Objetivos (30%)
   const sharedObj = userA.objectives.filter(o => userB.objectives.includes(o));
   const maxObj = Math.max(userA.objectives.length, userB.objectives.length, 1);
-  score += (sharedObj.length / maxObj) * 30;
+  breakdown.objectives = Math.round((sharedObj.length / maxObj) * 30);
+  breakdown.sharedObjectives = sharedObj;
+  score += breakdown.objectives;
 
-  if (userA.faculty && userB.faculty && userA.faculty === userB.faculty) score += 20;
-  if (Math.abs((userA.semester || 1) - (userB.semester || 1)) <= 2) score += 10;
+  // Facultad (20%)
+  if (userA.faculty && userB.faculty && userA.faculty === userB.faculty) {
+    breakdown.faculty = 20;
+    score += 20;
+  }
 
-  return Math.round(score);
+  // Semestre (10%)
+  if (Math.abs((userA.semester || 1) - (userB.semester || 1)) <= 2) {
+    breakdown.semester = 10;
+    score += 10;
+  }
+
+  return { score: Math.round(score), breakdown };
 };
 
 // OBTENER TODOS LOS USUARIOS
@@ -56,7 +81,7 @@ export const buscarUsuarios = async (req, res) => {
   }
 };
 
-// FEED CONTEXTUAL
+// FEED CONTEXTUAL MEJORADO
 export const feedUsuarios = async (req, res) => {
   try {
     const yo = await User.findById(req.usuario._id);
@@ -64,28 +89,129 @@ export const feedUsuarios = async (req, res) => {
 
     const miCampus = yo.currentCampus || yo.campus;
     const miInstitucion = yo.institution;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(20, parseInt(req.query.limit) || 10);
+    const skip = (page - 1) * limit;
 
-    const candidatos = await User.find({
+    // Debug: Log de información del usuario actual
+    console.log("🔍 FEED DEBUG:", {
+      usuarioId: yo._id,
+      nombre: yo.fullName,
+      miInstitucion,
+      miCampus,
+      intereses: yo.interests?.length || 0,
+      objetivos: yo.objectives?.length || 0
+    });
+
+    // Obtener conexiones ya existentes (pending o accepted)
+    const conexionesExistentes = await Connection.find({
+      $or: [
+        { from: yo._id },
+        { to: yo._id }
+      ]
+    }).select("from to");
+
+    const usuariosConectados = new Set();
+    conexionesExistentes.forEach(conn => {
+      usuariosConectados.add(conn.from.toString());
+      usuariosConectados.add(conn.to.toString());
+    });
+
+    // Obtener perfiles guardados
+    const perfilesGuardados = await SavedProfile.find({ from: yo._id }).select("to");
+    const perfilesGuardadosSet = new Set(perfilesGuardados.map(p => p.to.toString()));
+
+    // Búsqueda más flexible - primero intenta con filtros estrictos, luego más relajados
+    let candidatos = await User.find({
       _id:         { $ne: yo._id },
       institution: miInstitucion,
       $or: [
         { currentCampus: miCampus },
         { campus:        miCampus }
       ],
-      isActive:  true,
-      interests: { $exists: true, $not: { $size: 0 } }
+      isActive:  true
     }).select("-password -__v");
 
-    const feed = candidatos
-      .map(usuario => ({
-        usuario,
-        compatibilidad: calcCompatibility(yo, usuario)
-      }))
-      .filter(r => r.compatibilidad > 0)
-      .sort((a, b) => b.compatibilidad - a.compatibilidad);
+    console.log("📊 Candidatos encontrados (sin filtro de intereses):", candidatos.length);
 
-    res.status(200).json(feed);
+    // Si no hay candidatos, busca más ampliamente (solo institución)
+    if (candidatos.length === 0) {
+      candidatos = await User.find({
+        _id:         { $ne: yo._id },
+        institution: miInstitucion,
+        isActive:  true
+      }).select("-password -__v");
+      
+      console.log("📊 Candidatos encontrados (solo institución):", candidatos.length);
+    }
+
+    // Si aún no hay, busca por campus sin importar institución
+    if (candidatos.length === 0 && miCampus) {
+      candidatos = await User.find({
+        _id: { $ne: yo._id },
+        $or: [
+          { currentCampus: miCampus },
+          { campus:        miCampus }
+        ],
+        isActive:  true
+      }).select("-password -__v");
+      
+      console.log("📊 Candidatos encontrados (por campus):", candidatos.length);
+    }
+
+    // Si aún no hay, retorna todos los usuarios activos
+    if (candidatos.length === 0) {
+      candidatos = await User.find({
+        _id: { $ne: yo._id },
+        isActive:  true
+      }).select("-password -__v");
+      
+      console.log("📊 Candidatos encontrados (todos activos):", candidatos.length);
+    }
+
+    const feed = candidatos
+      .filter(usuario => !usuariosConectados.has(usuario._id.toString()))
+      .map(usuario => {
+        const { score, breakdown } = calcCompatibility(yo, usuario);
+        return {
+          usuario,
+          compatibilidad: score,
+          breakdown,
+          guardado: perfilesGuardadosSet.has(usuario._id.toString())
+        };
+      })
+      .filter(r => r.compatibilidad > 0)
+      .sort((a, b) => b.compatibilidad - a.compatibilidad)
+      .slice(skip, skip + limit);
+
+    const totalCompatibles = candidatos
+      .filter(usuario => !usuariosConectados.has(usuario._id.toString()))
+      .map(usuario => {
+        const { score } = calcCompatibility(yo, usuario);
+        return { compatibilidad: score };
+      })
+      .filter(r => r.compatibilidad > 0).length;
+
+    console.log("✅ Feed final:", feed.length, "usuarios | Total compatible:", totalCompatibles);
+
+    res.status(200).json({
+      data: feed,
+      pagination: {
+        page,
+        limit,
+        total: totalCompatibles,
+        pages: Math.ceil(totalCompatibles / limit)
+      },
+      debug: {
+        miInstitucion,
+        miCampus,
+        totalCandidatos: candidatos.length,
+        totalCompatibles: totalCompatibles,
+        conexionesTotales: conexionesExistentes.length
+      }
+    });
   } catch (error) {
+    console.error("❌ Error en feedUsuarios:", error);
     res.status(500).json({ message: error.message });
   }
 };
