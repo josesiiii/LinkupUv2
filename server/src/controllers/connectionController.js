@@ -2,6 +2,9 @@ import Connection from "../models/Connection.js";
 import User from "../models/User.js";
 
 export const enviarConexion = async (req, res) => {
+  console.log("=== CONEXION DEBUG ===");
+  console.log("Body:", req.body);
+  console.log("Usuario:", req.usuario);
   try {
     const from = req.usuario._id;
     const { to } = req.body;

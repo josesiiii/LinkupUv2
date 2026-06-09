@@ -10,6 +10,7 @@ import messageRoutes      from "./routes/messageRoutes.js";
 import savedProfileRoutes from "./routes/savedProfileRoutes.js";
 import campusRoutes       from "./routes/campusRoutes.js";
 import adminRoutes        from "./routes/adminRoutes.js";
+import connectionRoutes   from "./routes/connectionRoutes.js";
 
 dotenv.config();
 
@@ -45,6 +46,14 @@ app.use(limitadorGeneral);
 // ── MIDDLEWARES ───────────────────────────────
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+app.use((req, res, next) => {
+  console.log("Content-Type:", req.headers["content-type"]);
+  console.log("Body:", req.body);
+  next();
+});
 
 // ── ROUTES ────────────────────────────────────
 app.use("/api/auth",         limitadorAuth, authRoutes);
@@ -53,6 +62,7 @@ app.use("/api/messages",     messageRoutes);
 app.use("/api/savedprofiles", savedProfileRoutes);
 app.use("/api/campus",       campusRoutes);
 app.use("/api/admin",        adminRoutes);
+app.use("/api/connections",   connectionRoutes);
 
 // ── TEST ──────────────────────────────────────
 app.get("/", (req, res) => {
