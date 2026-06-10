@@ -1,142 +1,158 @@
 // src/pages/FeedPage.jsx
-import { useState, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User, UserPlus, Heart, Check, Loader2 } from "lucide-react";
-import api from "../api/axios";
+import { LogOut, User, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { gsap } from "gsap";
 import useAuthStore from "../store/authStore";
+import useFeed from "../hooks/useFeed";
+import UserCard from "../features/feed/UserCard";
+
+// ── Nombre animado estilo HORIZON ──
+function AnimatedName({ name }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current || !name) return;
+    const chars = containerRef.current.querySelectorAll(".name-char");
+
+    gsap.killTweensOf(chars);
+    gsap.set(chars, { y: 80, opacity: 0, skewX: 15 });
+
+    gsap.to(chars, {
+      y: 0,
+      opacity: 1,
+      skewX: 0,
+      duration: 0.8,
+      stagger: 0.04,
+      ease: "power4.out",
+    });
+  }, [name]);
+
+  if (!name) return null;
+
+  return (
+    <h2
+      ref={containerRef}
+      style={{
+        fontSize: "clamp(26px, 4vw, 38px)",
+        fontWeight: 800,
+        margin: 0,
+        letterSpacing: "-0.01em",
+        lineHeight: 1.2,
+        display: "flex",
+        justifyContent: "center",
+        flexWrap: "wrap",
+        gap: "0 1px",
+        background: "linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #a855f7 100%)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+        padding: "4px 16px 8px",
+      }}
+    >
+      {name.split("").map((char, i) => (
+        <span
+          key={i}
+          className="name-char"
+          style={{
+            display: "inline-block",
+            marginRight: char === " " ? "0.3em" : 0,
+            willChange: "transform, opacity",
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </span>
+      ))}
+    </h2>
+  );
+}
 
 export default function FeedPage() {
   const navigate = useNavigate();
-  const { usuario, token, logout } = useAuthStore();
+  const { usuario, logout } = useAuthStore();
+  const {
+    usuarios, loading, error,
+    connectingIds, connectedIds,
+    savingIds, savedIds,
+    handleConectar, handleGuardar,
+  } = useFeed();
 
-  const [usuarios, setUsuarios] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
+  // Clave para re-montar AnimatedName al cambiar de persona
+  const [nameKey, setNameKey] = useState(0);
 
-  const [connectingIds, setConnectingIds] = useState([]);
-  const [connectedIds, setConnectedIds] = useState([]);
-  const [savingIds, setSavingIds] = useState([]);
-  const [savedIds, setSavedIds] = useState([]);
+  const handleLogout = () => { logout(); navigate("/login"); };
 
-  useEffect(() => {
-    const cargarFeed = async () => {
-      try {
-        setLoading(true);
-        setError("");
+  const goPrev = useCallback(() => {
+    setActiveIndex((i) => {
+      const next = Math.max(0, i - 1);
+      if (next !== i) setNameKey((k) => k + 1);
+      return next;
+    });
+  }, []);
 
-        const res = await api.get("/users/feed", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  const goNext = useCallback(() => {
+    setActiveIndex((i) => {
+      const next = Math.min(usuarios.length - 1, i + 1);
+      if (next !== i) setNameKey((k) => k + 1);
+      return next;
+    });
+  }, [usuarios.length]);
 
-        if (Array.isArray(res.data)) {
-          setUsuarios(res.data);
-        } else if (res.data && Array.isArray(res.data.data)) {
-          setUsuarios(res.data.data);
-        } else if (res.data && Array.isArray(res.data.usuarios)) {
-          setUsuarios(res.data.usuarios);
-        } else if (res.data && Array.isArray(res.data.users)) {
-          setUsuarios(res.data.users);
-        } else {
-          setUsuarios([]);
-        }
-      } catch (err) {
-        setError(
-          err.response?.data?.message ||
-          "Error al cargar las recomendaciones de compatibilidad"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (token) cargarFeed();
-  }, [token]);
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
-  const handleConectar = async (recipientId) => {
-    setConnectingIds((prev) => [...prev, recipientId]);
-    try {
-      await api.post("/connections", { to: recipientId });
-      setConnectedIds((prev) => [...prev, recipientId]);
-    } catch (err) {
-      alert(err.response?.data?.message || "No se pudo enviar la solicitud");
-    } finally {
-      setConnectingIds((prev) => prev.filter((id) => id !== recipientId));
+  const handleDotClick = (i) => {
+    if (i !== activeIndex) {
+      setActiveIndex(i);
+      setNameKey((k) => k + 1);
     }
   };
 
-  const handleGuardarPerfil = async (savedUserId) => {
-    setSavingIds((prev) => [...prev, savedUserId]);
-    try {
-      await api.post("/savedprofiles", { savedUser: savedUserId });
-      setSavedIds((prev) => [...prev, savedUserId]);
-    } catch (err) {
-      alert(err.response?.data?.message || "No se pudo guardar el perfil");
-    } finally {
-      setSavingIds((prev) => prev.filter((id) => id !== savedUserId));
-    }
-  };
-
-  const listaUsuariosValida = Array.isArray(usuarios) ? usuarios : [];
+  const perfilActivo = usuarios[activeIndex]
+    ? (usuarios[activeIndex].usuario || usuarios[activeIndex])
+    : null;
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        minHeight: "100vh",
-        background: "#080808",
-        color: "#ffffff",
-        fontFamily: "'Inter', sans-serif",
+    <div style={{
+      width: "100vw",
+      height: "100dvh",
+      background: "#080808",
+      color: "#fff",
+      fontFamily: "'Inter', sans-serif",
+      display: "flex",
+      flexDirection: "column",
+    }}>
+
+      {/* ── NAVBAR ── */}
+      <nav style={{
         display: "flex",
-        flexDirection: "column",
-        boxSizing: "border-box",
-      }}
-    >
-      {/* NAVBAR */}
-      <nav
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "16px 32px",
-          borderBottom: "1px solid #141414",
-          background: "#0a0a0a",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-        }}
-      >
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "14px 24px",
+        borderBottom: "1px solid #141414",
+        background: "#0a0a0a",
+        zIndex: 100,
+        flexShrink: 0,
+      }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-            <path
-              d="M6 4h10c3.3 0 6 2.7 6 6s-2.7 6-6 6h-2l6 8H16l-5.5-8H10v8H6V4z M10 8v4h6a2 2 0 000-4h-6z"
-              fill="white"
-            />
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+            <path d="M6 4h10c3.3 0 6 2.7 6 6s-2.7 6-6 6h-2l6 8H16l-5.5-8H10v8H6V4z M10 8v4h6a2 2 0 000-4h-6z" fill="white" />
           </svg>
-          <span style={{ fontWeight: 600, fontSize: 16, letterSpacing: "-0.01em" }}>
-            LinkUp <span style={{ color: "#666" }}>– U</span>
+          <span style={{ fontWeight: 600, fontSize: 15, letterSpacing: "-0.01em" }}>
+            LinkUp <span style={{ color: "#444" }}>– U</span>
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: "50%",
-                background: "#141414",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1px solid #222",
-              }}
-            >
-              <User size={14} color="#888" />
+            <div style={{
+              width: 30, height: 30, borderRadius: "50%",
+              background: "#141414", border: "1px solid #222",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              overflow: "hidden",
+            }}>
+              {usuario?.profilePicture
+                ? <img src={usuario.profilePicture} style={{ width: 30, height: 30, objectFit: "cover" }} alt="avatar" />
+                : <User size={14} color="#888" />}
             </div>
             <span style={{ fontSize: 13, color: "#9CA3AF", fontWeight: 500 }}>
               {usuario?.fullName || usuario?.email || "Estudiante"}
@@ -146,401 +162,191 @@ export default function FeedPage() {
           <button
             onClick={handleLogout}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: "transparent",
-              border: "1px solid #222",
-              borderRadius: 8,
-              padding: "6px 12px",
-              color: "#888",
-              fontSize: 13,
-              cursor: "pointer",
-              transition: "all 150ms ease",
+              display: "flex", alignItems: "center", gap: 6,
+              background: "transparent", border: "1px solid #222",
+              borderRadius: 8, padding: "6px 12px", color: "#888",
+              fontSize: 13, cursor: "pointer", transition: "all 150ms",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#ef4444";
-              e.currentTarget.style.color = "#ef4444";
-              e.currentTarget.style.background = "rgba(239, 68, 68, 0.05)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#222";
-              e.currentTarget.style.color = "#888";
-              e.currentTarget.style.background = "transparent";
-            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "#222"; e.currentTarget.style.color = "#888"; }}
           >
-            <LogOut size={13} />
-            Log out
+            <LogOut size={13} /> Log out
           </button>
         </div>
       </nav>
 
-      {/* CONTENIDO */}
-      <main
-        style={{
-          flex: 1,
-          padding: "40px 32px",
-          maxWidth: 1200,
-          margin: "0 auto",
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        <header style={{ marginBottom: 32 }}>
-          <h1
-            style={{
-              fontSize: 28,
-              fontWeight: 600,
-              margin: "0 0 8px 0",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Recomendaciones Inteligentes
-          </h1>
-          <p style={{ color: "#666666", margin: 0, fontSize: 14 }}>
-            Estudiantes con mayor afinidad académica según tus intereses,
-            objetivos, facultad y campus.
-          </p>
-        </header>
+      {/* ── ESTADOS ── */}
+      {loading && (
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, color: "#555" }}>
+          <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
+          <span style={{ fontSize: 14 }}>Calculando compatibilidad...</span>
+        </div>
+      )}
 
-        {loading && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "50vh",
-              gap: 10,
-              color: "#666",
-            }}
-          >
-            <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
-            <span>Calculando niveles de compatibilidad...</span>
-          </div>
-        )}
-
-        {error && (
-          <div
-            style={{
-              background: "rgba(239, 68, 68, 0.1)",
-              border: "1px solid #ef4444",
-              padding: 16,
-              borderRadius: 12,
-              color: "#ef4444",
-              fontSize: 14,
-            }}
-          >
+      {error && !loading && (
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 32 }}>
+          <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid #ef4444", padding: 20, borderRadius: 12, color: "#ef4444", fontSize: 14, maxWidth: 400, textAlign: "center" }}>
             {error}
           </div>
-        )}
+        </div>
+      )}
 
-        {!loading && !error && (
-          <>
-            {listaUsuariosValida.length === 0 ? (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "80px 0",
-                  border: "1px dashed #222",
-                  borderRadius: 16,
-                }}
-              >
-                <p style={{ color: "#444", margin: 0, fontSize: 15 }}>
-                  No se encontraron nuevos perfiles compatibles en tu campus en
-                  este momento.
-                </p>
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-                  gap: 20,
-                }}
-              >
-                {listaUsuariosValida.map((item) => {
-                  if (!item) return null;
+      {!loading && !error && usuarios.length === 0 && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, color: "#444" }}>
+          <div style={{ fontSize: 48 }}>🔍</div>
+          <p style={{ fontSize: 15, margin: 0 }}>No hay usuarios compatibles en tu campus.</p>
+          <p style={{ fontSize: 13, color: "#333", margin: 0 }}>Completa tu perfil para mejorar la compatibilidad</p>
+        </div>
+      )}
 
-                  // El backend devuelve { usuario, compatibilidad, breakdown, guardado }
-                  const perfil = item.usuario || item;
-                  const id = perfil._id;
+      {/* ── FEED FULLSCREEN ── */}
+      {!loading && !error && usuarios.length > 0 && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
 
-                  const intereses = Array.isArray(perfil.interests)
-                    ? perfil.interests
-                    : [];
-                  const objetivos = Array.isArray(perfil.objectives)
-                    ? perfil.objectives
-                    : [];
+          {/* Nombre animado — sin overflow hidden para que GSAP no corte los chars */}
+          <div style={{
+            padding: "14px 0 4px",
+            textAlign: "center",
+            flexShrink: 0,
+            zIndex: 10,
+          }}>
+            {/* nameKey fuerza re-render → re-dispara el useEffect de GSAP */}
+            <AnimatedName
+              key={nameKey}
+              name={perfilActivo?.fullName}
+            />
 
-                  return (
-                    <div
-                      key={id}
-                      style={{
-                        background: "#111111",
-                        border: "1px solid #1f1f1f",
-                        borderRadius: 16,
-                        padding: 24,
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        position: "relative",
-                        overflow: "hidden",
-                        transition: "border-color 200ms ease",
-                      }}
-                    >
-                      {/* % Compatibilidad */}
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: 16,
-                          right: 16,
-                          background: "rgba(255, 255, 255, 0.06)",
-                          border: "1px solid rgba(255, 255, 255, 0.1)",
-                          padding: "4px 10px",
-                          borderRadius: 20,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color: "#fff",
-                        }}
-                      >
-                        {item.compatibilidad || item.compatibilityPercentage || 100}% match
-                      </div>
-
-                      {/* Info */}
-                      <div>
-                        <h3
-                          style={{
-                            fontSize: 18,
-                            fontWeight: 600,
-                            margin: "0 0 4px 0",
-                            color: "#ffffff",
-                            paddingRight: 80,
-                          }}
-                        >
-                          {perfil.fullName}
-                        </h3>
-
-                        <p
-                          style={{
-                            fontSize: 13,
-                            color: "#888888",
-                            margin: "0 0 16px 0",
-                            fontWeight: 400,
-                          }}
-                        >
-                          {perfil.career || "Carrera no especificada"}
-                          {perfil.semester && ` • ${perfil.semester}° Semestre`}
-                          <br />
-                          <span style={{ fontSize: 12, color: "#444" }}>
-                            {perfil.faculty || "Facultad"}{" "}
-                            {perfil.currentCampus && `(${perfil.currentCampus})`}
-                          </span>
-                        </p>
-
-                        {perfil.bio && (
-                          <p
-                            style={{
-                              fontSize: 13,
-                              color: "#9CA3AF",
-                              margin: "0 0 16px 0",
-                              lineHeight: "1.4",
-                            }}
-                          >
-                            "{perfil.bio}"
-                          </p>
-                        )}
-
-                        {/* Intereses */}
-                        <div style={{ marginBottom: 14 }}>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              color: "#555",
-                              fontWeight: 600,
-                              textTransform: "uppercase",
-                              display: "block",
-                              marginBottom: 6,
-                            }}
-                          >
-                            Intereses
-                          </span>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                            {intereses.length > 0 ? (
-                              intereses.map((int, i) => (
-                                <span
-                                  key={`int-${i}-${int}`}
-                                  style={{
-                                    background: "#181818",
-                                    border: "1px solid #262626",
-                                    color: "#CECFD0",
-                                    padding: "3px 8px",
-                                    borderRadius: 6,
-                                    fontSize: 12,
-                                  }}
-                                >
-                                  {int}
-                                </span>
-                              ))
-                            ) : (
-                              <span style={{ fontSize: 12, color: "#333" }}>
-                                Ninguno registrado
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Objetivos */}
-                        <div style={{ marginBottom: 24 }}>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              color: "#555",
-                              fontWeight: 600,
-                              textTransform: "uppercase",
-                              display: "block",
-                              marginBottom: 6,
-                            }}
-                          >
-                            Objetivos
-                          </span>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                            {objetivos.length > 0 ? (
-                              objetivos.map((obj, i) => (
-                                <span
-                                  key={`obj-${i}-${obj}`}
-                                  style={{
-                                    background: "rgba(255,255,255,0.02)",
-                                    border: "1px dashed #262626",
-                                    color: "#9CA3AF",
-                                    padding: "3px 8px",
-                                    borderRadius: 6,
-                                    fontSize: 12,
-                                  }}
-                                >
-                                  {obj}
-                                </span>
-                              ))
-                            ) : (
-                              <span style={{ fontSize: 12, color: "#333" }}>
-                                Ninguno registrado
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Botones */}
-                      <div style={{ display: "flex", gap: 8, marginTop: "auto" }}>
-                        <button
-                          disabled={
-                            connectingIds.includes(id) ||
-                            connectedIds.includes(id)
-                          }
-                          onClick={() => handleConectar(id)}
-                          style={{
-                            flex: 1,
-                            height: 38,
-                            borderRadius: 10,
-                            background: connectedIds.includes(id)
-                              ? "transparent"
-                              : "#ffffff",
-                            border: connectedIds.includes(id)
-                              ? "1px solid #222"
-                              : "1px solid #ffffff",
-                            color: connectedIds.includes(id) ? "#666" : "#000000",
-                            fontSize: 13,
-                            fontWeight: 600,
-                            cursor:
-                              connectingIds.includes(id) ||
-                              connectedIds.includes(id)
-                                ? "not-allowed"
-                                : "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 6,
-                            transition: "all 150ms ease",
-                          }}
-                        >
-                          {connectingIds.includes(id) ? (
-                            <Loader2
-                              size={14}
-                              style={{ animation: "spin 1s linear infinite" }}
-                            />
-                          ) : connectedIds.includes(id) ? (
-                            <>
-                              <Check size={14} color="#22c55e" />
-                              Enviada
-                            </>
-                          ) : (
-                            <>
-                              <UserPlus size={14} />
-                              Conectar
-                            </>
-                          )}
-                        </button>
-
-                        <button
-                          disabled={
-                            savingIds.includes(id) || savedIds.includes(id)
-                          }
-                          onClick={() => handleGuardarPerfil(id)}
-                          style={{
-                            width: 38,
-                            height: 38,
-                            borderRadius: 10,
-                            background: "transparent",
-                            border: "1px solid #222",
-                            color: savedIds.includes(id) ? "#ef4444" : "#666",
-                            cursor:
-                              savingIds.includes(id) || savedIds.includes(id)
-                                ? "not-allowed"
-                                : "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            transition: "all 150ms ease",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!savedIds.includes(id)) {
-                              e.currentTarget.style.borderColor = "#444";
-                              e.currentTarget.style.color = "#fff";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!savedIds.includes(id)) {
-                              e.currentTarget.style.borderColor = "#222";
-                              e.currentTarget.style.color = "#666";
-                            }
-                          }}
-                        >
-                          {savingIds.includes(id) ? (
-                            <Loader2
-                              size={14}
-                              style={{ animation: "spin 1s linear infinite" }}
-                            />
-                          ) : (
-                            <Heart
-                              size={14}
-                              fill={savedIds.includes(id) ? "#ef4444" : "none"}
-                            />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* Dots */}
+            {usuarios.length > 1 && (
+              <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 8 }}>
+                {usuarios.map((_, i) => (
+                  <div
+                    key={i}
+                    onClick={() => handleDotClick(i)}
+                    style={{
+                      width: i === activeIndex ? 20 : 6,
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: i === activeIndex ? "#c084fc" : "#222",
+                      transition: "all 300ms",
+                      cursor: "pointer",
+                    }}
+                  />
+                ))}
               </div>
             )}
-          </>
-        )}
-      </main>
+          </div>
+
+          {/* ── CARRUSEL HORIZONTAL ── */}
+          <div style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+            overflow: "visible",
+            perspective: "1200px",
+          }}>
+
+            {activeIndex > 0 && (
+              <button
+                onClick={goPrev}
+                style={{
+                  position: "absolute", left: 12, zIndex: 50,
+                  width: 44, height: 44, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  backdropFilter: "blur(10px)",
+                  color: "#fff",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", transition: "all 150ms",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.14)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
+
+            {activeIndex < usuarios.length - 1 && (
+              <button
+                onClick={goNext}
+                style={{
+                  position: "absolute", right: 12, zIndex: 50,
+                  width: 44, height: 44, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  backdropFilter: "blur(10px)",
+                  color: "#fff",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", transition: "all 150ms",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.14)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}
+              >
+                <ChevronRight size={20} />
+              </button>
+            )}
+
+            <div style={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}>
+              {usuarios.map((item, index) => {
+                if (!item) return null;
+                const perfil = item.usuario || item;
+                const offset = index - activeIndex;
+                if (Math.abs(offset) > 1) return null;
+                const isCenter = offset === 0;
+
+                return (
+                  <motion.div
+                    key={perfil._id}
+                    animate={{
+                      x: isCenter ? "0%" : offset < 0 ? "calc(-50vw - 30px)" : "calc(50vw + 30px)",
+                      scale: isCenter ? 1 : 0.88,
+                      opacity: isCenter ? 1 : 0.45,
+                      rotateY: isCenter ? 0 : offset * -8,
+                      filter: isCenter ? "blur(0px)" : "blur(2px)",
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    style={{
+                      position: "absolute",
+                      width: "40%",
+                      height: "100%",
+                      zIndex: isCenter ? 10 : 5,
+                      cursor: !isCenter ? "pointer" : "default",
+                    }}
+                    onClick={() => !isCenter && handleDotClick(index)}
+                  >
+                    <UserCard
+                      item={item}
+                      yo={usuario}
+                      connectingIds={connectingIds}
+                      connectedIds={connectedIds}
+                      savingIds={savingIds}
+                      savedIds={savedIds}
+                      onConectar={handleConectar}
+                      onGuardar={handleGuardar}
+                      fullscreen
+                    />
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ flexShrink: 0, height: 16 }} />
+        </div>
+      )}
 
       <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        * { box-sizing: border-box; }
       `}</style>
     </div>
   );
