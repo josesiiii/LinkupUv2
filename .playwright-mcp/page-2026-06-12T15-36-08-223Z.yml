@@ -1,0 +1,259 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - button "LinkUp LinkUp" [ref=e6] [cursor=pointer]:
+        - generic [ref=e7]:
+          - img "LinkUp" [ref=e8]
+          - generic [ref=e9]: LinkUp
+      - generic [ref=e10]:
+        - link "Campus" [ref=e11] [cursor=pointer]:
+          - /url: "#campus"
+        - link "Networking" [ref=e12] [cursor=pointer]:
+          - /url: "#networking"
+        - link "Oportunidades" [ref=e13] [cursor=pointer]:
+          - /url: "#oportunidades"
+        - link "Eventos" [ref=e14] [cursor=pointer]:
+          - /url: "#eventos"
+      - generic [ref=e15]:
+        - button "Iniciar sesión" [ref=e16] [cursor=pointer]
+        - button "Crear cuenta" [ref=e17] [cursor=pointer]
+  - generic [ref=e21]:
+    - generic [ref=e22]:
+      - heading "Conecta. Colabora." [level=1] [ref=e23]
+      - heading "Crece." [level=1] [ref=e24]
+    - paragraph [ref=e25]: Encuentra personas, proyectos y oportunidades dentro de tu comunidad universitaria.
+    - generic [ref=e26]:
+      - button "Crear cuenta gratis" [ref=e27] [cursor=pointer]
+      - button "Explorar la plataforma" [ref=e28] [cursor=pointer]
+  - generic [ref=e30]:
+    - generic [ref=e32]: 02 — Campus
+    - heading "Encuentra tu comunidad" [level=2] [ref=e33]
+    - paragraph [ref=e34]: Selecciona tu campus y conecta con miles de estudiantes que comparten tu espacio, tu institución y tus objetivos.
+    - button "Elige tu campus…" [ref=e36] [cursor=pointer]:
+      - generic [ref=e37]: Elige tu campus…
+      - img [ref=e38]
+  - generic [ref=e41]:
+    - generic [ref=e42]:
+      - generic [ref=e43]: 03 — Networking
+      - heading "Conoce a quienes piensan como tú" [level=2] [ref=e44]
+      - paragraph [ref=e45]: Perfiles reales de estudiantes con proyectos, metas y pasiones en común.
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: VR
+          - generic [ref=e50]:
+            - generic [ref=e51]: Valentina Ríos
+            - generic [ref=e52]: Ingeniería de Sistemas
+            - generic [ref=e53]: ITM Robledo · 6to semestre
+          - generic [ref=e54]: Proyectos
+        - paragraph [ref=e55]: Apasionada por el ML y el diseño. Busco equipo para hackathon.
+        - generic [ref=e56]:
+          - generic [ref=e57]: Python
+          - generic [ref=e58]: ML
+          - generic [ref=e59]: Figma
+          - generic [ref=e60]: UI/UX
+        - button "Conectar →" [ref=e61] [cursor=pointer]
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64]: SM
+          - generic [ref=e65]:
+            - generic [ref=e66]: Santiago Morales
+            - generic [ref=e67]: Ingeniería Electrónica
+            - generic [ref=e68]: UNAL Medellín · 8vo semestre
+          - generic [ref=e69]: Investigación
+        - paragraph [ref=e70]: IoT + Arduino lover. Quiero construir soluciones reales para problemas reales.
+        - generic [ref=e71]:
+          - generic [ref=e72]: Arduino
+          - generic [ref=e73]: IoT
+          - generic [ref=e74]: C++
+          - generic [ref=e75]: Linux
+        - button "Conectar →" [ref=e76] [cursor=pointer]
+      - generic [ref=e77]:
+        - generic [ref=e78]:
+          - generic [ref=e79]: IC
+          - generic [ref=e80]:
+            - generic [ref=e81]: Isabela Cano
+            - generic [ref=e82]: Diseño de Comunicación Visual
+            - generic [ref=e83]: EAFIT · 4to semestre
+          - generic [ref=e84]: Emprendimiento
+        - paragraph [ref=e85]: Diseñadora con ojo para los detalles. Me interesan los proyectos con impacto social.
+        - generic [ref=e86]:
+          - generic [ref=e87]: Figma
+          - generic [ref=e88]: Branding
+          - generic [ref=e89]: CSS
+          - generic [ref=e90]: Motion
+        - button "Conectar →" [ref=e91] [cursor=pointer]
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - generic [ref=e94]: DO
+          - generic [ref=e95]:
+            - generic [ref=e96]: Daniel Ospina
+            - generic [ref=e97]: Ciencias de la Computación
+            - generic [ref=e98]: U. de Antioquia · 7mo semestre
+          - generic [ref=e99]: Networking
+        - paragraph [ref=e100]: Backend dev buscando co-fundador para startup EdTech.
+        - generic [ref=e101]:
+          - generic [ref=e102]: Node.js
+          - generic [ref=e103]: Docker
+          - generic [ref=e104]: AWS
+          - generic [ref=e105]: MongoDB
+        - button "Conectar →" [ref=e106] [cursor=pointer]
+    - button "Ver más perfiles" [ref=e108] [cursor=pointer]
+  - generic [ref=e110]:
+    - generic [ref=e111]:
+      - generic [ref=e112]: 04 — Oportunidades
+      - heading "Tu próximo gran proyecto te espera" [level=2] [ref=e113]
+      - paragraph [ref=e114]: Hackathons, investigación, emprendimientos y vacantes estudiantiles en un solo lugar.
+    - generic [ref=e115]:
+      - button "Todos" [ref=e116] [cursor=pointer]
+      - button "Hackathon" [ref=e117] [cursor=pointer]
+      - button "Investigación" [ref=e118] [cursor=pointer]
+      - button "Emprendimiento" [ref=e119] [cursor=pointer]
+      - button "Vacante" [ref=e120] [cursor=pointer]
+      - button "Proyecto" [ref=e121] [cursor=pointer]
+    - generic [ref=e122]:
+      - generic [ref=e123]:
+        - generic [ref=e124]: Destacado
+        - generic [ref=e125]:
+          - generic [ref=e126]: ⚡
+          - generic [ref=e127]:
+            - generic [ref=e129]: Hackathon
+            - generic [ref=e130]: HackITM 2025
+            - generic [ref=e131]: Instituto Tecnológico Metropolitano
+        - paragraph [ref=e132]: 48h para construir soluciones con impacto social. Equipos de 3-5 personas. Premios en efectivo y mentoría.
+        - generic [ref=e133]:
+          - generic [ref=e134]: Presencial
+          - generic [ref=e135]: Medellín
+          - generic [ref=e136]: Open
+        - generic [ref=e137]:
+          - generic [ref=e138]:
+            - generic [ref=e139]:
+              - generic [ref=e140]: Cierre
+              - generic [ref=e141]: 20 Jun
+            - generic [ref=e142]:
+              - generic [ref=e143]: Cupos
+              - generic [ref=e144]: 12 equipos
+          - button "Ver más" [ref=e145] [cursor=pointer]
+      - generic [ref=e146]:
+        - generic [ref=e147]:
+          - generic [ref=e148]: 🔬
+          - generic [ref=e149]:
+            - generic [ref=e151]: Investigación
+            - generic [ref=e152]: Grupo IA & Salud
+            - generic [ref=e153]: Universidad de Antioquia
+        - paragraph [ref=e154]: Semillero de investigación en inteligencia artificial aplicada a diagnóstico médico. Publicaciones ISI.
+        - generic [ref=e155]:
+          - generic [ref=e156]: Remoto
+          - generic [ref=e157]: Postgrado
+          - generic [ref=e158]: Abierto
+        - generic [ref=e159]:
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - generic [ref=e162]: Cierre
+              - generic [ref=e163]: Continuo
+            - generic [ref=e164]:
+              - generic [ref=e165]: Cupos
+              - generic [ref=e166]: 3 cupos
+          - button "Ver más" [ref=e167] [cursor=pointer]
+      - generic [ref=e168]:
+        - generic [ref=e169]:
+          - generic [ref=e170]: 🚀
+          - generic [ref=e171]:
+            - generic [ref=e173]: Emprendimiento
+            - generic [ref=e174]: EduFlow Startup
+            - generic [ref=e175]: Startup — Campus EAFIT
+        - paragraph [ref=e176]: Buscamos co-fundador técnico para plataforma de microaprendizaje. Pre-seed. Equity disponible.
+        - generic [ref=e177]:
+          - generic [ref=e178]: Híbrido
+          - generic [ref=e179]: Equity
+          - generic [ref=e180]: Series A
+        - generic [ref=e181]:
+          - generic [ref=e182]:
+            - generic [ref=e183]:
+              - generic [ref=e184]: Cierre
+              - generic [ref=e185]: Cerrado pronto
+            - generic [ref=e186]:
+              - generic [ref=e187]: Cupos
+              - generic [ref=e188]: 1 co-founder
+          - button "Ver más" [ref=e189] [cursor=pointer]
+      - generic [ref=e190]:
+        - generic [ref=e191]:
+          - generic [ref=e192]: 💼
+          - generic [ref=e193]:
+            - generic [ref=e195]: Vacante
+            - generic [ref=e196]: Dev React Jr.
+            - generic [ref=e197]: MiTienda.co · Medellín
+        - paragraph [ref=e198]: Posición part-time para estudiante de sistemas o afines. React, Tailwind, Node. Modalidad híbrida.
+        - generic [ref=e199]:
+          - generic [ref=e200]: Part-time
+          - generic [ref=e201]: Pago
+          - generic [ref=e202]: Híbrido
+        - generic [ref=e203]:
+          - generic [ref=e204]:
+            - generic [ref=e205]:
+              - generic [ref=e206]: Cierre
+              - generic [ref=e207]: 15 Jun
+            - generic [ref=e208]:
+              - generic [ref=e209]: Cupos
+              - generic [ref=e210]: 2 posiciones
+          - button "Ver más" [ref=e211] [cursor=pointer]
+      - generic [ref=e212]:
+        - generic [ref=e213]:
+          - generic [ref=e214]: 🌱
+          - generic [ref=e215]:
+            - generic [ref=e217]: Proyecto
+            - generic [ref=e218]: MapUrbe
+            - generic [ref=e219]: Proyecto independiente
+        - paragraph [ref=e220]: "App de mapeo ciudadano colaborativo. Stack: React Native + Firebase. Buscamos diseñador y backend."
+        - generic [ref=e221]:
+          - generic [ref=e222]: Remoto
+          - generic [ref=e223]: Open source
+          - generic [ref=e224]: Voluntario
+        - generic [ref=e225]:
+          - generic [ref=e226]:
+            - generic [ref=e227]:
+              - generic [ref=e228]: Cierre
+              - generic [ref=e229]: Abierto
+            - generic [ref=e230]:
+              - generic [ref=e231]: Cupos
+              - generic [ref=e232]: 2 roles
+          - button "Ver más" [ref=e233] [cursor=pointer]
+      - generic [ref=e234]:
+        - generic [ref=e235]:
+          - generic [ref=e236]: 🤖
+          - generic [ref=e237]:
+            - generic [ref=e239]: Investigación
+            - generic [ref=e240]: NLP para Lenguas Nativas
+            - generic [ref=e241]: UNAL Bogotá
+        - paragraph [ref=e242]: Proyecto de procesamiento de lenguaje natural para lenguas indígenas colombianas. Convocatoria Colciencias.
+        - generic [ref=e243]:
+          - generic [ref=e244]: Presencial
+          - generic [ref=e245]: Financiado
+          - generic [ref=e246]: Bogotá
+        - generic [ref=e247]:
+          - generic [ref=e248]:
+            - generic [ref=e249]:
+              - generic [ref=e250]: Cierre
+              - generic [ref=e251]: 30 Jun
+            - generic [ref=e252]:
+              - generic [ref=e253]: Cupos
+              - generic [ref=e254]: 4 estudiantes
+          - button "Ver más" [ref=e255] [cursor=pointer]
+  - contentinfo [ref=e256]:
+    - generic [ref=e257]:
+      - generic [ref=e258]:
+        - img [ref=e260]
+        - generic [ref=e262]: LinkUp
+      - paragraph [ref=e263]: La red de networking universitario para conectar, colaborar y crecer.
+      - generic [ref=e264]:
+        - link "Campus" [ref=e265] [cursor=pointer]:
+          - /url: "#"
+        - link "Networking" [ref=e266] [cursor=pointer]:
+          - /url: "#"
+        - link "Oportunidades" [ref=e267] [cursor=pointer]:
+          - /url: "#"
+        - link "Privacidad" [ref=e268] [cursor=pointer]:
+          - /url: "#"
+        - link "Términos" [ref=e269] [cursor=pointer]:
+          - /url: "#"
+      - paragraph [ref=e270]: © 2025 LinkUp · Hecho con 💜 para estudiantes colombianos

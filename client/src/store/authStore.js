@@ -7,7 +7,7 @@ const useAuthStore = create((set) => ({
     if (!saved || saved === "undefined") return null;
     try {
       return JSON.parse(saved);
-    } catch (e) {
+    } catch {
       return null;
     }
   })(),

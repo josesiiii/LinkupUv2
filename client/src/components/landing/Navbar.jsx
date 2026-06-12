@@ -1,6 +1,7 @@
 // src/components/landing/Navbar.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../ui/Logo';
 
 const NAV_LINKS = [
   { label: 'Campus',        href: '#campus' },
@@ -69,25 +70,7 @@ export default function Navbar() {
               flexShrink: 0,
             }}
           >
-            <div style={{
-              width: 32, height: 32, borderRadius: 10,
-              background: 'linear-gradient(135deg, #f1adc2 0%, #d8b4fe 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(241,173,194,0.4)',
-            }}>
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 3a2.5 2.5 0 110 5 2.5 2.5 0 010-5zm0 10.2a6 6 0 01-5-2.68c.02-1.66 3.34-2.57 5-2.57s4.98.91 5 2.57a6 6 0 01-5 2.68z" fill="white"/>
-              </svg>
-            </div>
-            <span style={{
-              fontSize: '1.05rem',
-              fontWeight: 700,
-              color: '#3c2f41',
-              letterSpacing: '-0.02em',
-              fontFamily: "'Syne', sans-serif",
-            }}>
-              LinkUp
-            </span>
+            <Logo size={32} />
           </button>
 
           {/* Links — desktop */}

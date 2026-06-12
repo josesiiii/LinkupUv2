@@ -1,7 +1,7 @@
 // src/features/feed/UserCard.jsx
-import { motion } from "framer-motion";
 import { UserPlus, Heart, Check, Loader2 } from "lucide-react";
 import PhotoCarousel from "./PhotoCarousel";
+import { COLORS } from "../../styles/authTheme";
 
 export default function UserCard({
   item, yo,
@@ -20,7 +20,7 @@ export default function UserCard({
 
   const scoreColor =
     score >= 90 ? "#10B981" :
-    score >= 70 ? "#6366F1" :
+    score >= 70 ? COLORS.lilac :
     score >= 50 ? "#F59E0B" : "#6B7280";
 
   return (
@@ -44,8 +44,8 @@ export default function UserCard({
             position: "absolute",
             inset: 0,
             zIndex: 0,
-            borderRadius: 0,
-            overflow: "visible",
+            borderRadius: "inherit",
+            overflow: "hidden",
         }}
 >
         <PhotoCarousel
@@ -135,10 +135,10 @@ export default function UserCard({
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
             {interesesComunes.slice(0, fullscreen ? 4 : 3).map((int, i) => (
               <span key={i} style={{
-                background: "rgba(99,102,241,0.22)",
-                border: "1px solid rgba(99,102,241,0.4)",
+                background: "rgba(196,181,253,0.25)",
+                border: "1px solid rgba(196,181,253,0.45)",
                 backdropFilter: "blur(6px)",
-                color: "#c7d2fe",
+                color: "#e6ddff",
                 padding: "2px 8px", borderRadius: 6,
                 fontSize: 11, fontWeight: 500,
               }}>
@@ -186,12 +186,12 @@ export default function UserCard({
               borderRadius: 14,
               background: connectedIds.includes(id)
                 ? "rgba(255,255,255,0.06)"
-                : "rgba(99,102,241,0.88)",
+                : COLORS.gradient,
               border: connectedIds.includes(id)
                 ? "1px solid rgba(255,255,255,0.1)"
-                : "1px solid rgba(99,102,241,0.5)",
+                : "1px solid transparent",
               backdropFilter: "blur(12px)",
-              color: connectedIds.includes(id) ? "rgba(255,255,255,0.35)" : "#fff",
+              color: connectedIds.includes(id) ? "rgba(255,255,255,0.35)" : COLORS.textDark,
               fontSize: fullscreen ? 14 : 13,
               fontWeight: 600,
               cursor: connectedIds.includes(id) ? "not-allowed" : "pointer",
@@ -215,13 +215,13 @@ export default function UserCard({
               height: fullscreen ? 48 : 42,
               borderRadius: 14,
               background: savedIds.includes(id)
-                ? "rgba(239,68,68,0.22)"
+                ? "rgba(241,173,194,0.28)"
                 : "rgba(255,255,255,0.09)",
               border: savedIds.includes(id)
-                ? "1px solid rgba(239,68,68,0.4)"
+                ? `1px solid ${COLORS.pink}`
                 : "1px solid rgba(255,255,255,0.13)",
               backdropFilter: "blur(12px)",
-              color: savedIds.includes(id) ? "#ef4444" : "rgba(255,255,255,0.65)",
+              color: savedIds.includes(id) ? COLORS.pink : "rgba(255,255,255,0.65)",
               cursor: savedIds.includes(id) ? "not-allowed" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               transition: "all 150ms",
@@ -230,7 +230,7 @@ export default function UserCard({
           >
             {savingIds.includes(id)
               ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
-              : <Heart size={16} fill={savedIds.includes(id) ? "#ef4444" : "none"} />}
+              : <Heart size={16} fill={savedIds.includes(id) ? COLORS.pink : "none"} />}
           </button>
         </div>
       </div>

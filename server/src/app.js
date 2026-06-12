@@ -12,6 +12,7 @@ import campusRoutes       from "./routes/campusRoutes.js";
 import adminRoutes        from "./routes/adminRoutes.js";
 import connectionRoutes   from "./routes/connectionRoutes.js";
 import institutionRoutes from "./routes/institutionRoutes.js";
+import conversationRoutes from "./routes/conversationRoutes.js";
 
 
 dotenv.config();
@@ -66,6 +67,7 @@ app.use("/api/campus",       campusRoutes);
 app.use("/api/admin",        adminRoutes);
 app.use("/api/connections",   connectionRoutes);
 app.use("/api/institutions", institutionRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 
 // ── TEST ──────────────────────────────────────

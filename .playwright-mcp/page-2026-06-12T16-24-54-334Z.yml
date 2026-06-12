@@ -1,0 +1,65 @@
+- generic [ref=e5]:
+  - navigation [ref=e6]:
+    - generic [ref=e7]:
+      - button "LinkUp LinkUp" [ref=e8] [cursor=pointer]:
+        - generic [ref=e9]:
+          - img "LinkUp" [ref=e10]
+          - generic [ref=e11]: LinkUp
+      - generic [ref=e12]:
+        - button "Abrir menú de usuario" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: O
+          - img [ref=e16]
+        - button "Abrir navegación" [active] [ref=e18] [cursor=pointer]:
+          - img [ref=e70]
+    - generic [ref=e73]:
+      - button "Feed" [ref=e74] [cursor=pointer]:
+        - img [ref=e75]
+        - text: Feed
+      - button "Chats" [ref=e78] [cursor=pointer]:
+        - img [ref=e79]
+        - text: Chats
+      - button "Guardados" [ref=e81] [cursor=pointer]:
+        - img [ref=e82]
+        - text: Guardados
+      - button "Amigos" [ref=e84] [cursor=pointer]:
+        - img [ref=e85]
+        - text: Amigos
+  - main [ref=e20]:
+    - generic [ref=e22]:
+      - heading "J o n a t h a n A r r o y a v e" [level=2] [ref=e24]:
+        - generic [ref=e25]: J
+        - generic [ref=e26]: o
+        - generic [ref=e27]: "n"
+        - generic [ref=e28]: a
+        - generic [ref=e29]: t
+        - generic [ref=e30]: h
+        - generic [ref=e31]: a
+        - generic [ref=e32]: "n"
+        - generic [ref=e34]: A
+        - generic [ref=e35]: r
+        - generic [ref=e36]: r
+        - generic [ref=e37]: o
+        - generic [ref=e38]: "y"
+        - generic [ref=e39]: a
+        - generic [ref=e40]: v
+        - generic [ref=e41]: e
+      - generic [ref=e45]:
+        - generic [ref=e48]:
+          - generic [ref=e50] [cursor=pointer]:
+            - img "foto 2"
+          - generic [ref=e51]:
+            - img "foto 3"
+          - generic [ref=e69] [cursor=pointer]:
+            - img "foto 4"
+        - generic [ref=e57]: 10%
+        - heading "Jonathan Arroyave" [level=1] [ref=e59]
+        - generic:
+          - paragraph:
+            - text: Carrera no especificada · 1°
+            - text: LinkUp
+          - generic [ref=e60]:
+            - button "Conectar" [ref=e61] [cursor=pointer]:
+              - img [ref=e62]
+              - text: Conectar
+            - button [ref=e65] [cursor=pointer]:
+              - img [ref=e66]

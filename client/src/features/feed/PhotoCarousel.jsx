@@ -1,7 +1,7 @@
 // src/features/feed/PhotoCarousel.jsx
-import { useEffect, useCallback, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useCallback } from "react";
 import usePhotoCarousel from "../../hooks/usePhotoCarousel";
+import { COLORS } from "../../styles/authTheme";
 
 const optimizeUrl = (url) =>
   url?.replace("/upload/", "/upload/w_800,q_auto,f_auto/") || "";
@@ -17,7 +17,6 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
   const {
     current,
     setCurrent,
-    reset,
     onTouchStart,
     onTouchMove,
     onTouchEnd,
@@ -46,23 +45,20 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
         position: "relative",
         width: "100%",
         height: "100%",
+        aspectRatio: "9 / 16",
         overflow: "hidden",
         borderRadius: "inherit",
-        perspective: "1000px",
       }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* 3D Carousel track */}
+      {/* Carrusel inmersivo a sangre completa */}
       <div
         style={{
           position: "relative",
           width: "100%",
           height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
         }}
       >
         {fotos.map((url, index) => {
@@ -79,23 +75,15 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
               key={index}
               style={{
                 position: "absolute",
-                width: "78%",
-                height: "92%",
-                transform: `
-                  translateX(${pos * 65}%)
-                  scale(${isCenter ? 1 : isAdjacent ? 0.76 : 0.6})
-                  rotateY(${pos * -12}deg)
-                `,
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                transform: `translateX(${pos * 92}%)`,
                 zIndex: isCenter ? 10 : isAdjacent ? 5 : 1,
-                opacity: isCenter ? 1 : isAdjacent ? 0.38 : 0,
-                filter: isCenter ? "blur(0px)" : "blur(3px)",
+                opacity: isCenter ? 1 : isAdjacent ? 0.55 : 0,
+                filter: isCenter ? "blur(0px)" : "blur(6px)",
                 visibility: isVisible ? "visible" : "hidden",
                 transition: "all 500ms cubic-bezier(0.4,0,0.2,1)",
-                borderRadius: 32,
-                overflow: "hidden",
-                boxShadow: isCenter
-                  ? "0 24px 48px rgba(0,0,0,0.7)"
-                  : "0 8px 24px rgba(0,0,0,0.4)",
                 cursor: isAdjacent ? "pointer" : "default",
               }}
               onClick={() => {
@@ -113,8 +101,6 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
                   display: "block",
                   userSelect: "none",
                   pointerEvents: "none",
-                  borderRadius: 32,
-                  border: "1.px solid rgba(255,255,255,0.08)",
                 }}
                 draggable={false}
               />
@@ -147,8 +133,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
                 maxWidth: 36,
                 height: 3,
                 borderRadius: 2,
-                background:
-                  i === current ? "#fff" : "rgba(255,255,255,0.3)",
+                background: i === current ? COLORS.pink : "rgba(255,255,255,0.3)",
                 transition: "background 200ms",
                 cursor: "pointer",
               }}

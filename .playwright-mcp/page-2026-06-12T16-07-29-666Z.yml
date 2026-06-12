@@ -1,0 +1,27 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - button "LinkUp LinkUp" [ref=e6] [cursor=pointer]:
+        - generic [ref=e7]:
+          - img "LinkUp" [ref=e8]
+          - generic [ref=e9]: LinkUp
+      - generic [ref=e10]:
+        - button "Feed" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Feed
+        - button "Chats" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Chats
+        - button "Guardados" [ref=e18] [cursor=pointer]:
+          - img [ref=e19]
+          - text: Guardados
+        - button "Amigos" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Amigos
+      - button "Abrir menú de usuario" [ref=e29] [cursor=pointer]:
+        - generic [ref=e30]: O
+        - img [ref=e31]
+  - main [ref=e33]:
+    - generic [ref=e35]:
+      - img [ref=e36]
+      - generic [ref=e38]: Calculando compatibilidad...

@@ -1,0 +1,33 @@
+- generic [ref=e48]:
+  - link "‹ LinkUp" [ref=e50] [cursor=pointer]:
+    - /url: /
+    - generic [ref=e51]: ‹
+    - text: LinkUp
+  - generic [ref=e52]:
+    - generic [ref=e54]:
+      - heading "Conecta con personas de todo el mundo" [level=1] [ref=e55]
+      - paragraph [ref=e56]: Descubre amistades reales, comunidades y oportunidades, sin límites.
+    - paragraph [ref=e60]: Arrastra para explorar · Desliza para hacer zoom
+  - generic [ref=e62]:
+    - paragraph [ref=e63]: Bienvenido de nuevo
+    - heading "Iniciar sesión" [level=2] [ref=e64]
+    - paragraph [ref=e65]: Sigue construyendo conexiones con propósito.
+    - button "Continuar con Google" [ref=e66] [cursor=pointer]:
+      - img [ref=e67]
+      - text: Continuar con Google
+    - generic [ref=e74]: O INICIA CON EMAIL
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - generic [ref=e78]: Correo electrónico
+        - textbox "alan.turing@universidad.edu.co" [ref=e79]: oscargomezmosquera@gmail.com
+      - generic [ref=e80]:
+        - generic [ref=e81]: Contraseña
+        - generic [ref=e82]:
+          - textbox "Tu contraseña" [ref=e83]: Linkup#Oscar2025
+          - button [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+      - button "Iniciar sesión" [ref=e88] [cursor=pointer]
+    - paragraph [ref=e89]:
+      - text: ¿No tienes cuenta?
+      - link "Crear cuenta" [ref=e90] [cursor=pointer]:
+        - /url: /register
