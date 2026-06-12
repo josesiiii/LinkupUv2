@@ -11,6 +11,8 @@ import savedProfileRoutes from "./routes/savedProfileRoutes.js";
 import campusRoutes       from "./routes/campusRoutes.js";
 import adminRoutes        from "./routes/adminRoutes.js";
 import connectionRoutes   from "./routes/connectionRoutes.js";
+import institutionRoutes from "./routes/institutionRoutes.js";
+
 
 dotenv.config();
 
@@ -63,6 +65,8 @@ app.use("/api/savedprofiles", savedProfileRoutes);
 app.use("/api/campus",       campusRoutes);
 app.use("/api/admin",        adminRoutes);
 app.use("/api/connections",   connectionRoutes);
+app.use("/api/institutions", institutionRoutes);
+
 
 // ── TEST ──────────────────────────────────────
 app.get("/", (req, res) => {

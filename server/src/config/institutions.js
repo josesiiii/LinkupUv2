@@ -2,7 +2,7 @@
 
 export const INSTITUTIONS = {
   "soy.sena.edu.co": {
-    name: "SENA",
+    name: "Servicio Nacional de Aprendizaje (SENA)",
     campuses: [
       { id: "sena-medellin-centro",      label: "Centro de Servicios y Gestión Empresarial", city: "Medellín",     department: "Antioquia" },
       { id: "sena-medellin-industrial",  label: "Centro Industrial del Diseño y la Manufactura", city: "Medellín", department: "Antioquia" },

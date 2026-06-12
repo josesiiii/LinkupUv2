@@ -7,18 +7,9 @@ import { INSTITUTIONS } from "../config/institutions.js";
 export const registrarUsuario = async (req, res) => {
   try {
     const {
-      fullName,
-      email,
-      password,
-      interests,
-      objectives,
-      career,
-      faculty,
-      semester,
-      bio,
-      currentCampus,
-      city,
-      department
+      fullName, email, password,
+      interests, objectives, career, faculty, semester, bio,
+      currentCampus, city, department, role
     } = req.body;
 
     // 1. VALIDAR DOMAIN
@@ -75,7 +66,8 @@ export const registrarUsuario = async (req, res) => {
       institution:   institution.name,
       currentCampus: validCampus.id,
       city:          city       || validCampus.city,
-      department:    department || validCampus.department
+      department:    department || validCampus.department,
+      role:            role         || "user"
     });
 
     // 6. TOKEN
