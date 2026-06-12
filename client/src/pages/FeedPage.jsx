@@ -293,36 +293,38 @@ export default function FeedPage() {
               width: "100%",
               height: "100%",
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-start",
               justifyContent: "center",
             }}>
-              {usuarios.map((item, index) => {
-                if (!item) return null;
-                const perfil = item.usuario || item;
-                const offset = index - activeIndex;
-                if (Math.abs(offset) > 1) return null;
-                const isCenter = offset === 0;
+            {usuarios.map((item, index) => {
+              if (!item) return null;
+              const perfil = item.usuario || item;
+              const offset = index - activeIndex;
+              if (Math.abs(offset) > 1) return null;
+              const isCenter = offset === 0;
 
-                return (
-                  <motion.div
-                    key={perfil._id}
-                    animate={{
-                      x: isCenter ? "0%" : offset < 0 ? "calc(-50vw - 30px)" : "calc(50vw + 30px)",
-                      scale: isCenter ? 1 : 0.88,
-                      opacity: isCenter ? 1 : 0.45,
-                      rotateY: isCenter ? 0 : offset * -8,
-                      filter: isCenter ? "blur(0px)" : "blur(2px)",
-                    }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    style={{
-                      position: "absolute",
-                      width: "40%",
-                      height: "100%",
-                      zIndex: isCenter ? 10 : 5,
-                      cursor: !isCenter ? "pointer" : "default",
-                    }}
-                    onClick={() => !isCenter && handleDotClick(index)}
-                  >
+              return (
+                <motion.div
+                  key={perfil._id}
+                  animate={{
+                    x: isCenter ? "-50%" : offset < 0 ? "calc(-50% - 75vw)" : "calc(-50% + 75vw)",
+                    scale: isCenter ? 1 : 0.85,
+                    opacity: isCenter ? 1 : 0.6,
+                    rotateY: isCenter ? 0 : offset * -6,
+                    filter: isCenter ? "blur(0px)" : "blur(3px)",
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    width: "min(460px, 85vw)",
+                    height: "100%",
+                    top: 0,
+                    zIndex: isCenter ? 10 : 5,
+                    cursor: !isCenter ? "pointer" : "default",
+                  }}
+                  onClick={() => !isCenter && handleDotClick(index)}
+                >
                     <UserCard
                       item={item}
                       yo={usuario}

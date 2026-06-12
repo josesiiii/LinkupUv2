@@ -146,7 +146,7 @@ export default function RegisterPage() {
   // Institution
   const [institution,    setInstitution]    = useState("");
   const [campuses,       setCampuses]       = useState([]);
-  const [campus,         setCampus]         = useState("");
+  const [currentCampus,  setCurrentCampus]  = useState("");
   const [loadingCampus,  setLoadingCampus]  = useState(false);
 
   // Step 2
@@ -161,7 +161,7 @@ export default function RegisterPage() {
   const handleEmailBlur = async () => {
     if (!email.includes("@") || !email.includes(".")) return;
     setLoadingCampus(true);
-    setInstitution(""); setCampuses([]); setCampus("");
+    setInstitution(""); setCampuses([]); setCurrentCampus("");
     try {
       const { data } = await api.get(`/institutions/campuses?email=${email}`);
       setInstitution(data.institution);
@@ -174,7 +174,7 @@ export default function RegisterPage() {
     setList((prev) => prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]);
 
   const goToStep2 = () => {
-    if (!fullName || !email || !password || !campus) { setError("Completa todos los campos"); return; }
+    if (!fullName || !email || !password || !currentCampus) { setError("Completa todos los campos"); return; }
     if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres"); return; }
     setError(""); setStep(2);
   };
@@ -184,9 +184,11 @@ export default function RegisterPage() {
     setError(""); setLoading(true);
     try {
       const res = await api.post("/auth/register", {
-        fullName, email, password, campus,
+        fullName, email, password,
+        currentCampus,           // ID del campus
+        institution,      // nombre de la institución detectada
         career, faculty, semester: Number(semester),
-        bio, interests, objectives,
+        bio, interests, objectives, role,
       });
       setAuth(res.data.usuario, res.data.token);
       navigate("/feed");
@@ -217,12 +219,13 @@ export default function RegisterPage() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          width: "50%", minHeight: "100vh",
+          width: "50%", height: "100vh",
+          flexShrink: 0,
           background: "linear-gradient(150deg, #fff9fc 0%, #fff0f7 55%, #ffe4f2 100%)",
           borderRight: `1px solid ${BORDER}`,
           display: "flex", flexDirection: "column",
           justifyContent: "space-between",
-          padding: "44px 48px",
+          padding: "44px 48px", 
           position: "relative", overflow: "hidden",
         }}
       >
@@ -306,11 +309,12 @@ export default function RegisterPage() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          width: "50%", minHeight: "100vh",
+          width: "50%", height: "100vh",
+          overflowY: "auto",
           background: "linear-gradient(210deg, #fff0f7 0%, #ffffff 45%, #fff9fc 100%)",
-          display: "flex", alignItems: "center", justifyContent: "center",
+          display: "flex", justifyContent: "center",
           padding: "40px 48px",
-          position: "relative", overflowY: "auto",
+          position: "relative",
         }}
       >
         <div style={{ position: "absolute", top: -100, right: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,61,158,0.06) 0%, transparent 65%)", pointerEvents: "none" }} />
@@ -326,6 +330,7 @@ export default function RegisterPage() {
             borderRadius: 32, padding: "36px 40px",
             boxShadow: "0 10px 40px rgba(0,0,0,0.05)",
             zIndex: 1,
+            alignSelf: "flex-start",
           }}
         >
           <Link to="/" style={{ fontSize: 13, color: "#aaa", textDecoration: "none", display: "block", marginBottom: 20 }}>← Home</Link>
@@ -396,7 +401,7 @@ export default function RegisterPage() {
                 {campuses.length > 0 && (
                   <div>
                     <label style={labelStyle}>Campus</label>
-                    <select value={campus} onChange={(e) => setCampus(e.target.value)}
+                    <select value={currentCampus} onChange={(e) => setCurrentCampus(e.target.value)}
                       style={{ ...inputBase, cursor: "pointer", appearance: "auto" }}
                       onFocus={focusIn} onBlur={focusOut}
                     >
