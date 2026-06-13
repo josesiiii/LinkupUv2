@@ -1,19 +1,23 @@
 // src/components/layout/AppLayout.jsx
-import Navbar from "../ui/Navbar";
-import { COLORS } from "../../styles/authTheme";
+import Sidebar from "./Sidebar";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function AppLayout({ children }) {
+  const { colors } = useTheme();
+
   return (
     <div
       style={{
         minHeight: "100vh",
         width: "100%",
-        background: `linear-gradient(150deg, ${COLORS.cream} 0%, ${COLORS.blush} 55%, #ffe4f2 100%)`,
-        fontFamily: "'DM Sans', 'Inter', sans-serif",
+        background: colors.bg,
+        color: colors.textDark,
+        fontFamily: "'Inter', sans-serif",
+        transition: "background 200ms ease, color 200ms ease",
       }}
     >
-      <Navbar />
-      <main style={{ paddingTop: 96 }}>{children}</main>
+      <Sidebar />
+      <main className="md:pl-16 pb-16 md:pb-0">{children}</main>
     </div>
   );
 }

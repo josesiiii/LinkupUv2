@@ -7,8 +7,13 @@ import api from "../api/axios";
 import useAuthStore from "../store/authStore";
 import RotatingEarth from "../components/auth/RotatingEarth";
 import AuthHeader from "../components/auth/AuthHeader";
+import Logo from "../components/ui/Logo";
 import useResponsiveGlobeSize from "../hooks/useResponsiveGlobeSize";
-import { COLORS, inputBase, focusIn, focusOut } from "../styles/authTheme";
+import { LIGHT_COLORS as COLORS, getInputBase, getFocusIn, getFocusOut } from "../styles/authTheme";
+
+const inputBase = getInputBase(COLORS);
+const focusIn = getFocusIn(COLORS);
+const focusOut = getFocusOut(COLORS);
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -43,7 +48,7 @@ export default function LoginPage() {
       width: "100%", minHeight: "100vh",
       background: "#ffffff",
       display: "flex",
-      fontFamily: "'DM Sans', 'Inter', sans-serif",
+      fontFamily: "'Inter', sans-serif",
       overflowX: "hidden",
     }}>
 
@@ -62,7 +67,7 @@ export default function LoginPage() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         style={{
           width: "50%", minHeight: "100vh",
-          background: `linear-gradient(150deg, ${COLORS.cream} 0%, ${COLORS.blush} 55%, #ffe4f2 100%)`,
+          background: COLORS.surfaceAlt,
           borderRight: `1px solid ${COLORS.border}`,
           display: "flex", flexDirection: "column",
           justifyContent: "center",
@@ -70,9 +75,8 @@ export default function LoginPage() {
           position: "relative", overflow: "hidden",
         }}
       >
-        {/* Ambient blobs */}
-        <div style={{ position: "absolute", top: -160, left: -160, width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(241,173,194,0.18) 0%, transparent 65%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -120, right: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(216,180,254,0.15) 0%, transparent 65%)", pointerEvents: "none" }} />
+        {/* Ambient blob */}
+        <div style={{ position: "absolute", top: -160, left: -160, width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,61,158,0.06) 0%, transparent 65%)", pointerEvents: "none" }} />
 
         {/* Textos centrados encima del planeta */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 28, zIndex: 1, textAlign: "center" }}>
@@ -81,9 +85,9 @@ export default function LoginPage() {
               initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
               style={{
-                fontSize: "clamp(1.9rem, 3.4vw, 2.8rem)", fontWeight: 800,
+                fontSize: "clamp(1.9rem, 3.4vw, 2.8rem)", fontWeight: 700,
                 color: COLORS.textDark, lineHeight: 1.12, letterSpacing: "-0.03em",
-                margin: "0 0 14px 0", fontFamily: "'Syne', sans-serif",
+                margin: "0 0 14px 0", fontFamily: "'Inter', sans-serif",
               }}
             >
               Conecta con personas{" "}
@@ -130,13 +134,13 @@ export default function LoginPage() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         style={{
           width: "50%", minHeight: "100vh",
-          background: `linear-gradient(210deg, ${COLORS.blush} 0%, #ffffff 45%, ${COLORS.cream} 100%)`,
+          background: COLORS.bg,
           display: "flex", alignItems: "center", justifyContent: "center",
           padding: "48px",
           position: "relative", overflow: "hidden",
         }}
       >
-        <div style={{ position: "absolute", top: -100, right: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(241,173,194,0.12) 0%, transparent 65%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: -100, right: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,61,158,0.06) 0%, transparent 65%)", pointerEvents: "none" }} />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -146,16 +150,21 @@ export default function LoginPage() {
             width: "100%", maxWidth: 440,
             background: "#ffffff",
             border: `1px solid ${COLORS.border}`,
-            borderRadius: 32, padding: "40px",
-            boxShadow: "0 10px 40px rgba(60,47,65,0.06)",
+            borderRadius: 24, padding: "40px",
+            boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
             zIndex: 1,
           }}
         >
+          {/* Logo centrado */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginBottom: 24 }}>
+            <Logo size={44} showText textSize="1.3rem" textColor={COLORS.textDark} />
+          </div>
+
           {/* Eyebrow + título */}
           <p style={{ fontSize: 11, fontWeight: 700, color: COLORS.pink, letterSpacing: "0.10em", textTransform: "uppercase", margin: "0 0 8px 0", textAlign: "center" }}>
             Bienvenido de nuevo
           </p>
-          <h2 style={{ fontSize: 26, fontWeight: 800, color: COLORS.textDark, letterSpacing: "-0.03em", margin: "0 0 4px 0", textAlign: "center", fontFamily: "'Syne', sans-serif" }}>
+          <h2 style={{ fontSize: 26, fontWeight: 700, color: COLORS.textDark, letterSpacing: "-0.03em", margin: "0 0 4px 0", textAlign: "center", fontFamily: "'Inter', sans-serif" }}>
             Iniciar sesión
           </h2>
           <p style={{ fontSize: 14, color: COLORS.textMid, margin: "0 0 28px 0", textAlign: "center" }}>
@@ -249,10 +258,10 @@ export default function LoginPage() {
               whileTap={ready && !loading ? { scale: 0.98 } : {}}
               style={{
                 width: "100%", height: 54,
-                borderRadius: 14,
-                background: ready ? COLORS.pink : "#f0f0f0",
+                borderRadius: 12,
+                background: ready ? COLORS.pink : COLORS.surfaceAlt,
                 border: "none",
-                color: ready ? COLORS.textDark : "#bbb",
+                color: ready ? "#fff" : "#bbb",
                 fontSize: 15, fontWeight: 700,
                 cursor: ready && !loading ? "pointer" : "not-allowed",
                 transition: "background 250ms, color 250ms",
@@ -261,7 +270,7 @@ export default function LoginPage() {
               }}
             >
               {loading ? (
-                <div style={{ width: 18, height: 18, border: "2px solid rgba(60,47,65,0.25)", borderTopColor: COLORS.textDark, borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                <div style={{ width: 18, height: 18, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
               ) : "Iniciar sesión"}
             </motion.button>
           </form>

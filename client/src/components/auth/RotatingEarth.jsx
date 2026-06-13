@@ -92,42 +92,42 @@ export default function RotatingEarth({ size = 340 }) {
       context.arc(W / 2, H / 2, scale, 0, 2 * Math.PI);
       context.clip();
 
-      // Fondo del océano: rosado suave, casi transparente
+      // Fondo del océano: rosa acento
       context.beginPath();
       context.arc(W / 2, H / 2, scale, 0, 2 * Math.PI);
-      context.fillStyle = "rgba(207, 94, 242, 0.65)";
+      context.fillStyle = "rgba(255, 61, 158, 0.75)";
       context.fill();
 
       if (landFeatures) {
-        // Graticule (grilla) — rosa suave
+        // Graticule (grilla) — blanco suave sobre el océano rosa
         const graticule = d3.geoGraticule();
         context.beginPath();
         path(graticule());
-        context.strokeStyle = "rgba(255, 255, 255, 0.39)";
+        context.strokeStyle = "rgba(255, 255, 255, 0.4)";
         context.lineWidth = 0.7 * sf;
         context.stroke();
 
-        // Land fill — rosa sólido
+        // Land fill — rosa claro
         context.beginPath();
         landFeatures.features.forEach((f) => path(f));
-        context.fillStyle = "rgba(253,242,248,0.35)";
+        context.fillStyle = "rgba(255,214,235,0.9)";
         context.fill();
 
-        // Land outline — rosa más oscuro para definir
+        // Land outline — negro para definir
         context.beginPath();
         landFeatures.features.forEach((f) => path(f));
-        context.strokeStyle = "rgba(0, 0, 0, 0.52)";
+        context.strokeStyle = "rgba(0, 0, 0, 0.7)";
         context.lineWidth = 0.8 * sf;
         context.stroke();
 
-        // Dots sobre los continentes — rosa más oscuro/brillante
+        // Dots sobre los continentes — rosa claro
         allDots.forEach(([lng, lat]) => {
           const p = projection([lng, lat]);
           if (!p) return;
           if (p[0] < 0 || p[0] > W || p[1] < 0 || p[1] > H) return;
           context.beginPath();
           context.arc(p[0], p[1], 1.3 * sf, 0, 2 * Math.PI);
-          context.fillStyle = "rgba(253,242,248,0.35)";
+          context.fillStyle = "rgba(255,214,235,0.9)";
           context.fill();
         });
       }

@@ -4,9 +4,10 @@ import { Bookmark } from "lucide-react";
 import AppLayout from "../components/layout/AppLayout";
 import EmptyState from "../components/ui/EmptyState";
 import api from "../api/axios";
-import { COLORS } from "../styles/authTheme";
+import { useTheme } from "../context/ThemeContext";
 
 export default function SavedPage() {
+  const { theme, colors } = useTheme();
   const [guardados, setGuardados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,11 +22,11 @@ export default function SavedPage() {
   return (
     <AppLayout>
       <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 24px 64px" }}>
-        <h1 style={{ margin: "0 0 24px 0", fontSize: 28, fontWeight: 800, color: COLORS.textDark, fontFamily: "'Syne', sans-serif", letterSpacing: "-0.02em" }}>
+        <h1 style={{ margin: "0 0 24px 0", fontSize: 28, fontWeight: 700, color: colors.textDark, fontFamily: "'Inter', sans-serif", letterSpacing: "-0.02em" }}>
           Perfiles guardados
         </h1>
 
-        {loading && <p style={{ color: COLORS.textMuted, fontSize: 14 }}>Cargando...</p>}
+        {loading && <p style={{ color: colors.textMuted, fontSize: 14 }}>Cargando...</p>}
 
         {error && (
           <p style={{ fontSize: 13, color: "#cc0040", padding: "10px 14px", background: "#fff0f5", borderRadius: 12, border: "1px solid #ffc0d8" }}>
@@ -47,21 +48,25 @@ export default function SavedPage() {
               <div
                 key={item._id}
                 style={{
-                  background: "rgba(255,255,255,0.5)", border: `1px solid ${COLORS.border}`,
+                  ...(theme === "dark"
+                    ? { background: colors.surface }
+                    : { background: "rgba(255,255,255,0.5)" }),
+                  border: `1px solid ${colors.border}`,
                   borderRadius: 20, padding: "16px 20px",
+                  boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
                   display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap",
                 }}
               >
                 <div>
-                  <p style={{ margin: "0 0 2px 0", fontSize: 16, fontWeight: 700, color: COLORS.textDark }}>
+                  <p style={{ margin: "0 0 2px 0", fontSize: 16, fontWeight: 700, color: colors.textDark }}>
                     {item.savedUser?.fullName || "Usuario"}
                   </p>
-                  <p style={{ margin: 0, fontSize: 13, color: COLORS.textMuted }}>{item.savedUser?.email}</p>
+                  <p style={{ margin: 0, fontSize: 13, color: colors.textMuted }}>{item.savedUser?.email}</p>
                 </div>
                 {item.savedUser?.interests?.length > 0 && (
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {item.savedUser.interests.slice(0, 3).map((interest) => (
-                      <span key={interest} style={{ fontSize: 12, fontWeight: 500, color: COLORS.textDark, background: COLORS.pinkLight, padding: "4px 10px", borderRadius: 100 }}>
+                      <span key={interest} style={{ fontSize: 12, fontWeight: 500, color: colors.textDark, background: colors.pinkLight, padding: "4px 10px", borderRadius: 100 }}>
                         {interest}
                       </span>
                     ))}

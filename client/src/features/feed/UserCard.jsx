@@ -1,7 +1,7 @@
 // src/features/feed/UserCard.jsx
 import { UserPlus, Heart, Check, Loader2 } from "lucide-react";
 import PhotoCarousel from "./PhotoCarousel";
-import { COLORS } from "../../styles/authTheme";
+import { LIGHT_COLORS as COLORS } from "../../styles/authTheme";
 
 export default function UserCard({
   item, yo,
@@ -20,7 +20,7 @@ export default function UserCard({
 
   const scoreColor =
     score >= 90 ? "#10B981" :
-    score >= 70 ? COLORS.lilac :
+    score >= 70 ? "#FF6FB5" :
     score >= 50 ? "#F59E0B" : "#6B7280";
 
   return (
@@ -32,7 +32,7 @@ export default function UserCard({
     borderRadius: 0,
     overflow: "visible",
         width: "100%",
-        height: fullscreen ? "100vh" : "100%",        
+        height: "100%",
         // En modo grid (no fullscreen) mantiene proporción 9/16
         ...(fullscreen ? {} : { aspectRatio: "9 / 16", maxHeight: 520 }),
         transition: "border-color 200ms",
@@ -45,7 +45,7 @@ export default function UserCard({
             inset: 0,
             zIndex: 0,
             borderRadius: "inherit",
-            overflow: "hidden",
+            overflow: "visible",
         }}
 >
         <PhotoCarousel
@@ -100,6 +100,8 @@ export default function UserCard({
         bottom: 0, left: 0, right: 0,
         zIndex: 20,
         padding: fullscreen ? "24px 22px 22px" : "20px 18px 18px",
+        paddingTop: fullscreen ? 96 : 72,
+        background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0) 100%)",
         pointerEvents: "none",
       }}>
 
@@ -135,10 +137,10 @@ export default function UserCard({
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
             {interesesComunes.slice(0, fullscreen ? 4 : 3).map((int, i) => (
               <span key={i} style={{
-                background: "rgba(196,181,253,0.25)",
-                border: "1px solid rgba(196,181,253,0.45)",
+                background: "rgba(255,61,158,0.18)",
+                border: "1px solid rgba(255,61,158,0.4)",
                 backdropFilter: "blur(6px)",
-                color: "#e6ddff",
+                color: "#fff",
                 padding: "2px 8px", borderRadius: 6,
                 fontSize: 11, fontWeight: 500,
               }}>
@@ -180,10 +182,11 @@ export default function UserCard({
           <button
             disabled={connectingIds.includes(id) || connectedIds.includes(id)}
             onClick={() => onConectar(id)}
+            className={connectedIds.includes(id) ? "" : "hover:scale-105 active:scale-95"}
             style={{
               flex: 1,
               height: fullscreen ? 48 : 42,
-              borderRadius: 14,
+              borderRadius: 999,
               background: connectedIds.includes(id)
                 ? "rgba(255,255,255,0.06)"
                 : COLORS.gradient,
@@ -191,7 +194,7 @@ export default function UserCard({
                 ? "1px solid rgba(255,255,255,0.1)"
                 : "1px solid transparent",
               backdropFilter: "blur(12px)",
-              color: connectedIds.includes(id) ? "rgba(255,255,255,0.35)" : COLORS.textDark,
+              color: connectedIds.includes(id) ? "rgba(255,255,255,0.35)" : "#fff",
               fontSize: fullscreen ? 14 : 13,
               fontWeight: 600,
               cursor: connectedIds.includes(id) ? "not-allowed" : "pointer",
@@ -210,27 +213,39 @@ export default function UserCard({
           <button
             disabled={savingIds.includes(id) || savedIds.includes(id)}
             onClick={() => onGuardar(id)}
+            className={savedIds.includes(id) ? "" : "hover:scale-105 active:scale-95"}
             style={{
-              width: fullscreen ? 48 : 42,
               height: fullscreen ? 48 : 42,
-              borderRadius: 14,
+              padding: "0 18px",
+              borderRadius: 999,
               background: savedIds.includes(id)
-                ? "rgba(241,173,194,0.28)"
+                ? "rgba(255,61,158,0.18)"
                 : "rgba(255,255,255,0.09)",
               border: savedIds.includes(id)
-                ? `1px solid ${COLORS.pink}`
+                ? "1px solid #FF3D9E"
                 : "1px solid rgba(255,255,255,0.13)",
               backdropFilter: "blur(12px)",
-              color: savedIds.includes(id) ? COLORS.pink : "rgba(255,255,255,0.65)",
+              color: savedIds.includes(id) ? "#FF3D9E" : "rgba(255,255,255,0.85)",
+              fontSize: fullscreen ? 14 : 13,
+              fontWeight: 600,
               cursor: savedIds.includes(id) ? "not-allowed" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
               transition: "all 150ms",
               flexShrink: 0,
             }}
           >
             {savingIds.includes(id)
               ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
-              : <Heart size={16} fill={savedIds.includes(id) ? COLORS.pink : "none"} />}
+              : (
+                <>
+                  <Heart
+                    size={16}
+                    fill={savedIds.includes(id) ? COLORS.pink : "none"}
+                    style={{ transform: savedIds.includes(id) ? "scale(1.25)" : "scale(1)", transition: "transform 200ms" }}
+                  />
+                  {savedIds.includes(id) ? "Guardado" : "Guardar"}
+                </>
+              )}
           </button>
         </div>
       </div>

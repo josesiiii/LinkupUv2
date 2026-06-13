@@ -1,35 +1,44 @@
 // src/pages/ProfilePage.jsx
 import AppLayout from "../components/layout/AppLayout";
 import useAuthStore from "../store/authStore";
-import { COLORS } from "../styles/authTheme";
+import { useTheme } from "../context/ThemeContext";
 
-const Chip = ({ children, tone = "pink" }) => (
+const Chip = ({ children, tone = "pink", colors }) => (
   <span
     style={{
       display: "inline-block", padding: "6px 14px", borderRadius: 100,
       fontSize: 13, fontWeight: 500,
-      background: tone === "pink" ? COLORS.pinkLight : "rgba(196,181,253,0.18)",
-      color: COLORS.textDark,
+      background: tone === "pink" ? colors.pinkLight : colors.surfaceAlt,
+      color: colors.textDark,
     }}
   >
     {children}
   </span>
 );
 
-const InfoCard = ({ label, value }) => (
+const InfoCard = ({ label, value, theme, colors }) => (
   <div
     style={{
-      background: "rgba(255,255,255,0.5)", border: `1px solid ${COLORS.border}`,
+      ...(theme === "dark"
+        ? { background: colors.surface }
+        : { background: "rgba(255,255,255,0.5)" }),
+      border: `1px solid ${colors.border}`,
       borderRadius: 20, padding: "16px 20px",
+      boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
     }}
   >
-    <p style={{ margin: "0 0 4px 0", fontSize: 12, fontWeight: 600, color: COLORS.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</p>
-    <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: COLORS.textDark }}>{value || "—"}</p>
+    <p style={{ margin: "0 0 4px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</p>
+    <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: colors.textDark }}>{value || "—"}</p>
   </div>
 );
 
 export default function ProfilePage() {
   const usuario = useAuthStore((state) => state.usuario);
+  const { theme, colors } = useTheme();
+
+  const cardStyle = theme === "dark"
+    ? { background: colors.surface }
+    : { background: "rgba(255,255,255,0.45)", backdropFilter: "blur(20px)" };
 
   return (
     <AppLayout>
@@ -39,22 +48,23 @@ export default function ProfilePage() {
         <div
           style={{
             display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap",
-            background: "rgba(255,255,255,0.45)", backdropFilter: "blur(20px)",
-            border: `1px solid ${COLORS.border}`, borderRadius: 32, padding: 32, marginBottom: 24,
+            ...cardStyle,
+            border: `1px solid ${colors.border}`, borderRadius: 24, padding: 32, marginBottom: 24,
+            boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
           }}
         >
           {usuario?.profilePicture ? (
             <img
               src={usuario.profilePicture}
               alt={usuario?.fullName}
-              style={{ width: 96, height: 96, borderRadius: "50%", objectFit: "cover", border: `2px solid ${COLORS.border}`, flexShrink: 0 }}
+              style={{ width: 96, height: 96, borderRadius: 24, objectFit: "cover", border: `2px solid ${colors.border}`, flexShrink: 0 }}
             />
           ) : (
             <div
               style={{
-                width: 96, height: 96, borderRadius: "50%", background: COLORS.gradient,
+                width: 96, height: 96, borderRadius: 24, background: colors.gradient,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                color: COLORS.textDark, fontWeight: 800, fontSize: 36, flexShrink: 0,
+                color: "#fff", fontWeight: 700, fontSize: 36, flexShrink: 0,
               }}
             >
               {usuario?.fullName?.charAt(0)?.toUpperCase() || "?"}
@@ -62,13 +72,13 @@ export default function ProfilePage() {
           )}
 
           <div style={{ minWidth: 0 }}>
-            <h1 style={{ margin: "0 0 4px 0", fontSize: 28, fontWeight: 800, color: COLORS.textDark, fontFamily: "'Syne', sans-serif", letterSpacing: "-0.02em" }}>
+            <h1 style={{ margin: "0 0 4px 0", fontSize: 28, fontWeight: 700, color: colors.textDark, fontFamily: "'Inter', sans-serif", letterSpacing: "-0.02em" }}>
               {usuario?.fullName || "Usuario"}
             </h1>
-            <p style={{ margin: "0 0 10px 0", fontSize: 14, color: COLORS.textMid }}>{usuario?.email}</p>
+            <p style={{ margin: "0 0 10px 0", fontSize: 14, color: colors.textMid }}>{usuario?.email}</p>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {usuario?.institution && <Chip>{usuario.institution}</Chip>}
-              {usuario?.currentCampus && <Chip tone="lilac">{usuario.currentCampus}</Chip>}
+              {usuario?.institution && <Chip colors={colors}>{usuario.institution}</Chip>}
+              {usuario?.currentCampus && <Chip tone="lilac" colors={colors}>{usuario.currentCampus}</Chip>}
             </div>
           </div>
         </div>
@@ -77,34 +87,36 @@ export default function ProfilePage() {
         {usuario?.bio && (
           <div
             style={{
-              background: "rgba(255,255,255,0.45)", backdropFilter: "blur(20px)",
-              border: `1px solid ${COLORS.border}`, borderRadius: 24, padding: 24, marginBottom: 24,
+              ...cardStyle,
+              border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24, marginBottom: 24,
+              boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
             }}
           >
-            <p style={{ margin: "0 0 8px 0", fontSize: 12, fontWeight: 600, color: COLORS.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Sobre mí</p>
-            <p style={{ margin: 0, fontSize: 15, color: COLORS.textDark, lineHeight: 1.6 }}>{usuario.bio}</p>
+            <p style={{ margin: "0 0 8px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Sobre mí</p>
+            <p style={{ margin: 0, fontSize: 15, color: colors.textDark, lineHeight: 1.6 }}>{usuario.bio}</p>
           </div>
         )}
 
         {/* Datos académicos */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 24 }}>
-          <InfoCard label="Carrera" value={usuario?.career} />
-          <InfoCard label="Facultad" value={usuario?.faculty} />
-          <InfoCard label="Semestre" value={usuario?.semester} />
-          <InfoCard label="Ciudad" value={usuario?.city} />
+          <InfoCard label="Carrera" value={usuario?.career} theme={theme} colors={colors} />
+          <InfoCard label="Facultad" value={usuario?.faculty} theme={theme} colors={colors} />
+          <InfoCard label="Semestre" value={usuario?.semester} theme={theme} colors={colors} />
+          <InfoCard label="Ciudad" value={usuario?.city} theme={theme} colors={colors} />
         </div>
 
         {/* Intereses */}
         {usuario?.interests?.length > 0 && (
           <div
             style={{
-              background: "rgba(255,255,255,0.45)", backdropFilter: "blur(20px)",
-              border: `1px solid ${COLORS.border}`, borderRadius: 24, padding: 24, marginBottom: 24,
+              ...cardStyle,
+              border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24, marginBottom: 24,
+              boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
             }}
           >
-            <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: COLORS.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Intereses</p>
+            <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Intereses</p>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {usuario.interests.map((interest) => <Chip key={interest}>{interest}</Chip>)}
+              {usuario.interests.map((interest) => <Chip key={interest} colors={colors}>{interest}</Chip>)}
             </div>
           </div>
         )}
@@ -113,13 +125,14 @@ export default function ProfilePage() {
         {usuario?.objectives?.length > 0 && (
           <div
             style={{
-              background: "rgba(255,255,255,0.45)", backdropFilter: "blur(20px)",
-              border: `1px solid ${COLORS.border}`, borderRadius: 24, padding: 24,
+              ...cardStyle,
+              border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24,
+              boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
             }}
           >
-            <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: COLORS.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Objetivos</p>
+            <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Objetivos</p>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {usuario.objectives.map((objective) => <Chip key={objective} tone="lilac">{objective}</Chip>)}
+              {usuario.objectives.map((objective) => <Chip key={objective} tone="lilac" colors={colors}>{objective}</Chip>)}
             </div>
           </div>
         )}

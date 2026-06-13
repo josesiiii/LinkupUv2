@@ -1,6 +1,6 @@
 // src/components/auth/AuthHeader.jsx
 import { Link } from "react-router-dom";
-import { COLORS } from "../../styles/authTheme";
+import { LIGHT_COLORS as COLORS } from "../../styles/authTheme";
 
 // Encabezado compartido por Login y Register: "‹ LinkUp" → vuelve a la Home
 export default function AuthHeader() {
@@ -13,10 +13,10 @@ export default function AuthHeader() {
         gap: 8,
         textDecoration: "none",
         color: COLORS.textDark,
-        fontWeight: 800,
+        fontWeight: 700,
         fontSize: 19,
         letterSpacing: "-0.02em",
-        fontFamily: "'Syne', sans-serif",
+        fontFamily: "'Inter', sans-serif",
         transition: "opacity 180ms ease",
       }}
       onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}

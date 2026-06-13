@@ -7,8 +7,14 @@ import api from "../api/axios";
 import useAuthStore from "../store/authStore";
 import RotatingEarth from "../components/auth/RotatingEarth";
 import AuthHeader from "../components/auth/AuthHeader";
+import Logo from "../components/ui/Logo";
 import useResponsiveGlobeSize from "../hooks/useResponsiveGlobeSize";
-import { COLORS, inputBase, labelStyle, focusIn, focusOut } from "../styles/authTheme";
+import { LIGHT_COLORS as COLORS, getInputBase, getLabelStyle, getFocusIn, getFocusOut } from "../styles/authTheme";
+
+const inputBase = getInputBase(COLORS);
+const labelStyle = getLabelStyle(COLORS);
+const focusIn = getFocusIn(COLORS);
+const focusOut = getFocusOut(COLORS);
 
 // ── Intereses y objetivos ───────────────────────────────────────
 const INTERESES = ["React","Node.js","MongoDB","Docker","Python","Machine Learning","Figma","UI/UX","JavaScript","TypeScript","AWS","IoT","Arduino","Ciberseguridad","SQL","Linux"];
@@ -69,7 +75,7 @@ function RoleSelector({ value, onChange }) {
           >
             <div style={{
               width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-              background: isActive ? COLORS.pink : "#f0f0f0",
+              background: isActive ? COLORS.pink : COLORS.surfaceAlt,
               border: isActive ? "none" : `1.5px solid ${COLORS.border}`,
               display: "flex", alignItems: "center", justifyContent: "center",
               transition: "all 200ms",
@@ -181,7 +187,7 @@ export default function RegisterPage() {
       width: "100%", minHeight: "100vh",
       background: "#ffffff",
       display: "flex",
-      fontFamily: "'DM Sans', 'Inter', sans-serif",
+      fontFamily: "'Inter', sans-serif",
       overflowX: "hidden",
     }}>
 
@@ -200,7 +206,7 @@ export default function RegisterPage() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         style={{
           width: "50%", minHeight: "100vh",
-          background: `linear-gradient(150deg, ${COLORS.cream} 0%, ${COLORS.blush} 55%, #ffe4f2 100%)`,
+          background: COLORS.surfaceAlt,
           borderRight: `1px solid ${COLORS.border}`,
           display: "flex", flexDirection: "column",
           justifyContent: "center", gap: 28,
@@ -208,8 +214,7 @@ export default function RegisterPage() {
           position: "relative", overflow: "hidden",
         }}
       >
-        <div style={{ position: "absolute", top: -160, left: -160, width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(241,173,194,0.18) 0%, transparent 65%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -120, right: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(216,180,254,0.15) 0%, transparent 65%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: -160, left: -160, width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,61,158,0.06) 0%, transparent 65%)", pointerEvents: "none" }} />
 
         {/* Textos centrados */}
         <div style={{ zIndex: 1, textAlign: "center" }}>
@@ -217,9 +222,9 @@ export default function RegisterPage() {
             initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
             style={{
-              fontSize: "clamp(1.9rem, 3.4vw, 2.8rem)", fontWeight: 800,
+              fontSize: "clamp(1.9rem, 3.4vw, 2.8rem)", fontWeight: 700,
               color: COLORS.textDark, lineHeight: 1.12, letterSpacing: "-0.03em",
-              margin: "0 0 14px 0", fontFamily: "'Syne', sans-serif",
+              margin: "0 0 14px 0", fontFamily: "'Inter', sans-serif",
             }}
           >
             Tu red de contactos{" "}
@@ -261,12 +266,12 @@ export default function RegisterPage() {
               display: "flex", alignItems: "center", gap: 12,
               padding: "12px 16px",
               background: step >= s.n ? COLORS.pinkLight : "rgba(255,255,255,0.5)",
-              border: `1px solid ${step >= s.n ? COLORS.border : "rgba(241,173,194,0.15)"}`,
+              border: `1px solid ${step >= s.n ? COLORS.border : "rgba(255,61,158,0.10)"}`,
               borderRadius: 12, transition: "all 300ms",
             }}>
               <div style={{
                 width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
-                background: step > s.n ? COLORS.pink : step === s.n ? COLORS.pinkLight : "#f0f0f0",
+                background: step > s.n ? COLORS.pink : step === s.n ? COLORS.pinkLight : COLORS.surfaceAlt,
                 border: `1.5px solid ${step >= s.n ? COLORS.pink : COLORS.border}`,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 12, fontWeight: 700,
@@ -294,13 +299,13 @@ export default function RegisterPage() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         style={{
           width: "50%", minHeight: "100vh",
-          background: `linear-gradient(210deg, ${COLORS.blush} 0%, #ffffff 45%, ${COLORS.cream} 100%)`,
+          background: COLORS.bg,
           display: "flex", justifyContent: "center", alignItems: "flex-start",
           padding: "100px 48px 40px",
           position: "relative", overflow: "hidden",
         }}
       >
-        <div style={{ position: "absolute", top: -100, right: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(241,173,194,0.12) 0%, transparent 65%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: -100, right: -100, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,61,158,0.06) 0%, transparent 65%)", pointerEvents: "none" }} />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -310,16 +315,21 @@ export default function RegisterPage() {
             width: "100%", maxWidth: 440,
             background: "#ffffff",
             border: `1px solid ${COLORS.border}`,
-            borderRadius: 32, padding: "36px 40px",
-            boxShadow: "0 10px 40px rgba(60,47,65,0.06)",
+            borderRadius: 24, padding: "36px 40px",
+            boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
             zIndex: 1,
           }}
         >
+          {/* Logo centrado */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginBottom: 24 }}>
+            <Logo size={44} showText textSize="1.3rem" textColor={COLORS.textDark} />
+          </div>
+
           {/* Progress bar */}
           <div style={{ display: "flex", gap: 6, marginBottom: 28 }}>
             {[1, 2].map((s) => (
               <motion.div key={s}
-                animate={{ background: step >= s ? COLORS.pink : "#f0f0f0" }}
+                animate={{ background: step >= s ? COLORS.pink : COLORS.surfaceAlt }}
                 transition={{ duration: 0.3 }}
                 style={{ flex: 1, height: 3, borderRadius: 4 }}
               />
@@ -329,7 +339,7 @@ export default function RegisterPage() {
           <p style={{ fontSize: 11, fontWeight: 700, color: COLORS.pink, letterSpacing: "0.10em", textTransform: "uppercase", margin: "0 0 10px 0", textAlign: "center" }}>
             {step === 1 ? "Crear cuenta" : "Tu perfil"}
           </p>
-          <h2 style={{ fontSize: 26, fontWeight: 800, color: COLORS.textDark, letterSpacing: "-0.03em", margin: "0 0 6px 0", textAlign: "center", fontFamily: "'Syne', sans-serif" }}>
+          <h2 style={{ fontSize: 26, fontWeight: 700, color: COLORS.textDark, letterSpacing: "-0.03em", margin: "0 0 6px 0", textAlign: "center", fontFamily: "'Inter', sans-serif" }}>
             {step === 1 ? "Únete a LinkUp" : "Personaliza tu perfil"}
           </h2>
           <p style={{ fontSize: 14, color: COLORS.textMid, margin: "0 0 24px 0", textAlign: "center" }}>
@@ -391,7 +401,7 @@ export default function RegisterPage() {
                 <motion.button type="button" onClick={goToStep2}
                   whileHover={{ y: -2, boxShadow: `0 10px 28px ${COLORS.pinkShadow}` }}
                   whileTap={{ scale: 0.98 }}
-                  style={{ width: "100%", height: 52, borderRadius: 14, background: COLORS.pink, border: "none", color: COLORS.textDark, fontSize: 14, fontWeight: 700, cursor: "pointer", marginTop: 4 }}
+                  style={{ width: "100%", height: 52, borderRadius: 12, background: COLORS.pink, border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", marginTop: 4 }}
                 >
                   Continuar →
                 </motion.button>
@@ -471,9 +481,9 @@ export default function RegisterPage() {
                         style={{
                           padding: "5px 12px", borderRadius: 20,
                           fontSize: 12, fontWeight: 500, cursor: "pointer",
-                          background: interests.includes(item) ? COLORS.pink : "#f4f4f4",
+                          background: interests.includes(item) ? COLORS.pink : COLORS.surfaceAlt,
                           border: `1.5px solid ${interests.includes(item) ? COLORS.pink : COLORS.border}`,
-                          color: interests.includes(item) ? COLORS.textDark : COLORS.textMid,
+                          color: interests.includes(item) ? "#fff" : COLORS.textMid,
                           transition: "all 150ms",
                         }}
                       >
@@ -494,9 +504,9 @@ export default function RegisterPage() {
                         style={{
                           padding: "5px 12px", borderRadius: 20,
                           fontSize: 12, fontWeight: 500, cursor: "pointer",
-                          background: objectives.includes(item) ? COLORS.pink : "#f4f4f4",
+                          background: objectives.includes(item) ? COLORS.pink : COLORS.surfaceAlt,
                           border: `1.5px solid ${objectives.includes(item) ? COLORS.pink : COLORS.border}`,
-                          color: objectives.includes(item) ? COLORS.textDark : COLORS.textMid,
+                          color: objectives.includes(item) ? "#fff" : COLORS.textMid,
                           transition: "all 150ms",
                         }}
                       >
@@ -510,7 +520,7 @@ export default function RegisterPage() {
 
                 <div style={{ display: "flex", gap: 10 }}>
                   <button type="button" onClick={() => setStep(1)}
-                    style={{ flex: 1, height: 52, borderRadius: 14, background: "#f4f4f4", border: `1.5px solid ${COLORS.border}`, color: COLORS.textMid, fontWeight: 600, cursor: "pointer", fontSize: 14, transition: "all 200ms" }}
+                    style={{ flex: 1, height: 52, borderRadius: 12, background: COLORS.surfaceAlt, border: `1.5px solid ${COLORS.border}`, color: COLORS.textMid, fontWeight: 600, cursor: "pointer", fontSize: 14, transition: "all 200ms" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = COLORS.pink; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = COLORS.border; }}
                   >
@@ -519,9 +529,9 @@ export default function RegisterPage() {
                   <motion.button type="submit" disabled={loading}
                     whileHover={!loading ? { y: -2, boxShadow: `0 10px 28px ${COLORS.pinkShadow}` } : {}}
                     whileTap={!loading ? { scale: 0.98 } : {}}
-                    style={{ flex: 2, height: 52, borderRadius: 14, background: COLORS.pink, border: "none", color: COLORS.textDark, fontSize: 14, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                    style={{ flex: 2, height: 52, borderRadius: 12, background: COLORS.pink, border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                   >
-                    {loading ? <div style={{ width: 16, height: 16, border: "2px solid rgba(60,47,65,0.25)", borderTopColor: COLORS.textDark, borderRadius: "50%", animation: "spin 0.7s linear infinite" }} /> : "Crear cuenta"}
+                    {loading ? <div style={{ width: 16, height: 16, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} /> : "Crear cuenta"}
                   </motion.button>
                 </div>
               </motion.form>

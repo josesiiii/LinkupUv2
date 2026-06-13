@@ -1,6 +1,6 @@
 // src/components/ui/Logo.jsx
 // Componente de marca reutilizable: logo + wordmark "LinkUp"
-export default function Logo({ size = 32, showText = true, textColor = "#3c2f41", textSize = "1.05rem" }) {
+export default function Logo({ size = 32, showText = true, textColor = "#000000", textSize = "1.05rem" }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <img
@@ -15,7 +15,7 @@ export default function Logo({ size = 32, showText = true, textColor = "#3c2f41"
             fontWeight: 700,
             color: textColor,
             letterSpacing: "-0.02em",
-            fontFamily: "'Syne', sans-serif",
+            fontFamily: "'Inter', sans-serif",
           }}
         >
           LinkUp

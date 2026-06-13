@@ -1,50 +1,83 @@
 // src/styles/authTheme.js
-// Paleta y estilos compartidos por Login y Register, alineados con la Landing Page.
-export const COLORS = {
-  pink: "#f1adc2",
-  pinkHover: "#e892b0",
-  lavender: "#d8b4fe",
-  lilac: "#c4b5fd",
-  cream: "#fdf2f8",
-  blush: "#fde4ec",
-  textDark: "#3c2f41",
-  textMid: "#5e4e63",
-  textMuted: "#786b7d",
-  border: "rgba(241,173,194,0.3)",
-  pinkShadow: "rgba(241,173,194,0.35)",
-  pinkLight: "rgba(241,173,194,0.15)",
-  gradient: "linear-gradient(135deg, #f1adc2 0%, #d8b4fe 60%, #c4b5fd 100%)",
+// Paletas claro/oscuro del nuevo sistema de diseño LinkUp: negro/blanco + acento #FF3D9E.
+
+export const LIGHT_COLORS = {
+  pink: "#FF3D9E",
+  pinkHover: "#E0317F",
+  lavender: "#FF6FB5",
+  lilac: "#EEEEEE",
+  cream: "#FFFFFF",
+  blush: "#EEEEEE",
+  textDark: "#000000",
+  textMid: "#444444",
+  textMuted: "#777777",
+  border: "#DADADA",
+  pinkShadow: "rgba(255,61,158,0.25)",
+  pinkLight: "rgba(255,61,158,0.08)",
+  gradient: "linear-gradient(135deg, #FF3D9E 0%, #FF6FB5 100%)",
+  surface: "#FFFFFF",
+  surfaceAlt: "#EEEEEE",
+  bg: "#FFFFFF",
 };
 
-export const inputBase = {
+export const DARK_COLORS = {
+  pink: "#FF3D9E",
+  pinkHover: "#FF5CAD",
+  lavender: "#FF6FB5",
+  lilac: "#292929",
+  cream: "#000000",
+  blush: "#292929",
+  textDark: "#FFFFFF",
+  textMid: "#CCCCCC",
+  textMuted: "#999999",
+  border: "#444444",
+  pinkShadow: "rgba(255,61,158,0.35)",
+  pinkLight: "rgba(255,61,158,0.14)",
+  gradient: "linear-gradient(135deg, #FF3D9E 0%, #FF6FB5 100%)",
+  surface: "#292929",
+  surfaceAlt: "#000000",
+  bg: "#000000",
+};
+
+// Export estático de compatibilidad (modo claro)
+export const COLORS = LIGHT_COLORS;
+
+export const getInputBase = (colors) => ({
   width: "100%",
-  height: 52,
-  background: "rgba(255,255,255,0.6)",
-  border: `1.5px solid ${COLORS.border}`,
-  borderRadius: 14,
+  height: 48,
+  background: colors.surface,
+  border: `1.5px solid ${colors.border}`,
+  borderRadius: 12,
   padding: "0 16px",
   fontSize: 14,
-  color: COLORS.textDark,
+  color: colors.textDark,
   outline: "none",
   boxSizing: "border-box",
-  fontFamily: "'DM Sans', 'Inter', sans-serif",
-  transition: "border-color 250ms, box-shadow 250ms",
-};
+  fontFamily: "'Inter', sans-serif",
+  transition: "border-color 200ms, box-shadow 200ms, background 200ms",
+});
 
-export const labelStyle = {
+export const getLabelStyle = (colors) => ({
   display: "block",
   fontSize: 13,
   fontWeight: 600,
-  color: COLORS.textDark,
+  color: colors.textDark,
   marginBottom: 7,
+  fontFamily: "'Inter', sans-serif",
+});
+
+export const getFocusIn = (colors) => (e) => {
+  e.currentTarget.style.borderColor = colors.pink;
+  e.currentTarget.style.boxShadow = `0 0 0 4px ${colors.pinkLight}`;
 };
 
-export const focusIn = (e) => {
-  e.currentTarget.style.borderColor = COLORS.pink;
-  e.currentTarget.style.boxShadow = `0 0 0 4px ${COLORS.pinkLight}`;
-};
-
-export const focusOut = (e) => {
-  e.currentTarget.style.borderColor = COLORS.border;
+export const getFocusOut = (colors) => (e) => {
+  e.currentTarget.style.borderColor = colors.border;
   e.currentTarget.style.boxShadow = "none";
 };
+
+// Exports estáticos de compatibilidad (modo claro)
+export const inputBase = getInputBase(LIGHT_COLORS);
+export const labelStyle = getLabelStyle(LIGHT_COLORS);
+export const focusIn = getFocusIn(LIGHT_COLORS);
+export const focusOut = getFocusOut(LIGHT_COLORS);

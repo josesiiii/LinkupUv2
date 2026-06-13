@@ -1,7 +1,6 @@
 // src/features/feed/PhotoCarousel.jsx
 import { useEffect, useCallback } from "react";
 import usePhotoCarousel from "../../hooks/usePhotoCarousel";
-import { COLORS } from "../../styles/authTheme";
 
 const optimizeUrl = (url) =>
   url?.replace("/upload/", "/upload/w_800,q_auto,f_auto/") || "";
@@ -46,7 +45,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
         width: "100%",
         height: "100%",
         aspectRatio: "9 / 16",
-        overflow: "hidden",
+        overflow: "visible",
         borderRadius: "inherit",
       }}
       onTouchStart={onTouchStart}
@@ -56,9 +55,12 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
       {/* Carrusel inmersivo a sangre completa */}
       <div
         style={{
-          position: "relative",
+          position: "absolute",
+          inset: 0,
           width: "100%",
           height: "100%",
+          overflow: "visible",
+          borderRadius: "inherit",
         }}
       >
         {fotos.map((url, index) => {
@@ -78,7 +80,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
                 inset: 0,
                 width: "100%",
                 height: "100%",
-                transform: `translateX(${pos * 92}%)`,
+                transform: `translateX(${pos * 92}%) scale(${isCenter ? 1 : 0.85})`,
                 zIndex: isCenter ? 10 : isAdjacent ? 5 : 1,
                 opacity: isCenter ? 1 : isAdjacent ? 0.55 : 0,
                 filter: isCenter ? "blur(0px)" : "blur(6px)",
@@ -133,7 +135,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
                 maxWidth: 36,
                 height: 3,
                 borderRadius: 2,
-                background: i === current ? COLORS.pink : "rgba(255,255,255,0.3)",
+                background: i === current ? "#FF3D9E" : "rgba(255,255,255,0.3)",
                 transition: "background 200ms",
                 cursor: "pointer",
               }}

@@ -4,6 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "./routes/AppRouter";
+import { ThemeProvider } from "./context/ThemeContext";
 
 import "./index.css";
 
@@ -13,7 +14,9 @@ ReactDOM.createRoot(
 
   <React.StrictMode>
 
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
 
   </React.StrictMode>
 

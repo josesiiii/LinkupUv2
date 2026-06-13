@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import api from "../api/axios";
 import useAuthStore from "../store/authStore";
-import { COLORS } from "../styles/authTheme";
+import { LIGHT_COLORS as COLORS } from "../styles/authTheme";
 
 function ProtectedRoute({ children }) {
   const token = useAuthStore((state) => state.token);
@@ -52,7 +52,7 @@ function ProtectedRoute({ children }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: `linear-gradient(150deg, ${COLORS.cream} 0%, ${COLORS.blush} 100%)`,
+          background: COLORS.bg,
         }}
       >
         <div

@@ -7,11 +7,13 @@ import AppLayout from "../components/layout/AppLayout";
 import useAuthStore from "../store/authStore";
 import useFeed from "../hooks/useFeed";
 import UserCard from "../features/feed/UserCard";
-import { COLORS } from "../styles/authTheme";
+import StoriesRow from "../features/feed/StoriesRow";
+import { useTheme } from "../context/ThemeContext";
 
 // ── Nombre animado estilo HORIZON ──
 function AnimatedName({ name }) {
   const containerRef = useRef(null);
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (!containerRef.current || !name) return;
@@ -37,7 +39,7 @@ function AnimatedName({ name }) {
       ref={containerRef}
       style={{
         fontSize: "clamp(26px, 4vw, 38px)",
-        fontWeight: 800,
+        fontWeight: 700,
         margin: 0,
         letterSpacing: "-0.01em",
         lineHeight: 1.2,
@@ -45,8 +47,8 @@ function AnimatedName({ name }) {
         justifyContent: "center",
         flexWrap: "wrap",
         gap: "0 1px",
-        fontFamily: "'Syne', sans-serif",
-        background: COLORS.gradient,
+        fontFamily: "'Inter', sans-serif",
+        background: colors.gradient,
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         backgroundClip: "text",
@@ -71,6 +73,7 @@ function AnimatedName({ name }) {
 }
 
 export default function FeedPage() {
+  const { colors } = useTheme();
   const usuario = useAuthStore((state) => state.usuario);
   const {
     usuarios, loading, error,
@@ -112,18 +115,17 @@ export default function FeedPage() {
 
   return (
     <AppLayout>
-      <div style={{
-        height: "calc(100dvh - 96px)",
-        color: COLORS.textDark,
-        fontFamily: "'DM Sans', 'Inter', sans-serif",
+      <div className="feed-fullscreen" style={{
+        color: colors.textDark,
+        fontFamily: "'Inter', sans-serif",
         display: "flex",
         flexDirection: "column",
       }}>
 
         {/* ── ESTADOS ── */}
         {loading && (
-          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, color: COLORS.textMuted }}>
-            <Loader2 size={20} style={{ animation: "spin 1s linear infinite", color: COLORS.pink }} />
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, color: colors.textMuted }}>
+            <Loader2 size={20} style={{ animation: "spin 1s linear infinite", color: colors.pink }} />
             <span style={{ fontSize: 14 }}>Calculando compatibilidad...</span>
           </div>
         )}
@@ -137,16 +139,18 @@ export default function FeedPage() {
         )}
 
         {!loading && !error && usuarios.length === 0 && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, color: COLORS.textMuted }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, color: colors.textMuted }}>
             <div style={{ fontSize: 48 }}>🔍</div>
-            <p style={{ fontSize: 15, margin: 0, color: COLORS.textDark }}>No hay usuarios compatibles en tu campus.</p>
-            <p style={{ fontSize: 13, color: COLORS.textMuted, margin: 0 }}>Completa tu perfil para mejorar la compatibilidad</p>
+            <p style={{ fontSize: 15, margin: 0, color: colors.textDark }}>No hay usuarios compatibles en tu campus.</p>
+            <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>Completa tu perfil para mejorar la compatibilidad</p>
           </div>
         )}
 
         {/* ── FEED FULLSCREEN ── */}
         {!loading && !error && usuarios.length > 0 && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "visible", position: "relative" }}>
+
+            <StoriesRow usuarios={usuarios} yo={usuario} onSelect={handleDotClick} />
 
             {/* Nombre animado — sin overflow hidden para que GSAP no corte los chars */}
             <div style={{
@@ -172,7 +176,7 @@ export default function FeedPage() {
                         width: i === activeIndex ? 20 : 6,
                         height: 6,
                         borderRadius: 3,
-                        backgroundColor: i === activeIndex ? COLORS.pink : COLORS.border,
+                        backgroundColor: i === activeIndex ? colors.pink : colors.border,
                         transition: "all 300ms",
                         cursor: "pointer",
                       }}
@@ -189,7 +193,7 @@ export default function FeedPage() {
               alignItems: "center",
               justifyContent: "center",
               position: "relative",
-              overflow: "hidden",
+              overflow: "visible",
               perspective: "1200px",
             }}>
 
@@ -200,9 +204,9 @@ export default function FeedPage() {
                     position: "absolute", left: 12, zIndex: 50,
                     width: 44, height: 44, borderRadius: "50%",
                     background: "rgba(255,255,255,0.65)",
-                    border: `1px solid ${COLORS.border}`,
+                    border: "1px solid #DADADA",
                     backdropFilter: "blur(10px)",
-                    color: COLORS.textDark,
+                    color: "#000000",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer", transition: "all 150ms",
                   }}
@@ -220,9 +224,9 @@ export default function FeedPage() {
                     position: "absolute", right: 12, zIndex: 50,
                     width: 44, height: 44, borderRadius: "50%",
                     background: "rgba(255,255,255,0.65)",
-                    border: `1px solid ${COLORS.border}`,
+                    border: "1px solid #DADADA",
                     backdropFilter: "blur(10px)",
-                    color: COLORS.textDark,
+                    color: "#000000",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer", transition: "all 150ms",
                   }}
@@ -268,8 +272,8 @@ export default function FeedPage() {
                       zIndex: isCenter ? 10 : 5,
                       cursor: !isCenter ? "pointer" : "default",
                       borderRadius: 32,
-                      overflow: "hidden",
-                      boxShadow: "0 24px 48px rgba(60,47,65,0.18)",
+                      overflow: "visible",
+                      boxShadow: "0 24px 48px rgba(0,0,0,0.18)",
                     }}
                     onClick={() => !isCenter && handleDotClick(index)}
                   >
@@ -290,12 +294,62 @@ export default function FeedPage() {
               </div>
             </div>
 
-            <div style={{ flexShrink: 0, height: 16 }} />
+            {/* ── Navegación entre perfiles ── */}
+            {usuarios.length > 1 && (
+              <div style={{
+                flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                width: "100%", maxWidth: 460, margin: "0 auto",
+                padding: "10px 16px 16px",
+              }}>
+                <button
+                  onClick={goPrev}
+                  disabled={activeIndex === 0}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "10px 20px", borderRadius: 999,
+                    background: colors.pinkLight, color: colors.textDark,
+                    border: "none", fontSize: 13, fontWeight: 600,
+                    cursor: activeIndex === 0 ? "default" : "pointer",
+                    opacity: activeIndex === 0 ? 0.4 : 1,
+                    transition: "all 150ms",
+                  }}
+                >
+                  <ChevronLeft size={16} />
+                  Anterior
+                </button>
+
+                <span style={{ fontSize: 12, fontWeight: 600, color: colors.textMuted }}>
+                  {activeIndex + 1} / {usuarios.length}
+                </span>
+
+                <button
+                  onClick={goNext}
+                  disabled={activeIndex === usuarios.length - 1}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "10px 20px", borderRadius: 999,
+                    background: colors.pinkLight, color: colors.textDark,
+                    border: "none", fontSize: 13, fontWeight: 600,
+                    cursor: activeIndex === usuarios.length - 1 ? "default" : "pointer",
+                    opacity: activeIndex === usuarios.length - 1 ? 0.4 : 1,
+                    transition: "all 150ms",
+                  }}
+                >
+                  Siguiente
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
         <style>{`
           @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+          .feed-fullscreen { height: 100dvh; }
+          @media (max-width: 767px) {
+            .feed-fullscreen { height: calc(100dvh - 64px); }
+          }
         `}</style>
       </div>
     </AppLayout>
