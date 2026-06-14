@@ -17,7 +17,7 @@ export default function AppLayout({ children }) {
       }}
     >
       <Sidebar />
-      <main className="md:pl-16 pb-16 md:pb-0">{children}</main>
+      <main className="md:pl-20 pb-16 md:pb-0">{children}</main>
     </div>
   );
 }

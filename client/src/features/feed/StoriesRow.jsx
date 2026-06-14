@@ -1,6 +1,8 @@
 // src/features/feed/StoriesRow.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
+import api from "../../api/axios";
+import useAuthStore from "../../store/authStore";
 import { useTheme } from "../../context/ThemeContext";
 
 const STORAGE_KEY = "linkup-stories-seen";
@@ -13,17 +15,34 @@ function loadSeen() {
   }
 }
 
-export default function StoriesRow({ usuarios, yo, onSelect }) {
+export default function StoriesRow({ yo }) {
   const { colors } = useTheme();
+  const usuario = useAuthStore((state) => state.usuario);
+  const [amigos, setAmigos] = useState([]);
   const [seenIds, setSeenIds] = useState(loadSeen);
 
-  const handleClick = (id, index) => {
+  useEffect(() => {
+    api.get("/connections/accepted")
+      .then((res) => {
+        const conexiones = res.data || [];
+        const lista = conexiones
+          .map((conn) => {
+            const from = conn.from;
+            const to = conn.to;
+            return from?._id === usuario?._id ? to : from;
+          })
+          .filter(Boolean);
+        setAmigos(lista);
+      })
+      .catch(() => setAmigos([]));
+  }, [usuario?._id]);
+
+  const handleClick = (id) => {
     if (!seenIds.includes(id)) {
       const next = [...seenIds, id];
       setSeenIds(next);
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     }
-    onSelect(index);
   };
 
   return (
@@ -73,9 +92,7 @@ export default function StoriesRow({ usuarios, yo, onSelect }) {
         </span>
       </div>
 
-      {usuarios.map((item, index) => {
-        if (!item) return null;
-        const perfil = item.usuario || item;
+      {amigos.map((perfil) => {
         const id = perfil._id;
         const seen = seenIds.includes(id);
         const firstName = (perfil.fullName || perfil.name || "Usuario").split(" ")[0];
@@ -83,7 +100,7 @@ export default function StoriesRow({ usuarios, yo, onSelect }) {
         return (
           <div
             key={id}
-            onClick={() => handleClick(id, index)}
+            onClick={() => handleClick(id)}
             style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0, cursor: "pointer" }}
           >
             {perfil.profilePicture ? (

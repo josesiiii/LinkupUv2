@@ -1,6 +1,9 @@
 // src/features/feed/PhotoCarousel.jsx
 import { useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import usePhotoCarousel from "../../hooks/usePhotoCarousel";
+
+const RADIUS = 32;
 
 const optimizeUrl = (url) =>
   url?.replace("/upload/", "/upload/w_800,q_auto,f_auto/") || "";
@@ -46,7 +49,8 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
         height: "100%",
         aspectRatio: "9 / 16",
         overflow: "visible",
-        borderRadius: "inherit",
+        borderRadius: RADIUS,
+        perspective: "1200px",
       }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
@@ -60,7 +64,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
           width: "100%",
           height: "100%",
           overflow: "visible",
-          borderRadius: "inherit",
+          borderRadius: RADIUS,
         }}
       >
         {fotos.map((url, index) => {
@@ -71,21 +75,27 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
           const isCenter = pos === 0;
           const isAdjacent = Math.abs(pos) === 1;
           const isVisible = Math.abs(pos) <= 1;
+          if (!isVisible) return null;
 
           return (
-            <div
+            <motion.div
               key={index}
+              animate={{
+                x: isCenter ? "0%" : pos < 0 ? "-92%" : "92%",
+                scale: isCenter ? 1 : 0.85,
+                opacity: isCenter ? 1 : 0.55,
+                rotateY: isCenter ? 0 : pos * -8,
+                filter: isCenter ? "blur(0px)" : "blur(6px)",
+              }}
+              transition={{ type: "spring", stiffness: 120, damping: 20 }}
               style={{
                 position: "absolute",
                 inset: 0,
                 width: "100%",
                 height: "100%",
-                transform: `translateX(${pos * 92}%) scale(${isCenter ? 1 : 0.85})`,
-                zIndex: isCenter ? 10 : isAdjacent ? 5 : 1,
-                opacity: isCenter ? 1 : isAdjacent ? 0.55 : 0,
-                filter: isCenter ? "blur(0px)" : "blur(6px)",
-                visibility: isVisible ? "visible" : "hidden",
-                transition: "all 500ms cubic-bezier(0.4,0,0.2,1)",
+                zIndex: isCenter ? 10 : 5,
+                borderRadius: RADIUS,
+                overflow: "hidden",
                 cursor: isAdjacent ? "pointer" : "default",
               }}
               onClick={() => {
@@ -106,7 +116,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
                 }}
                 draggable={false}
               />
-            </div>
+            </motion.div>
           );
         })}
       </div>

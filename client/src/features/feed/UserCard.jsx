@@ -3,6 +3,8 @@ import { UserPlus, Heart, Check, Loader2 } from "lucide-react";
 import PhotoCarousel from "./PhotoCarousel";
 import { LIGHT_COLORS as COLORS } from "../../styles/authTheme";
 
+const RADIUS = 32;
+
 export default function UserCard({
   item, yo,
   connectingIds, connectedIds,
@@ -29,7 +31,7 @@ export default function UserCard({
     position: "relative",
     background: "#000",
     border: "none",
-    borderRadius: 0,
+    borderRadius: RADIUS,
     overflow: "visible",
         width: "100%",
         height: "100%",

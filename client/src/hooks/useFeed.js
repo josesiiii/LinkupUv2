@@ -25,6 +25,10 @@ export default function useFeed() {
           ? res.data
           : res.data?.data || res.data?.usuarios || res.data?.users || [];
         setUsuarios(data);
+        const saved = data
+          .filter((item) => item?.guardado)
+          .map((item) => item.usuario?._id || item._id);
+        setSavedIds(saved);
       } catch (err) {
         setError(err.response?.data?.message || "Error al cargar el feed");
       } finally {

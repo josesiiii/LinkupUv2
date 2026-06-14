@@ -7,6 +7,7 @@ import ProfilePage    from "../pages/ProfilePage";
 import SavedPage      from "../pages/SavedPage";
 import ChatPage       from "../pages/ChatPage";
 import ConnectionsPage from "../pages/ConnectionsPage";
+import PendingConnectionsPage from "../pages/PendingConnectionsPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 function AppRouter() {
@@ -42,6 +43,14 @@ function AppRouter() {
           element={
             <ProtectedRoute>
               <ConnectionsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/connections/pending"
+          element={
+            <ProtectedRoute>
+              <PendingConnectionsPage />
             </ProtectedRoute>
           }
         />

@@ -1,76 +1,13 @@
 // src/pages/FeedPage.jsx
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback } from "react";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { gsap } from "gsap";
 import AppLayout from "../components/layout/AppLayout";
 import useAuthStore from "../store/authStore";
 import useFeed from "../hooks/useFeed";
 import UserCard from "../features/feed/UserCard";
 import StoriesRow from "../features/feed/StoriesRow";
 import { useTheme } from "../context/ThemeContext";
-
-// ── Nombre animado estilo HORIZON ──
-function AnimatedName({ name }) {
-  const containerRef = useRef(null);
-  const { colors } = useTheme();
-
-  useEffect(() => {
-    if (!containerRef.current || !name) return;
-    const chars = containerRef.current.querySelectorAll(".name-char");
-
-    gsap.killTweensOf(chars);
-    gsap.set(chars, { y: 80, opacity: 0, skewX: 15 });
-
-    gsap.to(chars, {
-      y: 0,
-      opacity: 1,
-      skewX: 0,
-      duration: 0.8,
-      stagger: 0.04,
-      ease: "power4.out",
-    });
-  }, [name]);
-
-  if (!name) return null;
-
-  return (
-    <h2
-      ref={containerRef}
-      style={{
-        fontSize: "clamp(26px, 4vw, 38px)",
-        fontWeight: 700,
-        margin: 0,
-        letterSpacing: "-0.01em",
-        lineHeight: 1.2,
-        display: "flex",
-        justifyContent: "center",
-        flexWrap: "wrap",
-        gap: "0 1px",
-        fontFamily: "'Inter', sans-serif",
-        background: colors.gradient,
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        padding: "4px 16px 8px",
-      }}
-    >
-      {name.split("").map((char, i) => (
-        <span
-          key={i}
-          className="name-char"
-          style={{
-            display: "inline-block",
-            marginRight: char === " " ? "0.3em" : 0,
-            willChange: "transform, opacity",
-          }}
-        >
-          {char === " " ? " " : char}
-        </span>
-      ))}
-    </h2>
-  );
-}
 
 export default function FeedPage() {
   const { colors } = useTheme();
@@ -83,35 +20,18 @@ export default function FeedPage() {
   } = useFeed();
 
   const [activeIndex, setActiveIndex] = useState(0);
-  // Clave para re-montar AnimatedName al cambiar de persona
-  const [nameKey, setNameKey] = useState(0);
 
   const goPrev = useCallback(() => {
-    setActiveIndex((i) => {
-      const next = Math.max(0, i - 1);
-      if (next !== i) setNameKey((k) => k + 1);
-      return next;
-    });
+    setActiveIndex((i) => Math.max(0, i - 1));
   }, []);
 
   const goNext = useCallback(() => {
-    setActiveIndex((i) => {
-      const next = Math.min(usuarios.length - 1, i + 1);
-      if (next !== i) setNameKey((k) => k + 1);
-      return next;
-    });
+    setActiveIndex((i) => Math.min(usuarios.length - 1, i + 1));
   }, [usuarios.length]);
 
   const handleDotClick = (i) => {
-    if (i !== activeIndex) {
-      setActiveIndex(i);
-      setNameKey((k) => k + 1);
-    }
+    if (i !== activeIndex) setActiveIndex(i);
   };
-
-  const perfilActivo = usuarios[activeIndex]
-    ? (usuarios[activeIndex].usuario || usuarios[activeIndex])
-    : null;
 
   return (
     <AppLayout>
@@ -122,7 +42,6 @@ export default function FeedPage() {
         flexDirection: "column",
       }}>
 
-        {/* ── ESTADOS ── */}
         {loading && (
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, color: colors.textMuted }}>
             <Loader2 size={20} style={{ animation: "spin 1s linear infinite", color: colors.pink }} />
@@ -146,45 +65,29 @@ export default function FeedPage() {
           </div>
         )}
 
-        {/* ── FEED FULLSCREEN ── */}
         {!loading && !error && usuarios.length > 0 && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "visible", position: "relative" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
 
-            <StoriesRow usuarios={usuarios} yo={usuario} onSelect={handleDotClick} />
+            <StoriesRow yo={usuario} />
 
-            {/* Nombre animado — sin overflow hidden para que GSAP no corte los chars */}
-            <div style={{
-              padding: "14px 0 4px",
-              textAlign: "center",
-              flexShrink: 0,
-              zIndex: 10,
-            }}>
-              {/* nameKey fuerza re-render → re-dispara el useEffect de GSAP */}
-              <AnimatedName
-                key={nameKey}
-                name={perfilActivo?.fullName}
-              />
-
-              {/* Dots */}
-              {usuarios.length > 1 && (
-                <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 8 }}>
-                  {usuarios.map((_, i) => (
-                    <div
-                      key={i}
-                      onClick={() => handleDotClick(i)}
-                      style={{
-                        width: i === activeIndex ? 20 : 6,
-                        height: 6,
-                        borderRadius: 3,
-                        backgroundColor: i === activeIndex ? colors.pink : colors.border,
-                        transition: "all 300ms",
-                        cursor: "pointer",
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            {usuarios.length > 1 && (
+              <div style={{ display: "flex", justifyContent: "center", gap: 5, padding: "6px 0 2px", flexShrink: 0, zIndex: 10 }}>
+                {usuarios.map((_, i) => (
+                  <div
+                    key={i}
+                    onClick={() => handleDotClick(i)}
+                    style={{
+                      width: i === activeIndex ? 20 : 6,
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: i === activeIndex ? colors.pink : colors.border,
+                      transition: "all 300ms",
+                      cursor: "pointer",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* ── CARRUSEL HORIZONTAL ── */}
             <div style={{
@@ -193,7 +96,7 @@ export default function FeedPage() {
               alignItems: "center",
               justifyContent: "center",
               position: "relative",
-              overflow: "visible",
+              overflow: "hidden",
               perspective: "1200px",
             }}>
 
@@ -266,7 +169,7 @@ export default function FeedPage() {
                     style={{
                       position: "absolute",
                       left: "50%",
-                      width: "min(460px, 85vw)",
+                      width: "min(520px, 92vw)",
                       height: "100%",
                       top: 0,
                       zIndex: isCenter ? 10 : 5,
@@ -299,7 +202,7 @@ export default function FeedPage() {
               <div style={{
                 flexShrink: 0,
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                width: "100%", maxWidth: 460, margin: "0 auto",
+                width: "100%", maxWidth: 520, margin: "0 auto",
                 padding: "10px 16px 16px",
               }}>
                 <button
