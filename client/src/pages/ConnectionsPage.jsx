@@ -1,6 +1,7 @@
 // src/pages/ConnectionsPage.jsx
 import { useEffect, useState } from "react";
-import { Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Users, MessageCircle } from "lucide-react";
 import AppLayout from "../components/layout/AppLayout";
 import EmptyState from "../components/ui/EmptyState";
 import api from "../api/axios";
@@ -8,6 +9,7 @@ import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 
 export default function ConnectionsPage() {
+  const navigate = useNavigate();
   const { theme, colors } = useTheme();
   const usuario = useAuthStore((state) => state.usuario);
   const [conexiones, setConexiones] = useState([]);
@@ -74,6 +76,19 @@ export default function ConnectionsPage() {
                     </p>
                     <p style={{ margin: 0, fontSize: 13, color: colors.textMuted }}>{persona?.email}</p>
                   </div>
+
+                  <button
+                    onClick={() => navigate(`/chat?with=${persona?._id}`)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "8px 16px", borderRadius: 999,
+                      border: `1px solid ${colors.border}`,
+                      background: colors.pinkLight, color: colors.pink,
+                      fontSize: 13, fontWeight: 700, cursor: "pointer",
+                    }}
+                  >
+                    <MessageCircle size={15} /> Mensaje
+                  </button>
                 </div>
               );
             })}

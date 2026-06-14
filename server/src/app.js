@@ -20,7 +20,7 @@ dotenv.config();
 const app = express();
 
 // ── SEGURIDAD ─────────────────────────────────
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false }));
 
 // Rate limiting general — todas las rutas
 const limitadorGeneral = rateLimit({

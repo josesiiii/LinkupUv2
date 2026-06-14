@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 
 import app from "./app.js";
 import connectDB from "./config/db.js";
+import registerChatSocket from "./sockets/chatSocket.js";
 
 connectDB();
 
@@ -15,7 +16,7 @@ const server = http.createServer(app);
 
 
 // SOCKET.IO
-export const io = new Server(server, {
+const io = new Server(server, {
 
   cors: {
     origin: "*",
@@ -24,110 +25,7 @@ export const io = new Server(server, {
 
 });
 
-
-
-// USUARIOS ONLINE
-const onlineUsers = {};
-
-
-
-// SOCKET CONNECTION
-io.on("connection", (socket) => {
-
-  console.log(
-    "Usuario conectado:",
-    socket.id
-  );
-
-
-
-  // REGISTRAR USUARIO
-  socket.on(
-    "registerUser",
-    (userId) => {
-
-      onlineUsers[userId] =
-        socket.id;
-
-      console.log(
-        "Usuarios online:"
-      );
-
-      console.log(
-        onlineUsers
-      );
-
-    }
-  );
-
-
-
-  // JOIN ROOM
-  socket.on(
-    "joinRoom",
-    (roomId) => {
-
-      socket.join(roomId);
-
-      console.log(
-        `Socket ${socket.id} unido a room ${roomId}`
-      );
-
-    }
-  );
-
-
-
-  // SEND MESSAGE
-  socket.on(
-    "sendMessage",
-    (data) => {
-
-      io.to(data.roomId).emit(
-        "receiveMessage",
-        data
-      );
-
-    }
-  );
-
-
-
-  // DISCONNECT
-  socket.on(
-    "disconnect",
-    () => {
-
-      console.log(
-        "Usuario desconectado:",
-        socket.id
-      );
-
-      for (const userId in onlineUsers) {
-
-        if (
-          onlineUsers[userId] ===
-          socket.id
-        ) {
-
-          delete onlineUsers[userId];
-
-        }
-
-      }
-
-      console.log(
-        "Usuarios online:"
-      );
-
-      console.log(
-        onlineUsers
-      );
-
-    }
-  );
-
-});
+registerChatSocket(io);
 
 
 
