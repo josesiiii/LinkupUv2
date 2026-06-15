@@ -1,11 +1,12 @@
 // src/components/layout/Sidebar.jsx
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
-  Home, MessageCircle, Bookmark, Users, Inbox, UserCircle, LogOut, Sun, Moon, ChevronUp,
+  Home, MessageCircle, Bookmark, Users, Inbox, UserCircle, ChevronUp,
 } from "lucide-react";
 import Logo from "../ui/Logo";
+import AccountSwitcher from "./AccountSwitcher";
 import useAuthStore from "../../store/authStore";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -24,19 +25,11 @@ const MOBILE_ITEMS = [
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const usuario = useAuthStore((state) => state.usuario);
-  const logout = useAuthStore((state) => state.logout);
-  const { theme, toggleTheme, colors } = useTheme();
+  const { colors } = useTheme();
 
   const isActive = (path) => location.pathname === path;
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   const itemStyle = (active) => ({
     color: active ? colors.pink : colors.textMuted,
@@ -59,7 +52,7 @@ export default function Sidebar() {
       {/* Desktop Sidebar */}
       <motion.aside
         onMouseEnter={() => setIsExpanded(true)}
-        onMouseLeave={() => { setIsExpanded(false); setShowMenu(false); }}
+        onMouseLeave={() => setIsExpanded(false)}
         animate={{ width: isExpanded ? 280 : 80 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="hidden md:flex fixed left-0 top-0 z-50 h-screen flex-col overflow-hidden"
@@ -114,79 +107,49 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Footer: avatar + nombre + dropdown */}
+        {/* Footer: avatar + nombre + dropdown de cuentas */}
         <div className="relative py-3 px-3" style={{ borderTop: `1px solid ${colors.border}` }}>
-          <AnimatePresence>
-            {showMenu && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                transition={{ duration: 0.15 }}
-                className="absolute bottom-full left-3 right-3 mb-2 rounded-xl overflow-hidden shadow-xl"
-                style={{ background: colors.surface, border: `1px solid ${colors.border}` }}
+          <AccountSwitcher
+            includeExtras
+            align="left"
+            panelStyle={{ position: "absolute", bottom: "100%", left: 12, right: 12, marginBottom: 8, width: "auto" }}
+            trigger={({ open, toggle }) => (
+              <button
+                onClick={toggle}
+                className={`flex items-center gap-3 w-full rounded-xl px-2 py-2 ${isExpanded ? "" : "justify-center"}`}
+                style={{ background: open ? colors.pinkLight : "transparent", border: "none", cursor: "pointer" }}
               >
-                <Link
-                  to="/profile"
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm"
-                  style={{ color: colors.textDark }}
-                  onClick={() => setShowMenu(false)}
-                >
-                  <UserCircle className="h-4 w-4" /> Mi Perfil
-                </Link>
-                <button
-                  onClick={toggleTheme}
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm w-full text-left"
-                  style={{ color: colors.textDark, background: "transparent", border: "none", cursor: "pointer" }}
-                >
-                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                  {theme === "dark" ? "Modo claro" : "Modo oscuro"}
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm w-full text-left"
-                  style={{ color: "#e0556f", background: "transparent", border: "none", cursor: "pointer" }}
-                >
-                  <LogOut className="h-4 w-4" /> Cerrar sesión
-                </button>
-              </motion.div>
+                {usuario?.profilePicture ? (
+                  <img
+                    src={usuario.profilePicture}
+                    alt={usuario.fullName}
+                    className="h-9 w-9 rounded-full object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div
+                    className="h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
+                    style={{ background: colors.pinkLight, color: colors.pink }}
+                  >
+                    {(usuario?.fullName || "U").charAt(0).toUpperCase()}
+                  </div>
+                )}
+                {isExpanded && (
+                  <div className="flex-1 text-left overflow-hidden">
+                    <p className="text-sm font-semibold truncate" style={{ color: colors.textDark }}>
+                      {usuario?.fullName || "Usuario"}
+                    </p>
+                    <p className="text-xs truncate" style={{ color: colors.textMuted }}>Ver opciones</p>
+                  </div>
+                )}
+                {isExpanded && (
+                  <ChevronUp
+                    className="h-4 w-4 flex-shrink-0"
+                    style={{ color: colors.textMuted, transform: open ? "rotate(0deg)" : "rotate(180deg)", transition: "transform 200ms" }}
+                  />
+                )}
+              </button>
             )}
-          </AnimatePresence>
-
-          <button
-            onClick={() => setShowMenu((v) => !v)}
-            className={`flex items-center gap-3 w-full rounded-xl px-2 py-2 ${isExpanded ? "" : "justify-center"}`}
-            style={{ background: showMenu ? colors.pinkLight : "transparent", border: "none", cursor: "pointer" }}
-          >
-            {usuario?.profilePicture ? (
-              <img
-                src={usuario.profilePicture}
-                alt={usuario.fullName}
-                className="h-9 w-9 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
-              <div
-                className="h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
-                style={{ background: colors.pinkLight, color: colors.pink }}
-              >
-                {(usuario?.fullName || "U").charAt(0).toUpperCase()}
-              </div>
-            )}
-            {isExpanded && (
-              <div className="flex-1 text-left overflow-hidden">
-                <p className="text-sm font-semibold truncate" style={{ color: colors.textDark }}>
-                  {usuario?.fullName || "Usuario"}
-                </p>
-                <p className="text-xs truncate" style={{ color: colors.textMuted }}>Ver opciones</p>
-              </div>
-            )}
-            {isExpanded && (
-              <ChevronUp
-                className="h-4 w-4 flex-shrink-0"
-                style={{ color: colors.textMuted, transform: showMenu ? "rotate(0deg)" : "rotate(180deg)", transition: "transform 200ms" }}
-              />
-            )}
-          </button>
+          />
         </div>
       </motion.aside>
 

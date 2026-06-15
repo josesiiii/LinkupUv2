@@ -33,6 +33,40 @@ const messageSchema = new mongoose.Schema(
 
     editedAt: {
       type: Date
+    },
+
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null
+    },
+
+    pinned: {
+      type: Boolean,
+      default: false
+    },
+
+    pinnedAt: {
+      type: Date
+    },
+
+    starredBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ],
+
+    deletedFor: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ],
+
+    deletedForEveryone: {
+      type: Boolean,
+      default: false
     }
   },
   {

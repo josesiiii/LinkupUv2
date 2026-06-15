@@ -1,7 +1,8 @@
 // src/components/chat/MessageBubble.jsx
 import { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Reply, Forward, Copy, Pin, PinOff, Star } from "lucide-react";
 import Avatar from "./Avatar";
+import Dropdown from "../ui/Dropdown";
 import { formatTime } from "./utils";
 
 export default function MessageBubble({
@@ -9,14 +10,16 @@ export default function MessageBubble({
   isEditing, draftText, onEditChange,
   onEditStart, onEditSave, onEditCancel,
   isConfirmingDelete, onDeleteRequest, onDeleteConfirm, onDeleteCancel,
+  onReply, onForwardOpen, onTogglePin, onToggleStar, onDeleteForMe,
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const textareaRef = useRef(null);
 
   const isOwn = message.sender._id === currentUser._id;
-  const isDeleted = message.text === "DELETED";
+  const isDeleted = message.deletedForEveryone || message.text === "DELETED";
   const isUnread = !message.readBy?.includes(currentUser._id);
+  const isPinned = !!message.pinned;
+  const isStarred = !!message.starredBy?.includes(currentUser._id);
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -39,6 +42,17 @@ export default function MessageBubble({
   const bubbleBg = isOwn ? colors.pink : colors.surfaceAlt;
   const textColor = isOwn ? "#fff" : colors.textDark;
 
+  const actions = [
+    { id: "reply", label: "Responder", icon: Reply, onClick: () => onReply?.(message), visible: !isDeleted },
+    { id: "forward", label: "Reenviar", icon: Forward, onClick: () => onForwardOpen?.(message), visible: !isDeleted },
+    { id: "copy", label: "Copiar", icon: Copy, onClick: () => navigator.clipboard?.writeText(message.text), visible: !isDeleted },
+    { id: "pin", label: isPinned ? "Desfijar mensaje" : "Fijar mensaje", icon: isPinned ? PinOff : Pin, onClick: () => onTogglePin?.(message, isPinned), visible: !isDeleted },
+    { id: "star", label: isStarred ? "Quitar destacado" : "Destacar", icon: Star, onClick: () => onToggleStar?.(message, isStarred), visible: !isDeleted },
+    { id: "edit", label: "Editar", icon: Pencil, onClick: () => onEditStart?.(), visible: isOwn && !isDeleted },
+    { id: "deleteForMe", label: "Eliminar para mí", icon: Trash2, onClick: () => onDeleteForMe?.(message._id) },
+    { id: "deleteForEveryone", label: "Eliminar para todos", icon: Trash2, danger: true, onClick: () => onDeleteRequest?.(), visible: isOwn && !isDeleted },
+  ].filter((a) => a.visible !== false);
+
   return (
     <div
       style={{
@@ -49,47 +63,46 @@ export default function MessageBubble({
         position: "relative",
       }}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setHovered(false); setMenuOpen(false); }}
+      onMouseLeave={() => setHovered(false)}
     >
       {!isOwn && <Avatar name={otherParticipant?.name} src={otherParticipant?.avatar} size={32} colors={colors} />}
 
       <div style={{ maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: isOwn ? "flex-end" : "flex-start", position: "relative" }}>
-        {/* Menú de acciones — solo en mensajes propios, no eliminados, no en edición */}
-        {isOwn && !isDeleted && !isEditing && (
-          <div style={{ position: "absolute", top: -28, right: 0, opacity: hovered ? 1 : 0, transition: "opacity 150ms", zIndex: 5 }}>
-            <button
-              onClick={() => setMenuOpen((v) => !v)}
-              style={{
-                width: 26, height: 26, borderRadius: "50%",
-                background: colors.surface, border: `1px solid ${colors.border}`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", color: colors.textMuted,
-              }}
-            >
-              <MoreHorizontal size={14} />
-            </button>
+        {/* Menú de acciones */}
+        {!isEditing && !isConfirmingDelete && (
+          <div style={{ position: "absolute", top: -28, [isOwn ? "right" : "left"]: 0, opacity: hovered ? 1 : 0, transition: "opacity 150ms", zIndex: 5 }}>
+            <Dropdown
+              align={isOwn ? "right" : "left"}
+              items={actions.map(({ icon, label, onClick, danger }) => ({ icon, label, onClick, danger }))}
+              trigger={({ toggle }) => (
+                <button
+                  onClick={toggle}
+                  style={{
+                    width: 26, height: 26, borderRadius: "50%",
+                    background: colors.surface, border: `1px solid ${colors.border}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", color: colors.textMuted,
+                  }}
+                >
+                  <MoreHorizontal size={14} />
+                </button>
+              )}
+            />
+          </div>
+        )}
 
-            {menuOpen && (
-              <div style={{
-                position: "absolute", top: 30, right: 0,
-                background: colors.surface, border: `1px solid ${colors.border}`,
-                borderRadius: 12, overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
-                minWidth: 130, zIndex: 10,
-              }}>
-                <button
-                  onClick={() => { setMenuOpen(false); onEditStart(); }}
-                  style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 12px", background: "transparent", border: "none", cursor: "pointer", fontSize: 13, color: colors.textDark, textAlign: "left" }}
-                >
-                  <Pencil size={13} /> Editar
-                </button>
-                <button
-                  onClick={() => { setMenuOpen(false); onDeleteRequest(); }}
-                  style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 12px", background: "transparent", border: "none", cursor: "pointer", fontSize: 13, color: "#e0556f", textAlign: "left" }}
-                >
-                  <Trash2 size={13} /> Eliminar
-                </button>
-              </div>
-            )}
+        {/* Vista previa de respuesta */}
+        {message.replyTo && !isEditing && (
+          <div style={{
+            borderLeft: `3px solid ${colors.pink}`, paddingLeft: 8, marginBottom: 4,
+            maxWidth: "100%", boxSizing: "border-box",
+          }}>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: colors.pink }}>
+              {message.replyTo.sender?.fullName || message.replyTo.sender?.name || "Usuario"}
+            </p>
+            <p style={{ margin: 0, fontSize: 12, color: colors.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {message.replyTo.text}
+            </p>
           </div>
         )}
 
@@ -108,7 +121,7 @@ export default function MessageBubble({
             background: colors.surfaceAlt, color: colors.textDark,
             fontSize: 13, display: "flex", alignItems: "center", gap: 10,
           }}>
-            <span>¿Eliminar?</span>
+            <span>¿Eliminar para todos?</span>
             <button onClick={onDeleteConfirm} style={{ background: "none", border: "none", color: "#e0556f", fontWeight: 700, cursor: "pointer", fontSize: 13, padding: 0 }}>Sí</button>
             <button onClick={onDeleteCancel} style={{ background: "none", border: "none", color: colors.textMuted, fontWeight: 700, cursor: "pointer", fontSize: 13, padding: 0 }}>No</button>
           </div>
@@ -146,9 +159,11 @@ export default function MessageBubble({
           </div>
         )}
 
-        {/* Timestamp + editado */}
+        {/* Timestamp + editado + indicadores */}
         {!isEditing && !isConfirmingDelete && (
           <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3, padding: "0 4px" }}>
+            {isPinned && <Pin size={11} color={colors.textMuted} />}
+            {isStarred && <Star size={11} color={colors.textMuted} fill={colors.textMuted} />}
             <span style={{ fontSize: 11, color: colors.textMuted }}>{formatTime(message.createdAt)}</span>
             {message.edited && !isDeleted && (
               <span style={{ fontSize: 11, color: colors.textMuted, fontStyle: "italic" }}>(editado)</span>

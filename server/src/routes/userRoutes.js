@@ -4,13 +4,16 @@ import {
   obtenerUsuarios,
   buscarUsuarios,
   feedUsuarios,
+  obtenerFacets,
   obtenerUsuarioPorId,
   uploadPhoto,
   obtenerMisPhotos,
   deletePhoto,
   reorderPhotos,
   uploadProfilePicture,
-  deleteProfilePicture
+  deleteProfilePicture,
+  bloquearUsuario,
+  desbloquearUsuario
 } from "../controllers/userController.js";
 import protegerRuta from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/upload.js";
@@ -19,6 +22,7 @@ const router = express.Router();
 
 // ── Usuarios ───────────────────────────────
 router.get("/feed",    protegerRuta, feedUsuarios);
+router.get("/facets",  protegerRuta, obtenerFacets);
 router.get("/search",  protegerRuta, buscarUsuarios);
 router.get("/",        protegerRuta, obtenerUsuarios);
 router.put("/profile", protegerRuta, actualizarPerfil);
@@ -54,6 +58,10 @@ router.post(
 router.get("/my-photos",           protegerRuta, obtenerMisPhotos);
 router.patch("/photos/reorder",    protegerRuta, reorderPhotos);
 router.delete("/photos/:photoId",  protegerRuta, deletePhoto);
+
+// ── Bloqueo de usuarios ─────────────────────
+router.post("/:id/block",   protegerRuta, bloquearUsuario);
+router.delete("/:id/block", protegerRuta, desbloquearUsuario);
 
 // ── /:id siempre al final ──────────────────
 router.get("/:id", protegerRuta, obtenerUsuarioPorId);

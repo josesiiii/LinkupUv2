@@ -1,6 +1,6 @@
 // src/features/feed/PhotoCarousel.jsx
-import { useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import usePhotoCarousel from "../../hooks/usePhotoCarousel";
 
 const RADIUS = 32;
@@ -23,17 +23,6 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
     onTouchMove,
     onTouchEnd,
   } = usePhotoCarousel(fotos);
-
-  // Autoplay
-  const handleNext = useCallback(() => {
-    setCurrent((c) => (c + 1) % fotos.length);
-  }, [fotos.length, setCurrent]);
-
-  useEffect(() => {
-    if (fotos.length <= 1) return;
-    const t = setInterval(handleNext, 4000);
-    return () => clearInterval(t);
-  }, [handleNext, fotos.length]);
 
   const handlePrev = () =>
     setCurrent((c) => (c - 1 + fotos.length) % fotos.length);
@@ -152,6 +141,62 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
             />
           ))}
         </div>
+      )}
+
+      {/* Flechas de navegación — solo visibles cuando hay varias fotos */}
+      {fotos.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+            aria-label="Foto anterior"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: 12,
+              transform: "translateY(-50%)",
+              zIndex: 21,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              border: "none",
+              background: "rgba(0,0,0,0.35)",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); handleNextBtn(); }}
+            aria-label="Foto siguiente"
+            style={{
+              position: "absolute",
+              top: "50%",
+              right: 12,
+              transform: "translateY(-50%)",
+              zIndex: 21,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              border: "none",
+              background: "rgba(0,0,0,0.35)",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            <ChevronRight size={20} />
+          </button>
+        </>
       )}
 
       {/* Gradiente inferior — oscurece para que la info sea legible */}

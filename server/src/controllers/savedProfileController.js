@@ -64,7 +64,7 @@ export const obtenerGuardados = async (req, res) => {
     })
       .populate(
         "savedUser",
-        "fullName email interests objectives"
+        "fullName email bio profilePicture interests objectives"
       );
 
     res.status(200).json(guardados);

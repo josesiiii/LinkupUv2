@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Users, MessageCircle } from "lucide-react";
 import AppLayout from "../components/layout/AppLayout";
 import EmptyState from "../components/ui/EmptyState";
+import ProfileCard from "../components/profile/ProfileCard";
 import api from "../api/axios";
 import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
@@ -17,11 +18,12 @@ export default function ConnectionsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    setLoading(true);
     api.get("/connections/accepted")
       .then((res) => setConexiones(res.data || []))
       .catch(() => setError("No se pudieron cargar tus conexiones."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [usuario?._id]);
 
   const otherPerson = (conn) => {
     const from = conn.from;
@@ -54,42 +56,30 @@ export default function ConnectionsPage() {
         )}
 
         {!loading && conexiones.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {conexiones.map((conn) => {
               const persona = otherPerson(conn);
               return (
-                <div
+                <ProfileCard
                   key={conn._id}
-                  style={{
-                    ...(theme === "dark"
-                      ? { background: colors.surface }
-                      : { background: "rgba(255,255,255,0.5)" }),
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: 20, padding: "16px 20px",
-                    boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
-                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap",
-                  }}
-                >
-                  <div>
-                    <p style={{ margin: "0 0 2px 0", fontSize: 16, fontWeight: 700, color: colors.textDark }}>
-                      {persona?.fullName || "Usuario"}
-                    </p>
-                    <p style={{ margin: 0, fontSize: 13, color: colors.textMuted }}>{persona?.email}</p>
-                  </div>
-
-                  <button
-                    onClick={() => navigate(`/chat?with=${persona?._id}`)}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      padding: "8px 16px", borderRadius: 999,
-                      border: `1px solid ${colors.border}`,
-                      background: colors.pinkLight, color: colors.pink,
-                      fontSize: 13, fontWeight: 700, cursor: "pointer",
-                    }}
-                  >
-                    <MessageCircle size={15} /> Mensaje
-                  </button>
-                </div>
+                  user={persona}
+                  colors={colors}
+                  theme={theme}
+                  footer={
+                    <button
+                      onClick={() => navigate(`/chat?with=${persona?._id}`)}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                        width: "100%", padding: "8px 16px", borderRadius: 999,
+                        border: `1px solid ${colors.border}`,
+                        background: colors.pinkLight, color: colors.pink,
+                        fontSize: 13, fontWeight: 700, cursor: "pointer",
+                      }}
+                    >
+                      <MessageCircle size={15} /> Iniciar conversación
+                    </button>
+                  }
+                />
               );
             })}
           </div>

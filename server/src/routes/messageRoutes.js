@@ -4,12 +4,14 @@ import {
   enviarMensaje,
   obtenerMensajes,
   editarMensaje,
-  obtenerConversaciones
+  obtenerConversaciones,
+  reenviarMensaje
 } from "../controllers/messageController.js";
 
 const router = express.Router();
 
 router.post("/",                    protegerRuta, enviarMensaje);
+router.post("/forward",             protegerRuta, reenviarMensaje);
 router.get("/conversations",        protegerRuta, obtenerConversaciones);
 router.get("/conversation/:id",     protegerRuta, obtenerMensajes);
 router.put("/:id",                  protegerRuta, editarMensaje);

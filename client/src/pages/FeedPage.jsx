@@ -7,19 +7,41 @@ import useAuthStore from "../store/authStore";
 import useFeed from "../hooks/useFeed";
 import UserCard from "../features/feed/UserCard";
 import StoriesRow from "../features/feed/StoriesRow";
+import FeedFilterBar from "../features/feed/FeedFilterBar";
 import { useTheme } from "../context/ThemeContext";
+
+const FILTERS_KEY = "feedFilters";
+
+function loadFilters() {
+  try {
+    const raw = localStorage.getItem(FILTERS_KEY);
+    if (!raw) return { campus: "", faculty: "" };
+    const parsed = JSON.parse(raw);
+    return { campus: parsed.campus || "", faculty: parsed.faculty || "" };
+  } catch {
+    return { campus: "", faculty: "" };
+  }
+}
 
 export default function FeedPage() {
   const { colors } = useTheme();
   const usuario = useAuthStore((state) => state.usuario);
+  const [filters, setFilters] = useState(loadFilters);
+
   const {
     usuarios, loading, error,
     connectingIds, connectedIds,
     savingIds, savedIds,
     handleConectar, handleGuardar,
-  } = useFeed();
+  } = useFeed(filters);
 
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const updateFilters = (next) => {
+    setFilters(next);
+    localStorage.setItem(FILTERS_KEY, JSON.stringify(next));
+    setActiveIndex(0);
+  };
 
   const goPrev = useCallback(() => {
     setActiveIndex((i) => Math.max(0, i - 1));
@@ -63,6 +85,15 @@ export default function FeedPage() {
             <p style={{ fontSize: 15, margin: 0, color: colors.textDark }}>No hay usuarios compatibles en tu campus.</p>
             <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>Completa tu perfil para mejorar la compatibilidad</p>
           </div>
+        )}
+
+        {!loading && !error && (
+          <FeedFilterBar
+            campus={filters.campus}
+            faculty={filters.faculty}
+            onCampusChange={(campus) => updateFilters({ ...filters, campus })}
+            onFacultyChange={(faculty) => updateFilters({ ...filters, faculty })}
+          />
         )}
 
         {!loading && !error && usuarios.length > 0 && (

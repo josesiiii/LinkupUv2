@@ -96,8 +96,8 @@ export const obtenerAceptadas = async (req, res) => {
       status: "accepted",
       $or: [{ from: usuarioId }, { to: usuarioId }]
     })
-      .populate("from", "fullName email profilePicture")
-      .populate("to", "fullName email profilePicture");
+      .populate("from", "fullName email profilePicture bio interests")
+      .populate("to", "fullName email profilePicture bio interests");
 
     res.status(200).json(conexiones);
 

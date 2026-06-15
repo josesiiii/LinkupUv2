@@ -4,21 +4,24 @@ import { Inbox, Check, X } from "lucide-react";
 import AppLayout from "../components/layout/AppLayout";
 import EmptyState from "../components/ui/EmptyState";
 import api from "../api/axios";
+import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 
 export default function PendingConnectionsPage() {
   const { theme, colors } = useTheme();
+  const usuario = useAuthStore((state) => state.usuario);
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [processingIds, setProcessingIds] = useState([]);
 
   useEffect(() => {
+    setLoading(true);
     api.get("/connections/pending")
       .then((res) => setSolicitudes(res.data || []))
       .catch(() => setError("No se pudieron cargar tus solicitudes."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [usuario?._id]);
 
   const handleAceptar = async (id) => {
     setProcessingIds((p) => [...p, id]);

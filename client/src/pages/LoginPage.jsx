@@ -1,6 +1,6 @@
 // src/pages/LoginPage.jsx
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import api from "../api/axios";
@@ -17,6 +17,8 @@ const focusOut = getFocusOut(COLORS);
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const addingAccount = searchParams.get("addAccount") === "1";
   const { setAuth, token } = useAuthStore();
   const globeSize = useResponsiveGlobeSize();
 
@@ -26,7 +28,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => { if (token) navigate("/feed"); }, [token, navigate]);
+  useEffect(() => {
+    if (token && !addingAccount) navigate("/feed");
+  }, [token, addingAccount, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -60,7 +60,7 @@ const usuarioSchema = new mongoose.Schema(
       default: ""
     },
 
-    // Galería personal — carrusel del perfil público (máx 6)
+    // Galería personal — carrusel del perfil público (máx 4)
     photos: [
       {
         url:   { type: String, required: true },
@@ -108,6 +108,23 @@ const usuarioSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
+    },
+
+    // ── Presencia / actividad ───────────────
+    lastSeen: {
+      type: Date,
+      default: Date.now
+    },
+
+    doNotDisturb: {
+      type: Boolean,
+      default: false
+    },
+
+    blockedUsers: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+      default: []
     }
   },
   {

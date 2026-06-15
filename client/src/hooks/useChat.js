@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import api from "../api/axios";
 import { getSocket } from "../lib/socket";
+import { getOtherParticipant } from "../components/chat/utils";
 
 const normalizeUser = (user) =>
   user && {
@@ -29,6 +30,7 @@ export default function useChat({ roomId, currentUser }) {
   const [messages, setMessages] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [presence, setPresence] = useState({});
 
   const roomIdRef = useRef(roomId);
   roomIdRef.current = roomId;
@@ -164,7 +166,41 @@ export default function useChat({ roomId, currentUser }) {
 
     const handleMessageDeleted = ({ messageId }) => {
       setMessages((prev) =>
-        prev.map((m) => (m._id === messageId ? { ...m, text: "DELETED" } : m))
+        prev.map((m) => (m._id === messageId ? { ...m, text: "DELETED", deletedForEveryone: true } : m))
+      );
+    };
+
+    const handleMessageDeletedForMe = ({ messageId }) => {
+      setMessages((prev) => prev.filter((m) => m._id !== messageId));
+    };
+
+    const handleMessagePinned = ({ messageId, pinnedAt }) => {
+      setMessages((prev) =>
+        prev.map((m) => (m._id === messageId ? { ...m, pinned: true, pinnedAt } : m))
+      );
+    };
+
+    const handleMessageUnpinned = ({ messageId }) => {
+      setMessages((prev) =>
+        prev.map((m) => (m._id === messageId ? { ...m, pinned: false, pinnedAt: null } : m))
+      );
+    };
+
+    const handleMessageStarred = ({ messageId }) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === messageId ? { ...m, starredBy: [...(m.starredBy || []), currentUser._id] } : m
+        )
+      );
+    };
+
+    const handleMessageUnstarred = ({ messageId }) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === messageId
+            ? { ...m, starredBy: (m.starredBy || []).filter((id) => id !== currentUser._id) }
+            : m
+        )
       );
     };
 
@@ -178,30 +214,111 @@ export default function useChat({ roomId, currentUser }) {
       );
     };
 
+    const handlePresenceBulk = ({ presences }) => {
+      setPresence((prev) => {
+        const next = { ...prev };
+        presences.forEach((p) => {
+          next[p.userId] = { online: p.online, lastSeen: p.lastSeen, doNotDisturb: p.doNotDisturb };
+        });
+        return next;
+      });
+    };
+
+    const handlePresenceUpdate = ({ userId, online, lastSeen }) => {
+      setPresence((prev) => ({
+        ...prev,
+        [userId]: { ...prev[userId], online, lastSeen: lastSeen ?? prev[userId]?.lastSeen ?? null },
+      }));
+    };
+
     socket.on("message:new", handleNewMessage);
     socket.on("typing", handleTyping);
     socket.on("message:edited", handleMessageEdited);
     socket.on("message:deleted", handleMessageDeleted);
+    socket.on("message:deleted-for-me", handleMessageDeletedForMe);
+    socket.on("message:pinned", handleMessagePinned);
+    socket.on("message:unpinned", handleMessageUnpinned);
+    socket.on("message:starred", handleMessageStarred);
+    socket.on("message:unstarred", handleMessageUnstarred);
     socket.on("messages:read", handleMessagesRead);
+    socket.on("presence:bulk", handlePresenceBulk);
+    socket.on("presence:update", handlePresenceUpdate);
 
     return () => {
       socket.off("message:new", handleNewMessage);
       socket.off("typing", handleTyping);
       socket.off("message:edited", handleMessageEdited);
       socket.off("message:deleted", handleMessageDeleted);
+      socket.off("message:deleted-for-me", handleMessageDeletedForMe);
+      socket.off("message:pinned", handleMessagePinned);
+      socket.off("message:unpinned", handleMessageUnpinned);
+      socket.off("message:starred", handleMessageStarred);
+      socket.off("message:unstarred", handleMessageUnstarred);
       socket.off("messages:read", handleMessagesRead);
+      socket.off("presence:bulk", handlePresenceBulk);
+      socket.off("presence:update", handlePresenceUpdate);
       typingTimeoutsRef.current.forEach(clearTimeout);
       typingTimeoutsRef.current.clear();
     };
   }, [socket, currentUser?._id, fetchConversations]);
 
+  // Solicita el estado de presencia de los participantes de cada conversación
+  useEffect(() => {
+    if (!socket || !isConnected || !currentUser?._id || conversations.length === 0) return;
+
+    const ids = [
+      ...new Set(
+        conversations
+          .map((c) => getOtherParticipant(c, currentUser._id)?._id)
+          .filter(Boolean)
+      ),
+    ];
+    if (ids.length === 0) return;
+
+    socket.emit("presence:request", { userIds: ids });
+  }, [socket, isConnected, currentUser?._id, conversations.length]);
+
   const sendMessage = useCallback(
-    (text) => {
+    (text, replyToId) => {
       if (!socket || !roomId || !text.trim() || !currentUser?._id) return;
-      socket.emit("message:send", { roomId, text: text.trim(), senderId: currentUser._id });
+      socket.emit("message:send", { roomId, text: text.trim(), senderId: currentUser._id, replyTo: replyToId || null });
     },
     [socket, roomId, currentUser?._id]
   );
+
+  const deleteMessageForMe = useCallback(
+    (messageId) => {
+      if (!socket) return;
+      socket.emit("message:delete-for-me", { messageId });
+    },
+    [socket]
+  );
+
+  const togglePinMessage = useCallback(
+    (messageId, pinned) => {
+      if (!socket || !roomId) return;
+      socket.emit(pinned ? "message:unpin" : "message:pin", { messageId, roomId });
+    },
+    [socket, roomId]
+  );
+
+  const toggleStarMessage = useCallback(
+    (messageId, starred) => {
+      if (!socket) return;
+      socket.emit(starred ? "message:unstar" : "message:star", { messageId });
+    },
+    [socket]
+  );
+
+  const forwardMessage = useCallback(async (messageId, toUserIds) => {
+    try {
+      await api.post("/messages/forward", { messageId, toUserIds });
+      return true;
+    } catch (err) {
+      alert(err.response?.data?.message || "No se pudo reenviar el mensaje");
+      return false;
+    }
+  }, []);
 
   const editMessage = useCallback(
     (messageId, text) => {
@@ -219,14 +336,65 @@ export default function useChat({ roomId, currentUser }) {
     [socket, roomId]
   );
 
+  // Acciones sobre la conversación: archivar, fijar, silenciar, marcar como leído
+  const updateConversation = useCallback(
+    async (conversationId, action) => {
+      try {
+        const res = await api.patch(`/conversations/${conversationId}`, { action });
+        setConversations((prev) =>
+          prev.map((c) => (c._id === conversationId ? { ...c, ...res.data } : c))
+        );
+        return res.data;
+      } catch (err) {
+        alert(err.response?.data?.message || "No se pudo actualizar la conversación");
+        return null;
+      }
+    },
+    []
+  );
+
+  // Eliminar conversación (y sus mensajes) por completo
+  const removeConversation = useCallback(
+    async (conversationId) => {
+      try {
+        await api.delete(`/conversations/${conversationId}`);
+        setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+        return true;
+      } catch (err) {
+        alert(err.response?.data?.message || "No se pudo eliminar la conversación");
+        return false;
+      }
+    },
+    []
+  );
+
+  // Bloquear/desbloquear usuario
+  const blockUser = useCallback(async (userId) => {
+    try {
+      await api.post(`/users/${userId}/block`);
+      return true;
+    } catch (err) {
+      alert(err.response?.data?.message || "No se pudo bloquear al usuario");
+      return false;
+    }
+  }, []);
+
   return {
     conversations,
     messages,
     sendMessage,
     editMessage,
     deleteMessage,
+    deleteMessageForMe,
+    togglePinMessage,
+    toggleStarMessage,
+    forwardMessage,
     typingUsers,
     isConnected,
     socket,
+    presence,
+    updateConversation,
+    removeConversation,
+    blockUser,
   };
 }

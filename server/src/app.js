@@ -25,7 +25,7 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 // Rate limiting general — todas las rutas
 const limitadorGeneral = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100,                  // máximo 100 requests por IP
+  max: 1000,                  // máximo 100 requests por IP
   message: {
     message: "Demasiadas solicitudes, intenta de nuevo en 15 minutos"
   },

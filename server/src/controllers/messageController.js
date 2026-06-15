@@ -57,12 +57,82 @@ export const enviarMensaje = async (req, res) => {
 // OBTENER MENSAJES DE UNA CONVERSACIÓN
 export const obtenerMensajes = async (req, res) => {
   try {
-    const mensajes = await Message.find({ conversation: req.params.id })
+    const mensajes = await Message.find({
+      conversation: req.params.id,
+      deletedFor: { $ne: req.usuario._id }
+    })
       .populate("sender", "fullName email")
+      .populate({
+        path: "replyTo",
+        select: "text sender",
+        populate: { path: "sender", select: "fullName" }
+      })
       .sort({ createdAt: 1 })
       .limit(100);
 
     res.status(200).json(mensajes);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// REENVIAR MENSAJE A OTRO(S) USUARIO(S)
+export const reenviarMensaje = async (req, res) => {
+  try {
+    const { messageId, toUserIds } = req.body;
+
+    const original = await Message.findById(messageId);
+    if (!original) {
+      return res.status(404).json({ message: "Mensaje no encontrado" });
+    }
+
+    const results = [];
+
+    for (const to of toUserIds) {
+      let conversation = await Conversation.findOne({
+        $or: [
+          { participantA: req.usuario._id, participantB: to },
+          { participantA: to, participantB: req.usuario._id }
+        ]
+      });
+
+      if (!conversation) {
+        conversation = await Conversation.create({
+          roomId: [req.usuario._id.toString(), to.toString()].sort().join("_"),
+          participantA:      req.usuario._id,
+          participantB:      to,
+          lastMessage:       original.text,
+          lastMessageSender: req.usuario._id,
+          lastMessageAt:     new Date(),
+          unreadCountA:      0,
+          unreadCountB:      1
+        });
+      } else {
+        conversation.lastMessage       = original.text;
+        conversation.lastMessageSender = req.usuario._id;
+        conversation.lastMessageAt     = new Date();
+
+        if (conversation.participantA.toString() === req.usuario._id.toString()) {
+          conversation.unreadCountB += 1;
+        } else {
+          conversation.unreadCountA += 1;
+        }
+
+        await conversation.save();
+      }
+
+      const mensaje = await Message.create({
+        conversation: conversation._id,
+        sender:       req.usuario._id,
+        text:         original.text,
+        readBy:       [req.usuario._id]
+      });
+
+      results.push({ conversation, mensaje });
+    }
+
+    res.status(201).json({ results });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

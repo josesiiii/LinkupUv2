@@ -5,21 +5,10 @@ import api from "../../api/axios";
 import useAuthStore from "../../store/authStore";
 import { useTheme } from "../../context/ThemeContext";
 
-const STORAGE_KEY = "linkup-stories-seen";
-
-function loadSeen() {
-  try {
-    return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || [];
-  } catch {
-    return [];
-  }
-}
-
 export default function StoriesRow({ yo }) {
   const { colors } = useTheme();
   const usuario = useAuthStore((state) => state.usuario);
   const [amigos, setAmigos] = useState([]);
-  const [seenIds, setSeenIds] = useState(loadSeen);
 
   useEffect(() => {
     api.get("/connections/accepted")
@@ -36,14 +25,6 @@ export default function StoriesRow({ yo }) {
       })
       .catch(() => setAmigos([]));
   }, [usuario?._id]);
-
-  const handleClick = (id) => {
-    if (!seenIds.includes(id)) {
-      const next = [...seenIds, id];
-      setSeenIds(next);
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    }
-  };
 
   return (
     <div
@@ -94,14 +75,12 @@ export default function StoriesRow({ yo }) {
 
       {amigos.map((perfil) => {
         const id = perfil._id;
-        const seen = seenIds.includes(id);
         const firstName = (perfil.fullName || perfil.name || "Usuario").split(" ")[0];
 
         return (
           <div
             key={id}
-            onClick={() => handleClick(id)}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0, cursor: "pointer" }}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0 }}
           >
             {perfil.profilePicture ? (
               <img
@@ -109,20 +88,16 @@ export default function StoriesRow({ yo }) {
                 alt={firstName}
                 style={{
                   width: 64, height: 64, borderRadius: "50%", objectFit: "cover",
-                  border: seen ? `2px solid ${colors.border}` : "2px solid #FF3D9E",
-                  filter: seen ? "grayscale(60%)" : "none",
-                  transition: "filter 200ms, border-color 200ms",
+                  border: `2px solid ${colors.border}`,
                 }}
               />
             ) : (
               <div style={{
                 width: 64, height: 64, borderRadius: "50%",
-                border: seen ? `2px solid ${colors.border}` : "2px solid #FF3D9E",
-                filter: seen ? "grayscale(60%)" : "none",
+                border: `2px solid ${colors.border}`,
                 background: colors.surfaceAlt,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 20, fontWeight: 700, color: colors.textDark,
-                transition: "filter 200ms, border-color 200ms",
               }}>
                 {firstName.charAt(0).toUpperCase()}
               </div>

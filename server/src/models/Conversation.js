@@ -41,6 +41,25 @@ const conversationSchema = new mongoose.Schema(
     unreadCountB: {
       type: Number,
       default: 0
+    },
+
+    // ── Estado por usuario (Fase 2) ─────────
+    archivedBy: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+      default: []
+    },
+
+    pinnedBy: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+      default: []
+    },
+
+    mutedBy: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+      default: []
     }
   },
   {

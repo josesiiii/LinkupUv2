@@ -1,5 +1,10 @@
 // src/pages/ProfilePage.jsx
+import { useState } from "react";
+import { Pencil } from "lucide-react";
 import AppLayout from "../components/layout/AppLayout";
+import AvatarEditButton from "../components/profile/AvatarEditButton";
+import EditProfileModal from "../components/profile/EditProfileModal";
+import GalleryEditor from "../components/profile/GalleryEditor";
 import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 
@@ -35,6 +40,7 @@ const InfoCard = ({ label, value, theme, colors }) => (
 export default function ProfilePage() {
   const usuario = useAuthStore((state) => state.usuario);
   const { theme, colors } = useTheme();
+  const [editOpen, setEditOpen] = useState(false);
 
   const cardStyle = theme === "dark"
     ? { background: colors.surface }
@@ -47,29 +53,47 @@ export default function ProfilePage() {
         {/* Header */}
         <div
           style={{
+            position: "relative",
             display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap",
             ...cardStyle,
             border: `1px solid ${colors.border}`, borderRadius: 24, padding: 32, marginBottom: 24,
             boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
           }}
         >
-          {usuario?.profilePicture ? (
-            <img
-              src={usuario.profilePicture}
-              alt={usuario?.fullName}
-              style={{ width: 96, height: 96, borderRadius: 24, objectFit: "cover", border: `2px solid ${colors.border}`, flexShrink: 0 }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 96, height: 96, borderRadius: 24, background: colors.gradient,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#fff", fontWeight: 700, fontSize: 36, flexShrink: 0,
-              }}
-            >
-              {usuario?.fullName?.charAt(0)?.toUpperCase() || "?"}
-            </div>
-          )}
+          <button
+            onClick={() => setEditOpen(true)}
+            style={{
+              position: "absolute", top: 16, right: 16,
+              width: 36, height: 36, borderRadius: "50%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              border: `1px solid ${colors.border}`, background: colors.surfaceAlt,
+              color: colors.textDark, cursor: "pointer",
+            }}
+            aria-label="Editar perfil"
+          >
+            <Pencil size={16} />
+          </button>
+
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            {usuario?.profilePicture ? (
+              <img
+                src={usuario.profilePicture}
+                alt={usuario?.fullName}
+                style={{ width: 96, height: 96, borderRadius: 24, objectFit: "cover", border: `2px solid ${colors.border}`, display: "block" }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 96, height: 96, borderRadius: 24, background: colors.gradient,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "#fff", fontWeight: 700, fontSize: 36,
+                }}
+              >
+                {usuario?.fullName?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+            )}
+            <AvatarEditButton hasPhoto={!!usuario?.profilePicture} />
+          </div>
 
           <div style={{ minWidth: 0 }}>
             <h1 style={{ margin: "0 0 4px 0", fontSize: 28, fontWeight: 700, color: colors.textDark, fontFamily: "'Inter', sans-serif", letterSpacing: "-0.02em" }}>
@@ -126,7 +150,7 @@ export default function ProfilePage() {
           <div
             style={{
               ...cardStyle,
-              border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24,
+              border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24, marginBottom: 24,
               boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
             }}
           >
@@ -136,7 +160,21 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* Galería */}
+        <div
+          style={{
+            ...cardStyle,
+            border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24,
+            boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
+          }}
+        >
+          <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Galería</p>
+          <GalleryEditor />
+        </div>
       </div>
+
+      <EditProfileModal open={editOpen} onClose={() => setEditOpen(false)} usuario={usuario} />
     </AppLayout>
   );
 }

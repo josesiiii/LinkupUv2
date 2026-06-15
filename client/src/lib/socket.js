@@ -14,3 +14,12 @@ export function getSocket(token) {
   }
   return socket;
 }
+
+// Disconnects and discards the current socket so the next getSocket() call
+// creates a fresh connection (used when switching between accounts).
+export function resetSocket() {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+}

@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import api from "../api/axios";
 import useAuthStore from "../store/authStore";
 
-export default function useFeed() {
+export default function useFeed(filters = {}) {
   const { token } = useAuthStore();
+  const { campus, faculty } = filters;
 
   const [usuarios,      setUsuarios]      = useState([]);
   const [loading,       setLoading]       = useState(true);
@@ -20,7 +21,10 @@ export default function useFeed() {
       try {
         setLoading(true);
         setError("");
-        const res = await api.get("/users/feed");
+        const params = {};
+        if (campus) params.campus = campus;
+        if (faculty) params.faculty = faculty;
+        const res = await api.get("/users/feed", { params });
         const data = Array.isArray(res.data)
           ? res.data
           : res.data?.data || res.data?.usuarios || res.data?.users || [];
@@ -36,7 +40,7 @@ export default function useFeed() {
       }
     };
     cargar();
-  }, [token]);
+  }, [token, campus, faculty]);
 
   const handleConectar = async (id) => {
     setConnectingIds(p => [...p, id]);
