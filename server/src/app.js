@@ -14,6 +14,7 @@ import adminRoutes        from "./routes/adminRoutes.js";
 import connectionRoutes   from "./routes/connectionRoutes.js";
 import institutionRoutes from "./routes/institutionRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
+import storyRoutes        from "./routes/story.routes.js";
 import passportConfig, { initPassport } from "./config/passport.js";
 
 
@@ -42,7 +43,7 @@ const limitadorGeneral = rateLimit({
 // Rate limiting estricto — solo auth (login y register)
 const limitadorAuth = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10,                   // máximo 10 intentos por IP
+  max: 100,                   // máximo 10 intentos por IP
   message: {
     message: "Demasiados intentos, intenta de nuevo en 15 minutos"
   },
@@ -75,6 +76,7 @@ app.use("/api/admin",        adminRoutes);
 app.use("/api/connections",   connectionRoutes);
 app.use("/api/institutions", institutionRoutes);
 app.use("/api/conversations", conversationRoutes);
+app.use("/api/stories",      storyRoutes);
 
 
 // ── TEST ──────────────────────────────────────

@@ -7,8 +7,10 @@ import { Server } from "socket.io";
 import app from "./app.js";
 import connectDB from "./config/db.js";
 import registerChatSocket from "./sockets/chatSocket.js";
+import { startCleanupJob } from "./jobs/cleanExpiredStories.js";
 
 connectDB();
+startCleanupJob();
 
 // HTTP SERVER
 const server = http.createServer(app);

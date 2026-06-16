@@ -1,12 +1,15 @@
 // src/pages/ProfilePage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Pencil } from "lucide-react";
 import AppLayout from "../components/layout/AppLayout";
 import AvatarEditButton from "../components/profile/AvatarEditButton";
 import EditProfileModal from "../components/profile/EditProfileModal";
 import GalleryEditor from "../components/profile/GalleryEditor";
+import StoryViewer from "../components/stories/StoryViewer";
+import StoryUploader from "../components/stories/StoryUploader";
 import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
+import useStories from "../hooks/useStories";
 
 const Chip = ({ children, tone = "pink", colors }) => (
   <span
@@ -37,10 +40,39 @@ const InfoCard = ({ label, value, theme, colors }) => (
   </div>
 );
 
+const GRADIENT = "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)";
+
 export default function ProfilePage() {
   const usuario = useAuthStore((state) => state.usuario);
   const { theme, colors } = useTheme();
   const [editOpen, setEditOpen] = useState(false);
+
+  const {
+    viewerOpen, activeAuthorIndex, activeStoryIndex,
+    uploaderOpen, ownStories,
+    fetchOwnStories,
+    openUploader, closeUploader,
+    closeViewer, handleUpload, handleView, handleDelete,
+    setActiveAuthorIndex, setActiveStoryIndex, setViewerOpen
+  } = useStories();
+
+  const openOwnViewer = async () => {
+    if (!usuario?._id) return;
+    const stories = await fetchOwnStories(usuario._id);
+    if (stories?.length > 0) {
+      setViewerOpen(true);
+    } else {
+      openUploader();
+    }
+  };
+
+  const handleAvatarClick = () => {
+    if (usuario?.hasActiveStory) {
+      openOwnViewer();
+    } else {
+      openUploader();
+    }
+  };
 
   const cardStyle = theme === "dark"
     ? { background: colors.surface }
@@ -75,23 +107,36 @@ export default function ProfilePage() {
           </button>
 
           <div style={{ position: "relative", flexShrink: 0 }}>
-            {usuario?.profilePicture ? (
-              <img
-                src={usuario.profilePicture}
-                alt={usuario?.fullName}
-                style={{ width: 96, height: 96, borderRadius: 24, objectFit: "cover", border: `2px solid ${colors.border}`, display: "block" }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: 96, height: 96, borderRadius: 24, background: colors.gradient,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "#fff", fontWeight: 700, fontSize: 36,
-                }}
-              >
-                {usuario?.fullName?.charAt(0)?.toUpperCase() || "?"}
+            <div
+              onClick={handleAvatarClick}
+              style={{
+                cursor: "pointer",
+                borderRadius: 24, overflow: "hidden",
+                padding: usuario?.hasActiveStory ? 3 : 0,
+                background: usuario?.hasActiveStory ? GRADIENT : "transparent",
+                display: "inline-block"
+              }}
+            >
+              <div style={{ borderRadius: 20, overflow: "hidden", padding: usuario?.hasActiveStory ? 2 : 0, background: usuario?.hasActiveStory ? colors.surface : "transparent" }}>
+                {usuario?.profilePicture ? (
+                  <img
+                    src={usuario.profilePicture}
+                    alt={usuario?.fullName}
+                    style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", border: usuario?.hasActiveStory ? "none" : `2px solid ${colors.border}`, display: "block" }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 96, height: 96, borderRadius: 20, background: colors.gradient,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: "#fff", fontWeight: 700, fontSize: 36,
+                    }}
+                  >
+                    {usuario?.fullName?.charAt(0)?.toUpperCase() || "?"}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
             <AvatarEditButton hasPhoto={!!usuario?.profilePicture} />
           </div>
 
@@ -175,6 +220,25 @@ export default function ProfilePage() {
       </div>
 
       <EditProfileModal open={editOpen} onClose={() => setEditOpen(false)} usuario={usuario} />
+
+      <StoryViewer
+        open={viewerOpen}
+        onClose={closeViewer}
+        storiesFeed={[]}
+        ownStories={ownStories}
+        activeAuthorIndex={0}
+        activeStoryIndex={activeStoryIndex}
+        setActiveAuthorIndex={setActiveAuthorIndex}
+        setActiveStoryIndex={setActiveStoryIndex}
+        onView={handleView}
+        onDelete={handleDelete}
+      />
+
+      <StoryUploader
+        open={uploaderOpen}
+        onClose={closeUploader}
+        onUpload={handleUpload}
+      />
     </AppLayout>
   );
 }
