@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 
 import authRoutes         from "./routes/authRoutes.js";
+import authGoogleRoutes   from "./routes/authGoogle.js";
 import userRoutes         from "./routes/userRoutes.js";
 import messageRoutes      from "./routes/messageRoutes.js";
 import savedProfileRoutes from "./routes/savedProfileRoutes.js";
@@ -13,11 +14,15 @@ import adminRoutes        from "./routes/adminRoutes.js";
 import connectionRoutes   from "./routes/connectionRoutes.js";
 import institutionRoutes from "./routes/institutionRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
+import passportConfig     from "./config/passport.js";
 
 
 dotenv.config();
 
 const app = express();
+
+// Passport (debe estar antes de las rutas)
+app.use(passportConfig.initialize());
 
 // ── SEGURIDAD ─────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: false }));
@@ -60,6 +65,7 @@ app.use((req, res, next) => {
 
 // ── ROUTES ────────────────────────────────────
 app.use("/api/auth",         limitadorAuth, authRoutes);
+app.use("/api/auth",         authGoogleRoutes);
 app.use("/api/users",        userRoutes);
 app.use("/api/messages",     messageRoutes);
 app.use("/api/savedprofiles", savedProfileRoutes);

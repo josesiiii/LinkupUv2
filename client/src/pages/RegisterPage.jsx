@@ -1,5 +1,5 @@
 // src/pages/RegisterPage.jsx
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,6 +8,7 @@ import useAuthStore from "../store/authStore";
 import RotatingEarth from "../components/auth/RotatingEarth";
 import AuthHeader from "../components/auth/AuthHeader";
 import Logo from "../components/ui/Logo";
+import RecaptchaField from "../components/RecaptchaField";
 import useResponsiveGlobeSize from "../hooks/useResponsiveGlobeSize";
 import { LIGHT_COLORS as COLORS, getInputBase, getLabelStyle, getFocusIn, getFocusOut } from "../styles/authTheme";
 
@@ -112,9 +113,11 @@ export default function RegisterPage() {
   const { setAuth } = useAuthStore();
   const globeSize = useResponsiveGlobeSize();
 
+  const recaptchaRef = useRef(null);
   const [step,    setStep]    = useState(1);
   const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
   // Paso 1
   const [fullName, setFullName] = useState("");
@@ -155,6 +158,7 @@ export default function RegisterPage() {
   const goToStep2 = () => {
     if (!fullName || !email || !password || !currentCampus) { setError("Completa todos los campos"); return; }
     if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres"); return; }
+    if (!recaptchaToken) { setError("Por favor completa el reCAPTCHA"); return; }
     setError(""); setStep(2);
   };
 
@@ -164,14 +168,17 @@ export default function RegisterPage() {
     try {
       const res = await api.post("/auth/register", {
         fullName, email, password,
-        currentCampus,     // ID del campus
-        institution,       // nombre de la institución detectada
+        currentCampus,
+        institution,
         career, faculty, semester: Number(semester),
         bio, interests, objectives, role,
+        recaptchaToken,
       });
       setAuth(res.data.usuario, res.data.token);
       navigate("/feed");
     } catch (err) {
+      recaptchaRef.current?.reset();
+      setRecaptchaToken(null);
       setError(err.response?.data?.message || "Error al registrarse");
     } finally { setLoading(false); }
   };
@@ -395,6 +402,8 @@ export default function RegisterPage() {
                     </select>
                   </div>
                 )}
+
+                <RecaptchaField ref={recaptchaRef} onChange={setRecaptchaToken} />
 
                 {error && <p style={{ fontSize: 12, color: "#cc0040", margin: 0, padding: "8px 12px", background: "#fff0f5", borderRadius: 10, border: "1px solid #ffc0d8" }}>{error}</p>}
 

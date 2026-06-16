@@ -1,5 +1,5 @@
 // src/pages/LoginPage.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,6 +8,7 @@ import useAuthStore from "../store/authStore";
 import RotatingEarth from "../components/auth/RotatingEarth";
 import AuthHeader from "../components/auth/AuthHeader";
 import Logo from "../components/ui/Logo";
+import RecaptchaField from "../components/RecaptchaField";
 import useResponsiveGlobeSize from "../hooks/useResponsiveGlobeSize";
 import { LIGHT_COLORS as COLORS, getInputBase, getFocusIn, getFocusOut } from "../styles/authTheme";
 
@@ -22,9 +23,11 @@ export default function LoginPage() {
   const { setAuth, token } = useAuthStore();
   const globeSize = useResponsiveGlobeSize();
 
+  const recaptchaRef = useRef(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,20 +35,34 @@ export default function LoginPage() {
     if (token && !addingAccount) navigate("/feed");
   }, [token, addingAccount, navigate]);
 
+  // Mostrar error si Google OAuth falló
+  useEffect(() => {
+    if (searchParams.get("error") === "google_failed") {
+      setError("Error al iniciar sesión con Google. Intenta de nuevo.");
+    }
+  }, []);
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) { setError("Completa todos los campos"); return; }
+    if (!recaptchaToken) { setError("Por favor completa el reCAPTCHA"); return; }
     setError(""); setLoading(true);
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const res = await api.post("/auth/login", { email, password, recaptchaToken });
       setAuth(res.data.usuario, res.data.token);
       navigate("/feed");
     } catch (err) {
+      recaptchaRef.current?.reset();
+      setRecaptchaToken(null);
       setError(err.response?.data?.message || "Error al iniciar sesión");
     } finally { setLoading(false); }
   };
 
-  const ready = email.trim() && password.trim();
+  const ready = email.trim() && password.trim() && recaptchaToken;
 
   return (
     <div className="auth-page" style={{
@@ -178,6 +195,7 @@ export default function LoginPage() {
           {/* Solo Google */}
           <button
             type="button"
+            onClick={handleGoogleLogin}
             style={{
               width: "100%", height: 46, borderRadius: 12,
               background: "#fff", border: `1.5px solid ${COLORS.border}`,
@@ -224,7 +242,17 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: COLORS.textDark, marginBottom: 7 }}>Contraseña</label>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textDark }}>Contraseña</label>
+                <Link
+                  to="/forgot-password"
+                  style={{ fontSize: 12, color: COLORS.pink, fontWeight: 500, textDecoration: "none" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -246,6 +274,9 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
+            {/* reCAPTCHA */}
+            <RecaptchaField ref={recaptchaRef} onChange={setRecaptchaToken} />
 
             {/* Error */}
             {error && (

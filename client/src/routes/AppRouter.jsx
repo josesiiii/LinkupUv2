@@ -8,6 +8,9 @@ import SavedPage      from "../pages/SavedPage";
 import ChatPage       from "../pages/ChatPage";
 import ConnectionsPage from "../pages/ConnectionsPage";
 import PendingConnectionsPage from "../pages/PendingConnectionsPage";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword  from "../pages/ResetPassword";
+import AuthCallback   from "../pages/AuthCallback";
 import ProtectedRoute from "./ProtectedRoute";
 
 function AppRouter() {
@@ -20,6 +23,9 @@ function AppRouter() {
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* App protegida */}
         <Route

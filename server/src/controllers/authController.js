@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { INSTITUTIONS } from "../config/institutions.js";
+import { generateResetToken, verifyResetToken } from "../utils/resetToken.js";
+import { sendPasswordResetEmail } from "../utils/email.js";
 
 // REGISTER
 export const registrarUsuario = async (req, res) => {
@@ -104,6 +106,18 @@ export const iniciarSesion = async (req, res) => {
       });
     }
 
+    if (usuario.authProvider === "google") {
+      return res.status(400).json({
+        message: "Esta cuenta usa Google. Inicia sesión con Google."
+      });
+    }
+
+    if (!usuario.isActive) {
+      return res.status(400).json({
+        message: "Cuenta desactivada. Contacta al administrador."
+      });
+    }
+
     const passwordCorrecto = await bcrypt.compare(password, usuario.password);
 
     if (!passwordCorrecto) {
@@ -140,6 +154,13 @@ export const obtenerPerfil = async (req, res) => {
 export const cambiarPassword = async (req, res) => {
   try {
     const { passwordActual, passwordNuevo } = req.body;
+
+    // 0. GOOGLE USERS NO TIENEN PASSWORD LOCAL
+    if (req.usuario.authProvider === "google") {
+      return res.status(400).json({
+        message: "Esta cuenta usa Google. No puedes cambiar la contraseña desde aquí."
+      });
+    }
 
     // 1. VALIDAR QUE LLEGARON LOS DOS CAMPOS
     if (!passwordActual || !passwordNuevo) {
@@ -186,6 +207,83 @@ export const cambiarPassword = async (req, res) => {
     res.status(200).json({
       message: "Contraseña actualizada correctamente"
     });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// FORGOT PASSWORD — envía link al email
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "El correo es requerido" });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // Respuesta genérica para no revelar si el email existe
+    if (!user) {
+      return res.status(200).json({
+        message: "Si ese correo está registrado, recibirás un enlace en breve."
+      });
+    }
+
+    if (user.authProvider === "google") {
+      return res.status(400).json({
+        message: "Esta cuenta usa Google. Inicia sesión con Google."
+      });
+    }
+
+    const resetToken = generateResetToken(user._id);
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    await sendPasswordResetEmail({
+      toEmail: user.email,
+      userName: user.fullName,
+      resetLink
+    });
+
+    return res.status(200).json({
+      message: "Si ese correo está registrado, recibirás un enlace en breve."
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// RESET PASSWORD — establece la nueva contraseña usando el token del link
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: "Token y nueva contraseña son requeridos" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "La contraseña debe tener al menos 8 caracteres" });
+    }
+
+    const payload = verifyResetToken(token);
+
+    if (!payload) {
+      return res.status(400).json({ message: "El enlace expiró o no es válido" });
+    }
+
+    const user = await User.findById(payload.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return res.status(200).json({ message: "Contraseña actualizada correctamente" });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

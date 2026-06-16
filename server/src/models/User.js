@@ -22,9 +22,24 @@ const usuarioSchema = new mongoose.Schema(
       index: true
     },
 
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
+      default: null
+    },
+
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local"
+    },
+
     password: {
       type: String,
-      required: true
+      required: function () {
+        return this.authProvider === "local"
+      }
     },
 
     // ── Campos académicos ──────────────────
