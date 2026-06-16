@@ -561,3 +561,45 @@ export const desbloquearUsuario = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// ── BANNER DE PERFIL ───────────────────────────────────────────────
+
+export const uploadProfileBanner = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: "No se recibió ninguna imagen" });
+
+    const usuario = await User.findById(req.usuario._id);
+    if (!usuario) return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+
+    if (usuario.profileBanner) {
+      const publicId = usuario.profileBanner.split("/").slice(-2).join("/").split(".")[0];
+      await cloudinary.uploader.destroy(publicId).catch(() => {});
+    }
+
+    usuario.profileBanner = req.file.path;
+    await usuario.save();
+
+    res.status(200).json({ success: true, profileBanner: usuario.profileBanner });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteProfileBanner = async (req, res) => {
+  try {
+    const usuario = await User.findById(req.usuario._id);
+    if (!usuario) return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+
+    if (usuario.profileBanner) {
+      const publicId = usuario.profileBanner.split("/").slice(-2).join("/").split(".")[0];
+      await cloudinary.uploader.destroy(publicId).catch(() => {});
+    }
+
+    usuario.profileBanner = "";
+    await usuario.save();
+
+    res.status(200).json({ success: true, message: "Banner eliminado" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

@@ -1,7 +1,7 @@
 // src/components/chat/ConversationItem.jsx
 import {
   MoreVertical, Trash2, Archive, ArchiveRestore,
-  Pin, PinOff, CheckCheck, BellOff, Bell, Ban,
+  Pin, PinOff, CheckCheck, BellOff, Bell, Ban, User,
 } from "lucide-react";
 import Avatar from "./Avatar";
 import Dropdown from "../ui/Dropdown";
@@ -10,7 +10,7 @@ import { formatRelativeTime, getOtherParticipant, getUnreadCount, isInList } fro
 export default function ConversationItem({
   conversation, currentUser, isActive, onClick, colors, presence,
   onArchive, onUnarchive, onPin, onUnpin, onMute, onUnmute,
-  onMarkRead, onDelete, onBlock, disablePin,
+  onMarkRead, onDelete, onBlock, disablePin, onViewProfile,
 }) {
   const persona = getOtherParticipant(conversation, currentUser._id);
   const unread = getUnreadCount(conversation, currentUser._id);
@@ -21,6 +21,7 @@ export default function ConversationItem({
   const isMuted = isInList(conversation.mutedBy, currentUser._id);
 
   const menuItems = [
+    { label: "Ver perfil", icon: User, onClick: () => onViewProfile?.(persona) },
     ...(unread > 0 ? [{ label: "Marcar como leído", icon: CheckCheck, onClick: () => onMarkRead?.(conversation._id) }] : []),
     isPinned
       ? { label: "Desfijar", icon: PinOff, onClick: () => onUnpin?.(conversation._id) }
@@ -62,7 +63,7 @@ export default function ConversationItem({
       onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = colors.surfaceAlt; }}
       onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
     >
-      <Avatar name={persona?.name} src={persona?.avatar} size={46} colors={colors} online={online} showStatus />
+      <Avatar name={persona?.name} src={persona?.avatar} size={46} colors={colors} online={online} showStatus hasStory={!!persona?.hasActiveStory} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>

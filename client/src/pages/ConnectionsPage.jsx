@@ -65,9 +65,10 @@ export default function ConnectionsPage() {
                   user={persona}
                   colors={colors}
                   theme={theme}
+                  onClick={() => navigate(`/users/${persona?._id}`)}
                   footer={
                     <button
-                      onClick={() => navigate(`/chat?with=${persona?._id}`)}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/chat?with=${persona?._id}`); }}
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                         width: "100%", padding: "8px 16px", borderRadius: 999,

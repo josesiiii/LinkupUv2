@@ -1,8 +1,9 @@
 // src/components/profile/ProfileCard.jsx
 
-export default function ProfileCard({ user, colors, theme, footer }) {
+export default function ProfileCard({ user, colors, theme, footer, onClick }) {
   return (
     <div
+      onClick={onClick}
       style={{
         ...(theme === "dark"
           ? { background: colors.surface }
@@ -13,6 +14,7 @@ export default function ProfileCard({ user, colors, theme, footer }) {
         display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
         textAlign: "center",
         transition: "transform 150ms, box-shadow 150ms",
+        cursor: onClick ? "pointer" : "default",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = "translateY(-4px)";

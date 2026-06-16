@@ -12,6 +12,8 @@ import {
   reorderPhotos,
   uploadProfilePicture,
   deleteProfilePicture,
+  uploadProfileBanner,
+  deleteProfileBanner,
   bloquearUsuario,
   desbloquearUsuario
 } from "../controllers/userController.js";
@@ -41,6 +43,21 @@ router.post(
 );
 
 router.delete("/profile-picture", protegerRuta, deleteProfilePicture);
+
+// ── Banner de perfil ───────────────────────
+router.post(
+  "/profile-banner",
+  protegerRuta,
+  (req, res, next) => {
+    upload.single("image")(req, res, (err) => {
+      if (err) return res.status(500).json({ success: false, message: err.message });
+      next();
+    });
+  },
+  uploadProfileBanner
+);
+
+router.delete("/profile-banner", protegerRuta, deleteProfileBanner);
 
 // ── Galería personal ───────────────────────
 router.post(

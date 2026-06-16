@@ -14,6 +14,7 @@ import TypingIndicator from "./TypingIndicator";
 import ChatInput from "./ChatInput";
 import Avatar from "./Avatar";
 import Modal from "../ui/Modal";
+import ContactProfileModal from "./ContactProfileModal";
 import { getOtherParticipant, formatPresence, isInList } from "./utils";
 
 export default function ChatLayout() {
@@ -43,6 +44,7 @@ export default function ChatLayout() {
   const [replyingTo, setReplyingTo] = useState(null);
   const [forwardTarget, setForwardTarget] = useState(null);
   const [forwardConnections, setForwardConnections] = useState([]);
+  const [profileModalUser, setProfileModalUser] = useState(null);
 
   const typingLockRef = useRef(false);
   const typingUnlockTimeoutRef = useRef(null);
@@ -316,6 +318,7 @@ export default function ChatLayout() {
                 onMarkRead={handleMarkRead}
                 onDelete={handleDeleteConversation}
                 onBlock={handleBlockUser}
+                onViewProfile={(persona) => setProfileModalUser(persona)}
               />
             );
           })}
@@ -351,8 +354,13 @@ export default function ChatLayout() {
                 colors={colors}
                 online={!!presence[otherParticipant?._id]?.online}
                 showStatus={!!otherParticipant?._id}
+                hasStory={!!otherParticipant?.hasActiveStory}
+                onStoryClick={otherParticipant?._id ? () => setProfileModalUser(otherParticipant) : undefined}
               />
-              <div>
+              <div
+                style={{ cursor: otherParticipant?._id ? "pointer" : "default" }}
+                onClick={otherParticipant?._id ? () => setProfileModalUser(otherParticipant) : undefined}
+              >
                 <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: colors.textDark }}>
                   {otherParticipant?.name || "Usuario"}
                 </p>
@@ -458,6 +466,14 @@ export default function ChatLayout() {
           })}
         </div>
       </Modal>
+
+      <ContactProfileModal
+        open={!!profileModalUser}
+        onClose={() => setProfileModalUser(null)}
+        userId={profileModalUser?._id}
+        presence={profileModalUser?._id ? presence[profileModalUser._id] : null}
+        onOpenStory={(uid) => { setProfileModalUser(null); navigate(`/users/${uid}`); }}
+      />
 
       <style>{`
         @media (max-width: 767px) {

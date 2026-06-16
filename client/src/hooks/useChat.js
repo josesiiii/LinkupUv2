@@ -11,6 +11,7 @@ const normalizeUser = (user) =>
     _id: user._id,
     name: user.fullName,
     avatar: user.profilePicture || null,
+    hasActiveStory: user.hasActiveStory || false,
   };
 
 const normalizeConversation = (conv) => ({

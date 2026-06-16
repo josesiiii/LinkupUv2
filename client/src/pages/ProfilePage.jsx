@@ -1,6 +1,6 @@
 // src/pages/ProfilePage.jsx
-import { useState, useEffect } from "react";
-import { Pencil } from "lucide-react";
+import { useState, useRef } from "react";
+import { Pencil, Camera } from "lucide-react";
 import AppLayout from "../components/layout/AppLayout";
 import AvatarEditButton from "../components/profile/AvatarEditButton";
 import EditProfileModal from "../components/profile/EditProfileModal";
@@ -10,6 +10,7 @@ import StoryUploader from "../components/stories/StoryUploader";
 import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 import useStories from "../hooks/useStories";
+import api from "../api/axios";
 
 const Chip = ({ children, tone = "pink", colors }) => (
   <span
@@ -44,8 +45,28 @@ const GRADIENT = "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, 
 
 export default function ProfilePage() {
   const usuario = useAuthStore((state) => state.usuario);
+  const updateUsuario = useAuthStore((state) => state.updateUsuario);
   const { theme, colors } = useTheme();
   const [editOpen, setEditOpen] = useState(false);
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const bannerInputRef = useRef(null);
+
+  const handleBannerChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBannerUploading(true);
+    try {
+      const form = new FormData();
+      form.append("image", file);
+      const res = await api.post("/users/profile-banner", form);
+      updateUsuario({ profileBanner: res.data.profileBanner });
+    } catch {
+      alert("No se pudo subir el banner.");
+    } finally {
+      setBannerUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const {
     viewerOpen, activeAuthorIndex, activeStoryIndex,
@@ -81,6 +102,33 @@ export default function ProfilePage() {
   return (
     <AppLayout>
       <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 24px 64px" }}>
+
+        {/* Banner */}
+        <div
+          onClick={() => !bannerUploading && bannerInputRef.current?.click()}
+          style={{
+            position: "relative", height: 160, borderRadius: 24, marginBottom: 16,
+            background: usuario?.profileBanner
+              ? `url(${usuario.profileBanner}) center/cover`
+              : `linear-gradient(135deg, ${colors.pinkLight}, #e0d4ff)`,
+            cursor: bannerUploading ? "wait" : "pointer",
+            border: `1px solid ${colors.border}`,
+            overflow: "hidden",
+          }}
+        >
+          <div style={{
+            position: "absolute", inset: 0, background: "rgba(0,0,0,0)", display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "background 200ms",
+          }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.25)"; e.currentTarget.children[0].style.opacity = "1"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0)"; e.currentTarget.children[0].style.opacity = "0"; }}
+          >
+            <div style={{ opacity: 0, display: "flex", alignItems: "center", gap: 8, color: "#fff", fontWeight: 600, fontSize: 14, transition: "opacity 200ms" }}>
+              <Camera size={18} /> {bannerUploading ? "Subiendo..." : "Cambiar banner"}
+            </div>
+          </div>
+          <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleBannerChange} />
+        </div>
 
         {/* Header */}
         <div

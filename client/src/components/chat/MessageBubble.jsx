@@ -20,6 +20,9 @@ export default function MessageBubble({
   const isUnread = !message.readBy?.includes(currentUser._id);
   const isPinned = !!message.pinned;
   const isStarred = !!message.starredBy?.includes(currentUser._id);
+  const isReadByOther = isOwn && message.readBy?.some(
+    (id) => id?.toString() === otherParticipant?._id?.toString()
+  );
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -48,7 +51,7 @@ export default function MessageBubble({
     { id: "copy", label: "Copiar", icon: Copy, onClick: () => navigator.clipboard?.writeText(message.text), visible: !isDeleted },
     { id: "pin", label: isPinned ? "Desfijar mensaje" : "Fijar mensaje", icon: isPinned ? PinOff : Pin, onClick: () => onTogglePin?.(message, isPinned), visible: !isDeleted },
     { id: "star", label: isStarred ? "Quitar destacado" : "Destacar", icon: Star, onClick: () => onToggleStar?.(message, isStarred), visible: !isDeleted },
-    { id: "edit", label: "Editar", icon: Pencil, onClick: () => onEditStart?.(), visible: isOwn && !isDeleted },
+    { id: "edit", label: isReadByOther ? "Editar (ya fue leído)" : "Editar", icon: Pencil, onClick: () => onEditStart?.(), visible: isOwn && !isDeleted, disabled: isReadByOther },
     { id: "deleteForMe", label: "Eliminar para mí", icon: Trash2, onClick: () => onDeleteForMe?.(message._id) },
     { id: "deleteForEveryone", label: "Eliminar para todos", icon: Trash2, danger: true, onClick: () => onDeleteRequest?.(), visible: isOwn && !isDeleted },
   ].filter((a) => a.visible !== false);

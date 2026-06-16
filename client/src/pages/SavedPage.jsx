@@ -1,5 +1,6 @@
 // src/pages/SavedPage.jsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bookmark } from "lucide-react";
 import AppLayout from "../components/layout/AppLayout";
 import EmptyState from "../components/ui/EmptyState";
@@ -9,6 +10,7 @@ import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 
 export default function SavedPage() {
+  const navigate = useNavigate();
   const { theme, colors } = useTheme();
   const usuario = useAuthStore((state) => state.usuario);
   const [guardados, setGuardados] = useState([]);
@@ -49,7 +51,7 @@ export default function SavedPage() {
         {!loading && guardados.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {guardados.map((item) => (
-              <ProfileCard key={item._id} user={item.savedUser} colors={colors} theme={theme} />
+              <ProfileCard key={item._id} user={item.savedUser} colors={colors} theme={theme} onClick={() => navigate(`/users/${item.savedUser?._id}`)} />
             ))}
           </div>
         )}

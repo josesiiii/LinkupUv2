@@ -145,6 +145,11 @@ const usuarioSchema = new mongoose.Schema(
     hasActiveStory: {
       type: Boolean,
       default: false
+    },
+
+    profileBanner: {
+      type: String,
+      default: ""
     }
   },
   {

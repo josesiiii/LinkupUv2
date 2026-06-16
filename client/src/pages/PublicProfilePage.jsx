@@ -1,0 +1,224 @@
+// src/pages/PublicProfilePage.jsx
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { MessageCircle, UserPlus, UserCheck, ArrowLeft } from "lucide-react";
+import AppLayout from "../components/layout/AppLayout";
+import useAuthStore from "../store/authStore";
+import { useTheme } from "../context/ThemeContext";
+import useStories from "../hooks/useStories";
+import StoryViewer from "../components/stories/StoryViewer";
+import api from "../api/axios";
+
+const STORY_GRADIENT = "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)";
+
+const Chip = ({ children, colors, tone = "pink" }) => (
+  <span style={{
+    display: "inline-block", padding: "6px 14px", borderRadius: 100, fontSize: 13, fontWeight: 500,
+    background: tone === "pink" ? colors.pinkLight : colors.surfaceAlt, color: colors.textDark,
+  }}>
+    {children}
+  </span>
+);
+
+export default function PublicProfilePage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { colors, theme } = useTheme();
+  const usuario = useAuthStore((state) => state.usuario);
+
+  const [perfil, setPerfil] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState(null);
+
+  const {
+    viewerOpen, activeAuthorIndex, activeStoryIndex,
+    storiesFeed, closeViewer, handleView, handleDelete,
+    setActiveAuthorIndex, setActiveStoryIndex, setViewerOpen,
+    fetchFeed,
+  } = useStories();
+
+  const isOwn = usuario?._id === id;
+
+  useEffect(() => {
+    if (!id) return;
+    if (isOwn) { navigate("/profile", { replace: true }); return; }
+
+    setLoading(true);
+    Promise.all([
+      api.get(`/users/${id}`),
+      api.get("/connections/accepted").catch(() => ({ data: [] })),
+    ])
+      .then(([userRes, connRes]) => {
+        setPerfil(userRes.data);
+        const accepted = (connRes.data || []).some((c) => {
+          const other = c.from?._id === usuario?._id ? c.to : c.from;
+          return other?._id === id;
+        });
+        setConnectionStatus(accepted ? "connected" : "none");
+      })
+      .catch(() => setPerfil(null))
+      .finally(() => setLoading(false));
+  }, [id, isOwn, usuario?._id, navigate]);
+
+  const handleOpenStory = async () => {
+    await fetchFeed();
+    const idx = storiesFeed.findIndex((g) => g.author?._id === id);
+    if (idx >= 0) {
+      setActiveAuthorIndex(idx);
+      setActiveStoryIndex(0);
+      setViewerOpen(true);
+    }
+  };
+
+  const handleConnect = async () => {
+    try {
+      await api.post("/connections", { to: id });
+      setConnectionStatus("pending");
+    } catch (err) {
+      alert(err.response?.data?.message || "No se pudo enviar la solicitud.");
+    }
+  };
+
+  const cardStyle = theme === "dark"
+    ? { background: colors.surface }
+    : { background: "rgba(255,255,255,0.45)", backdropFilter: "blur(20px)" };
+
+  if (loading) return (
+    <AppLayout>
+      <div style={{ maxWidth: 880, margin: "0 auto", padding: "24px 24px 64px" }}>
+        <p style={{ color: colors.textMuted, fontSize: 14 }}>Cargando perfil...</p>
+      </div>
+    </AppLayout>
+  );
+
+  if (!perfil) return (
+    <AppLayout>
+      <div style={{ maxWidth: 880, margin: "0 auto", padding: "24px 24px 64px" }}>
+        <p style={{ color: colors.textMuted, fontSize: 14 }}>No se encontró el perfil.</p>
+      </div>
+    </AppLayout>
+  );
+
+  return (
+    <AppLayout>
+      <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 24px 64px" }}>
+
+        {/* Banner */}
+        <div style={{
+          height: 160, borderRadius: 24, marginBottom: 16,
+          background: perfil.profileBanner
+            ? `url(${perfil.profileBanner}) center/cover`
+            : `linear-gradient(135deg, ${colors.pinkLight}, #e0d4ff)`,
+          border: `1px solid ${colors.border}`,
+          position: "relative",
+        }}>
+          <button
+            onClick={() => navigate(-1)}
+            style={{ position: "absolute", top: 12, left: 12, background: "rgba(0,0,0,0.3)", border: "none", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}
+          >
+            <ArrowLeft size={18} />
+          </button>
+        </div>
+
+        {/* Header */}
+        <div style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 32, marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)", position: "relative", display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+
+          {/* Avatar */}
+          <div style={{ flexShrink: 0 }}>
+            {perfil.hasActiveStory ? (
+              <div onClick={handleOpenStory} style={{ cursor: "pointer", borderRadius: 24, overflow: "hidden", padding: 3, background: STORY_GRADIENT, display: "inline-block" }} title="Ver historia">
+                <div style={{ borderRadius: 20, overflow: "hidden", padding: 2, background: colors.surface, display: "flex" }}>
+                  {perfil.profilePicture ? (
+                    <img src={perfil.profilePicture} style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", display: "block" }} />
+                  ) : (
+                    <div style={{ width: 96, height: 96, borderRadius: 20, background: "#FF3D9E", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 36 }}>
+                      {perfil.fullName?.charAt(0)?.toUpperCase() || "?"}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : perfil.profilePicture ? (
+              <img src={perfil.profilePicture} style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", border: `2px solid ${colors.border}` }} />
+            ) : (
+              <div style={{ width: 96, height: 96, borderRadius: 20, background: "#FF3D9E", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 36 }}>
+                {perfil.fullName?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+            )}
+          </div>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1 style={{ margin: "0 0 4px 0", fontSize: 26, fontWeight: 700, color: colors.textDark, letterSpacing: "-0.02em" }}>
+              {perfil.fullName}
+            </h1>
+            {perfil.bio && <p style={{ margin: "0 0 12px 0", fontSize: 14, color: colors.textMuted, lineHeight: 1.5 }}>{perfil.bio}</p>}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {perfil.institution && <Chip colors={colors}>{perfil.institution}</Chip>}
+              {perfil.currentCampus && <Chip tone="lilac" colors={colors}>{perfil.currentCampus}</Chip>}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+            {connectionStatus === "connected" ? (
+              <button
+                onClick={() => navigate(`/chat?with=${perfil._id}`)}
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 12, border: "none", background: "#FF3D9E", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 14 }}
+              >
+                <MessageCircle size={16} /> Mensaje
+              </button>
+            ) : connectionStatus === "pending" ? (
+              <button disabled style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 12, border: `1px solid ${colors.border}`, background: "transparent", color: colors.textMuted, fontWeight: 600, fontSize: 14, cursor: "default" }}>
+                <UserCheck size={16} /> Solicitud enviada
+              </button>
+            ) : (
+              <button
+                onClick={handleConnect}
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 12, border: "none", background: "#FF3D9E", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 14 }}
+              >
+                <UserPlus size={16} /> Conectar
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Intereses */}
+        {perfil.interests?.length > 0 && (
+          <div style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24, marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)" }}>
+            <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Intereses</p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {perfil.interests.map((i) => <Chip key={i} colors={colors}>{i}</Chip>)}
+            </div>
+          </div>
+        )}
+
+        {/* Académico */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14 }}>
+          {[
+            { label: "Carrera", value: perfil.career },
+            { label: "Facultad", value: perfil.faculty },
+            { label: "Semestre", value: perfil.semester },
+            { label: "Ciudad", value: perfil.city },
+          ].filter((f) => f.value).map((f) => (
+            <div key={f.label} style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 20, padding: "16px 20px", boxShadow: "0 1px 10px rgba(0,0,0,0.05)" }}>
+              <p style={{ margin: "0 0 4px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{f.label}</p>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: colors.textDark }}>{f.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <StoryViewer
+        open={viewerOpen}
+        onClose={closeViewer}
+        storiesFeed={storiesFeed}
+        ownStories={[]}
+        activeAuthorIndex={activeAuthorIndex}
+        activeStoryIndex={activeStoryIndex}
+        setActiveAuthorIndex={setActiveAuthorIndex}
+        setActiveStoryIndex={setActiveStoryIndex}
+        onView={handleView}
+        onDelete={handleDelete}
+      />
+    </AppLayout>
+  );
+}

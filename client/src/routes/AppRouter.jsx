@@ -8,6 +8,7 @@ import SavedPage      from "../pages/SavedPage";
 import ChatPage       from "../pages/ChatPage";
 import ConnectionsPage from "../pages/ConnectionsPage";
 import PendingConnectionsPage from "../pages/PendingConnectionsPage";
+import PublicProfilePage from "../pages/PublicProfilePage";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword  from "../pages/ResetPassword";
 import AuthCallback   from "../pages/AuthCallback";
@@ -73,6 +74,15 @@ function AppRouter() {
           element={
             <ProtectedRoute>
               <ChatPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users/:id"
+          element={
+            <ProtectedRoute>
+              <PublicProfilePage />
             </ProtectedRoute>
           }
         />
