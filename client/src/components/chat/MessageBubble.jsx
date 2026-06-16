@@ -11,6 +11,7 @@ export default function MessageBubble({
   onEditStart, onEditSave, onEditCancel,
   isConfirmingDelete, onDeleteRequest, onDeleteConfirm, onDeleteCancel,
   onReply, onForwardOpen, onTogglePin, onToggleStar, onDeleteForMe,
+  onAvatarClick,
 }) {
   const [hovered, setHovered] = useState(false);
   const textareaRef = useRef(null);
@@ -68,7 +69,21 @@ export default function MessageBubble({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {!isOwn && <Avatar name={otherParticipant?.name} src={otherParticipant?.avatar} size={32} colors={colors} />}
+      {!isOwn && (
+        <div
+          onClick={() => onAvatarClick?.(message.sender._id)}
+          style={{
+            cursor: onAvatarClick ? "pointer" : "default",
+            flexShrink: 0, alignSelf: "flex-end",
+            transition: "opacity 150ms",
+          }}
+          onMouseEnter={(e) => { if (onAvatarClick) e.currentTarget.style.opacity = "0.8"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+          title={otherParticipant?.name}
+        >
+          <Avatar name={otherParticipant?.name} src={otherParticipant?.avatar} size={32} colors={colors} />
+        </div>
+      )}
 
       <div style={{ maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: isOwn ? "flex-end" : "flex-start", position: "relative" }}>
         {/* Menú de acciones */}

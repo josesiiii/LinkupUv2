@@ -1,7 +1,8 @@
 // src/pages/PublicProfilePage.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MessageCircle, UserPlus, UserCheck, ArrowLeft } from "lucide-react";
+import { MessageCircle, UserPlus, UserCheck, ArrowLeft, Users, UserCheck2, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import AppLayout from "../components/layout/AppLayout";
 import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
@@ -29,6 +30,8 @@ export default function PublicProfilePage() {
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState(null);
+  const [socialInfo, setSocialInfo] = useState({ totalConnections: 0, mutualFriends: [] });
+  const [mutualModal, setMutualModal] = useState(false);
 
   const {
     viewerOpen, activeAuthorIndex, activeStoryIndex,
@@ -47,14 +50,16 @@ export default function PublicProfilePage() {
     Promise.all([
       api.get(`/users/${id}`),
       api.get("/connections/accepted").catch(() => ({ data: [] })),
+      api.get(`/connections/social-info/${id}`).catch(() => ({ data: { totalConnections: 0, mutualFriends: [] } })),
     ])
-      .then(([userRes, connRes]) => {
+      .then(([userRes, connRes, socialRes]) => {
         setPerfil(userRes.data);
         const accepted = (connRes.data || []).some((c) => {
           const other = c.from?._id === usuario?._id ? c.to : c.from;
           return other?._id === id;
         });
         setConnectionStatus(accepted ? "connected" : "none");
+        setSocialInfo(socialRes.data || { totalConnections: 0, mutualFriends: [] });
       })
       .catch(() => setPerfil(null))
       .finally(() => setLoading(false));
@@ -181,6 +186,28 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
+        {/* Info Social */}
+        <div style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 20, padding: "14px 24px", marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Users size={16} style={{ color: colors.textMuted }} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: colors.textDark }}>{socialInfo.totalConnections}</span>
+            <span style={{ fontSize: 14, color: colors.textMuted }}>conexiones</span>
+          </div>
+          {socialInfo.mutualFriends.length > 0 && (
+            <>
+              <span style={{ color: colors.border }}>·</span>
+              <button
+                onClick={() => setMutualModal(true)}
+                style={{ display: "flex", alignItems: "center", gap: 8, border: "none", background: "transparent", cursor: "pointer", padding: 0 }}
+              >
+                <UserCheck2 size={16} style={{ color: colors.pink }} />
+                <span style={{ fontSize: 14, fontWeight: 600, color: colors.pink }}>{socialInfo.mutualFriends.length}</span>
+                <span style={{ fontSize: 14, color: colors.textMuted }}>amigos en común</span>
+              </button>
+            </>
+          )}
+        </div>
+
         {/* Intereses */}
         {perfil.interests?.length > 0 && (
           <div style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24, marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)" }}>
@@ -219,6 +246,58 @@ export default function PublicProfilePage() {
         onView={handleView}
         onDelete={handleDelete}
       />
+
+      {/* Modal amigos en común */}
+      <AnimatePresence>
+        {mutualModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMutualModal(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.97 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 28, width: "100%", maxWidth: 400, maxHeight: "80vh", overflowY: "auto" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: colors.textDark }}>Amigos en común</h3>
+                <button onClick={() => setMutualModal(false)} style={{ border: "none", background: "transparent", cursor: "pointer", color: colors.textMuted, display: "flex" }}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {socialInfo.mutualFriends.map((amigo) => (
+                  <button
+                    key={amigo._id}
+                    onClick={() => { setMutualModal(false); navigate(`/users/${amigo._id}`); }}
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 14, border: `1px solid ${colors.border}`, background: "transparent", cursor: "pointer", textAlign: "left", transition: "all 150ms" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = colors.pink; e.currentTarget.style.background = colors.pinkLight; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = colors.border; e.currentTarget.style.background = "transparent"; }}
+                  >
+                    {amigo.profilePicture ? (
+                      <img src={amigo.profilePicture} alt={amigo.fullName} style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: 40, height: 40, borderRadius: "50%", background: colors.pinkLight, display: "flex", alignItems: "center", justifyContent: "center", color: colors.pink, fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
+                        {(amigo.fullName || "U").charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: colors.textDark }}>{amigo.fullName}</p>
+                      {amigo.career && <p style={{ margin: "2px 0 0 0", fontSize: 12, color: colors.textMuted }}>{amigo.career}</p>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AppLayout>
   );
 }

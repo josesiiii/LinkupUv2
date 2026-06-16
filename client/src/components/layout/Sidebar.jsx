@@ -1,5 +1,5 @@
 // src/components/layout/Sidebar.jsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -25,9 +25,16 @@ const MOBILE_ITEMS = [
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const closeMenuRef = useRef(null);
   const location = useLocation();
   const usuario = useAuthStore((state) => state.usuario);
   const { colors } = useTheme();
+
+  useEffect(() => {
+    if (!isExpanded && closeMenuRef.current) {
+      closeMenuRef.current();
+    }
+  }, [isExpanded]);
 
   const isActive = (path) => location.pathname === path;
 
@@ -111,8 +118,14 @@ export default function Sidebar() {
         <div className="relative py-3 px-3" style={{ borderTop: `1px solid ${colors.border}` }}>
           <AccountSwitcher
             includeExtras
+            isExpanded={isExpanded}
+            onCollapseRef={closeMenuRef}
             align="left"
-            panelStyle={{ position: "absolute", bottom: "100%", left: 12, right: 12, marginBottom: 8, width: "auto" }}
+            panelStyle={
+              isExpanded
+                ? { position: "absolute", bottom: "100%", left: 12, right: 12, marginBottom: 8, width: "auto" }
+                : { position: "absolute", bottom: "100%", left: 0, marginBottom: 8, minWidth: 220 }
+            }
             trigger={({ open, toggle }) => (
               <button
                 onClick={toggle}

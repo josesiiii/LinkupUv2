@@ -1,23 +1,25 @@
 // src/components/layout/AccountSwitcher.jsx
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserCircle, LogOut, Sun, Moon, Plus, Check } from "lucide-react";
 import Dropdown from "../ui/Dropdown";
 import useAuthStore from "../../store/authStore";
 import { useTheme } from "../../context/ThemeContext";
 
-/**
- * Dropdown de cuentas, reutilizable en Sidebar y ChatLayout.
- * - trigger: render-prop pasado directo a Dropdown
- * - includeExtras: si true, agrega "Mi Perfil", tema y "Cerrar sesión" (uso en Sidebar)
- * - panelStyle / align: posicionamiento del panel
- */
-export default function AccountSwitcher({ trigger, includeExtras = false, panelStyle, align = "left" }) {
+export default function AccountSwitcher({ trigger, includeExtras = false, panelStyle, align = "left", isExpanded = true, onCollapseRef }) {
   const navigate = useNavigate();
   const usuario = useAuthStore((state) => state.usuario);
   const accounts = useAuthStore((state) => state.accounts);
   const switchAccount = useAuthStore((state) => state.switchAccount);
   const removeAccount = useAuthStore((state) => state.removeAccount);
   const { theme, toggleTheme, colors } = useTheme();
+  const closeFnRef = useRef(null);
+
+  useEffect(() => {
+    if (onCollapseRef) {
+      onCollapseRef.current = () => closeFnRef.current?.();
+    }
+  }, [onCollapseRef]);
 
   const handleSwitchAccount = (userId) => {
     if (userId === usuario?._id) return;
@@ -38,6 +40,7 @@ export default function AccountSwitcher({ trigger, includeExtras = false, panelS
           onClick={() => { handleSwitchAccount(acc.usuario._id); close(); }}
           className="flex items-center gap-3 px-3 py-2.5 text-sm w-full text-left"
           style={{ color: colors.textDark, background: "transparent", border: "none", cursor: "pointer" }}
+          title={!isExpanded ? acc.usuario.fullName : undefined}
         >
           {acc.usuario.profilePicture ? (
             <img src={acc.usuario.profilePicture} alt={acc.usuario.fullName} className="h-7 w-7 rounded-full object-cover flex-shrink-0" />
@@ -46,8 +49,11 @@ export default function AccountSwitcher({ trigger, includeExtras = false, panelS
               {(acc.usuario.fullName || "U").charAt(0).toUpperCase()}
             </div>
           )}
-          <span className="flex-1 truncate">{acc.usuario.fullName}</span>
-          {acc.usuario._id === usuario?._id && <Check className="h-4 w-4 flex-shrink-0" style={{ color: colors.pink }} />}
+          {isExpanded && <span className="flex-1 truncate">{acc.usuario.fullName}</span>}
+          {isExpanded && acc.usuario._id === usuario?._id && <Check className="h-4 w-4 flex-shrink-0" style={{ color: colors.pink }} />}
+          {!isExpanded && acc.usuario._id === usuario?._id && (
+            <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: colors.pink }} />
+          )}
         </button>
       ),
     })),
@@ -70,5 +76,15 @@ export default function AccountSwitcher({ trigger, includeExtras = false, panelS
       : []),
   ];
 
-  return <Dropdown align={align} items={items} trigger={trigger} panelStyle={panelStyle} />;
+  return (
+    <Dropdown
+      align={align}
+      items={items}
+      panelStyle={panelStyle}
+      trigger={(renderProps) => {
+        closeFnRef.current = renderProps.close;
+        return trigger(renderProps);
+      }}
+    />
+  );
 }

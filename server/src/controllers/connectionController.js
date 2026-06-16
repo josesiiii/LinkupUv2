@@ -76,8 +76,8 @@ export const obtenerPendientes = async (req, res) => {
       to: usuarioId,
       status: "pending"
     })
-      .populate("from", "fullName email")
-      .populate("to", "fullName email");
+      .populate("from", "fullName email profilePicture career")
+      .populate("to", "fullName email profilePicture career");
 
     res.status(200).json(solicitudes);
 
@@ -160,5 +160,111 @@ export const misContactos = async (req, res) => {
     res.status(500).json({
       message: error.message
     });
+  }
+};
+
+export const obtenerArchivadas = async (req, res) => {
+  try {
+    const usuarioId = req.usuario._id;
+
+    const solicitudes = await Connection.find({
+      to: usuarioId,
+      status: "archived"
+    })
+      .populate("from", "fullName email profilePicture career")
+      .populate("to", "fullName email profilePicture career");
+
+    res.status(200).json(solicitudes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const archivarConexion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuarioId = req.usuario._id;
+
+    const conexion = await Connection.findById(id);
+
+    if (!conexion) {
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+    }
+
+    if (conexion.to.toString() !== usuarioId.toString()) {
+      return res.status(403).json({ message: "No autorizado" });
+    }
+
+    if (conexion.status !== "pending") {
+      return res.status(400).json({ message: "Solo se pueden archivar solicitudes pendientes" });
+    }
+
+    conexion.status = "archived";
+    await conexion.save();
+
+    res.status(200).json({ message: "Solicitud archivada", conexion });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const restaurarConexion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuarioId = req.usuario._id;
+
+    const conexion = await Connection.findById(id);
+
+    if (!conexion) {
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+    }
+
+    if (conexion.to.toString() !== usuarioId.toString()) {
+      return res.status(403).json({ message: "No autorizado" });
+    }
+
+    if (conexion.status !== "archived") {
+      return res.status(400).json({ message: "Solo se pueden restaurar solicitudes archivadas" });
+    }
+
+    conexion.status = "pending";
+    await conexion.save();
+
+    res.status(200).json({ message: "Solicitud restaurada", conexion });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const socialInfo = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const myId = req.usuario._id;
+
+    const [totalConnections, myConns, theirConns] = await Promise.all([
+      Connection.countDocuments({
+        status: "accepted",
+        $or: [{ from: userId }, { to: userId }]
+      }),
+      Connection.find({ status: "accepted", $or: [{ from: myId }, { to: myId }] }),
+      Connection.find({ status: "accepted", $or: [{ from: userId }, { to: userId }] }),
+    ]);
+
+    const myFriendIds = myConns.map((c) =>
+      c.from.toString() === myId.toString() ? c.to.toString() : c.from.toString()
+    );
+
+    const theirFriendIds = theirConns.map((c) =>
+      c.from.toString() === userId ? c.to.toString() : c.from.toString()
+    );
+
+    const mutualIds = myFriendIds.filter((id) => theirFriendIds.includes(id));
+
+    const mutualFriends = await User.find({ _id: { $in: mutualIds } })
+      .select("fullName profilePicture career");
+
+    res.status(200).json({ totalConnections, mutualFriends });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

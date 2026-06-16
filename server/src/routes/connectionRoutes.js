@@ -1,5 +1,4 @@
 import express from "express";
-    
 
 import {
   enviarConexion,
@@ -7,7 +6,11 @@ import {
   obtenerPendientes,
   obtenerAceptadas,
   rechazarConexion,
-  misContactos
+  misContactos,
+  obtenerArchivadas,
+  archivarConexion,
+  restaurarConexion,
+  socialInfo,
 } from "../controllers/connectionController.js";
 import protegerRuta from "../middleware/authMiddleware.js";
 
@@ -15,14 +18,15 @@ const router = express.Router();
 
 router.post("/", protegerRuta, enviarConexion);
 
-router.put("/:id/accept", protegerRuta, aceptarConexion);
-
 router.get("/pending", protegerRuta, obtenerPendientes);
-
 router.get("/accepted", protegerRuta, obtenerAceptadas);
-
-router.put("/:id/reject", protegerRuta, rechazarConexion);
-
+router.get("/archived", protegerRuta, obtenerArchivadas);
 router.get("/contacts", protegerRuta, misContactos);
+router.get("/social-info/:userId", protegerRuta, socialInfo);
+
+router.put("/:id/accept", protegerRuta, aceptarConexion);
+router.put("/:id/reject", protegerRuta, rechazarConexion);
+router.put("/:id/archive", protegerRuta, archivarConexion);
+router.put("/:id/restore", protegerRuta, restaurarConexion);
 
 export default router;

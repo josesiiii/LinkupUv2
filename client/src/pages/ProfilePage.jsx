@@ -1,6 +1,7 @@
 // src/pages/ProfilePage.jsx
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Pencil, Camera } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
 import AvatarEditButton from "../components/profile/AvatarEditButton";
 import EditProfileModal from "../components/profile/EditProfileModal";
@@ -11,6 +12,9 @@ import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 import useStories from "../hooks/useStories";
 import api from "../api/axios";
+
+const otherPerson = (conn, myId) =>
+  conn.from?._id === myId ? conn.to : conn.from;
 
 const Chip = ({ children, tone = "pink", colors }) => (
   <span
@@ -44,12 +48,25 @@ const InfoCard = ({ label, value, theme, colors }) => (
 const GRADIENT = "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)";
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const usuario = useAuthStore((state) => state.usuario);
   const updateUsuario = useAuthStore((state) => state.updateUsuario);
   const { theme, colors } = useTheme();
   const [editOpen, setEditOpen] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
   const bannerInputRef = useRef(null);
+  const [amigos, setAmigos] = useState([]);
+  const [loadingAmigos, setLoadingAmigos] = useState(true);
+
+  useEffect(() => {
+    api.get("/connections/accepted")
+      .then((res) => {
+        const lista = (res.data || []).map((c) => otherPerson(c, usuario?._id)).filter(Boolean);
+        setAmigos(lista);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingAmigos(false));
+  }, [usuario?._id]);
 
   const handleBannerChange = async (e) => {
     const file = e.target.files?.[0];
@@ -258,12 +275,72 @@ export default function ProfilePage() {
         <div
           style={{
             ...cardStyle,
-            border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24,
+            border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24, marginBottom: 24,
             boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
           }}
         >
           <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Galería</p>
           <GalleryEditor />
+        </div>
+
+        {/* Amigos */}
+        <div
+          style={{
+            ...cardStyle,
+            border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24,
+            boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Amigos</p>
+            {!loadingAmigos && (
+              <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: colors.pinkLight, color: colors.pink }}>
+                {amigos.length}
+              </span>
+            )}
+          </div>
+
+          {loadingAmigos ? (
+            <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>Cargando...</p>
+          ) : amigos.length === 0 ? (
+            <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>Aún no tienes conexiones.</p>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12 }}>
+              {amigos.map((amigo) => (
+                <button
+                  key={amigo._id}
+                  onClick={() => navigate(`/users/${amigo._id}`)}
+                  style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+                    padding: "14px 10px", borderRadius: 16,
+                    border: `1px solid ${colors.border}`,
+                    background: theme === "dark" ? colors.surfaceAlt : "rgba(255,255,255,0.6)",
+                    cursor: "pointer", transition: "all 150ms", textAlign: "center",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = colors.pink; e.currentTarget.style.background = colors.pinkLight; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = colors.border; e.currentTarget.style.background = theme === "dark" ? colors.surfaceAlt : "rgba(255,255,255,0.6)"; }}
+                >
+                  {amigo.profilePicture ? (
+                    <img src={amigo.profilePicture} alt={amigo.fullName} style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: colors.pinkLight, display: "flex", alignItems: "center", justifyContent: "center", color: colors.pink, fontWeight: 700, fontSize: 18 }}>
+                      {(amigo.fullName || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div style={{ minWidth: 0, width: "100%" }}>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: colors.textDark, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {amigo.fullName}
+                    </p>
+                    {amigo.career && (
+                      <p style={{ margin: "2px 0 0 0", fontSize: 11, color: colors.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {amigo.career}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

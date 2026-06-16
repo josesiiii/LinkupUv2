@@ -318,7 +318,7 @@ export default function ChatLayout() {
                 onMarkRead={handleMarkRead}
                 onDelete={handleDeleteConversation}
                 onBlock={handleBlockUser}
-                onViewProfile={(persona) => setProfileModalUser(persona)}
+                onViewProfile={(persona) => navigate(`/users/${persona._id}`)}
               />
             );
           })}
@@ -347,19 +347,23 @@ export default function ChatLayout() {
               >
                 <ArrowLeft size={20} />
               </button>
-              <Avatar
-                name={otherParticipant?.name}
-                src={otherParticipant?.avatar}
-                size={40}
-                colors={colors}
-                online={!!presence[otherParticipant?._id]?.online}
-                showStatus={!!otherParticipant?._id}
-                hasStory={!!otherParticipant?.hasActiveStory}
-                onStoryClick={otherParticipant?._id ? () => setProfileModalUser(otherParticipant) : undefined}
-              />
+              <div
+                style={{ cursor: otherParticipant?._id ? "pointer" : "default", lineHeight: 0 }}
+                onClick={otherParticipant?._id ? () => navigate(`/users/${otherParticipant._id}`) : undefined}
+              >
+                <Avatar
+                  name={otherParticipant?.name}
+                  src={otherParticipant?.avatar}
+                  size={40}
+                  colors={colors}
+                  online={!!presence[otherParticipant?._id]?.online}
+                  showStatus={!!otherParticipant?._id}
+                  hasStory={!!otherParticipant?.hasActiveStory}
+                />
+              </div>
               <div
                 style={{ cursor: otherParticipant?._id ? "pointer" : "default" }}
-                onClick={otherParticipant?._id ? () => setProfileModalUser(otherParticipant) : undefined}
+                onClick={otherParticipant?._id ? () => navigate(`/users/${otherParticipant._id}`) : undefined}
               >
                 <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: colors.textDark }}>
                   {otherParticipant?.name || "Usuario"}
@@ -417,6 +421,7 @@ export default function ChatLayout() {
                   onTogglePin={handleTogglePin}
                   onToggleStar={handleToggleStar}
                   onDeleteForMe={handleDeleteForMe}
+                  onAvatarClick={(userId) => navigate(`/users/${userId}`)}
                 />
               ))}
               <TypingIndicator isTyping={isTyping} userName={typingUserName} colors={colors} />

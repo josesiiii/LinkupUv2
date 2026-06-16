@@ -63,7 +63,14 @@ export default function ConversationItem({
       onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = colors.surfaceAlt; }}
       onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
     >
-      <Avatar name={persona?.name} src={persona?.avatar} size={46} colors={colors} online={online} showStatus hasStory={!!persona?.hasActiveStory} />
+      <div
+        onClick={(e) => { e.stopPropagation(); onViewProfile?.(persona); }}
+        style={{ cursor: "pointer", flexShrink: 0, borderRadius: "50%", transition: "opacity 150ms" }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.8"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+      >
+        <Avatar name={persona?.name} src={persona?.avatar} size={46} colors={colors} online={online} showStatus hasStory={!!persona?.hasActiveStory} />
+      </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
