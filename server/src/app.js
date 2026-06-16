@@ -14,14 +14,15 @@ import adminRoutes        from "./routes/adminRoutes.js";
 import connectionRoutes   from "./routes/connectionRoutes.js";
 import institutionRoutes from "./routes/institutionRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
-import passportConfig     from "./config/passport.js";
+import passportConfig, { initPassport } from "./config/passport.js";
 
 
 dotenv.config();
 
 const app = express();
 
-// Passport (debe estar antes de las rutas)
+// Inicializar estrategia de Google DESPUÉS de que dotenv.config() haya corrido
+initPassport();
 app.use(passportConfig.initialize());
 
 // ── SEGURIDAD ─────────────────────────────────
