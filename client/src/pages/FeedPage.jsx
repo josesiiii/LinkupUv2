@@ -10,36 +10,34 @@ import StoriesRow from "../features/feed/StoriesRow";
 import FeedFilterBar from "../features/feed/FeedFilterBar";
 import { useTheme } from "../context/ThemeContext";
 
-const FILTERS_KEY = "feedFilters";
+const FILTERS_KEY = "feedFiltersV2";
 
-function loadFilters() {
+function loadMyUniversity() {
   try {
     const raw = localStorage.getItem(FILTERS_KEY);
-    if (!raw) return { campus: "", faculty: "" };
-    const parsed = JSON.parse(raw);
-    return { campus: parsed.campus || "", faculty: parsed.faculty || "" };
+    return raw ? JSON.parse(raw) : false;
   } catch {
-    return { campus: "", faculty: "" };
+    return false;
   }
 }
 
 export default function FeedPage() {
   const { colors } = useTheme();
   const usuario = useAuthStore((state) => state.usuario);
-  const [filters, setFilters] = useState(loadFilters);
+  const [myUniversity, setMyUniversity] = useState(loadMyUniversity);
 
   const {
     usuarios, loading, error,
     connectingIds, connectedIds,
     savingIds, savedIds,
-    handleConectar, handleGuardar,
-  } = useFeed(filters);
+    handleConectar, handleGuardar, handleDesguardar,
+  } = useFeed({ myUniversity });
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const updateFilters = (next) => {
-    setFilters(next);
-    localStorage.setItem(FILTERS_KEY, JSON.stringify(next));
+  const handleFilterChange = (val) => {
+    setMyUniversity(val);
+    localStorage.setItem(FILTERS_KEY, JSON.stringify(val));
     setActiveIndex(0);
   };
 
@@ -89,10 +87,8 @@ export default function FeedPage() {
 
         {!loading && !error && (
           <FeedFilterBar
-            campus={filters.campus}
-            faculty={filters.faculty}
-            onCampusChange={(campus) => updateFilters({ ...filters, campus })}
-            onFacultyChange={(faculty) => updateFilters({ ...filters, faculty })}
+            myUniversity={myUniversity}
+            onChange={handleFilterChange}
           />
         )}
 
@@ -220,6 +216,7 @@ export default function FeedPage() {
                         savedIds={savedIds}
                         onConectar={handleConectar}
                         onGuardar={handleGuardar}
+                        onDesguardar={handleDesguardar}
                         fullscreen
                       />
                     </motion.div>

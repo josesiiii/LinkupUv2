@@ -398,7 +398,7 @@ export default function ChatLayout() {
             )}
 
             {/* Mensajes */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="chat-messages-scroll" style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
               {visibleMessages.map((message) => (
                 <MessageBubble
                   key={message._id}
@@ -486,6 +486,11 @@ export default function ChatLayout() {
           .chat-sidebar { width: 100% !important; }
           .chat-back-btn { display: inline-flex !important; }
         }
+        .chat-messages-scroll::-webkit-scrollbar { width: 4px; }
+        .chat-messages-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 4px; }
+        .chat-messages-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.22); }
+        .chat-messages-scroll { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.12) transparent; }
       `}</style>
     </div>
   );

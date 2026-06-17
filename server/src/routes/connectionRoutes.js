@@ -10,6 +10,7 @@ import {
   obtenerArchivadas,
   archivarConexion,
   restaurarConexion,
+  eliminarConexion,
   socialInfo,
 } from "../controllers/connectionController.js";
 import protegerRuta from "../middleware/authMiddleware.js";
@@ -28,5 +29,6 @@ router.put("/:id/accept", protegerRuta, aceptarConexion);
 router.put("/:id/reject", protegerRuta, rechazarConexion);
 router.put("/:id/archive", protegerRuta, archivarConexion);
 router.put("/:id/restore", protegerRuta, restaurarConexion);
+router.delete("/:id", protegerRuta, eliminarConexion);
 
 export default router;

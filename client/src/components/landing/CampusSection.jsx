@@ -1,21 +1,29 @@
 // src/components/landing/CampusSection.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const CAMPUSES = [
-  { id: 'itm-bello',       label: 'Campus Bello',        institution: 'Instituto Tecnológico Metropolitano', city: 'Medellín, Colombia',    emoji: '🏛️', students: '4.2k' },
-  { id: 'itm-robledo',     label: 'Campus Robledo',      institution: 'Instituto Tecnológico Metropolitano', city: 'Medellín, Colombia',    emoji: '⚗️', students: '3.8k' },
-  { id: 'unal-medellin',   label: 'Sede Medellín',       institution: 'Universidad Nacional de Colombia',    city: 'Medellín, Colombia',    emoji: '🎓', students: '15k' },
-  { id: 'unal-bogota',     label: 'Sede Bogotá',         institution: 'Universidad Nacional de Colombia',    city: 'Bogotá, Colombia',      emoji: '🏙️', students: '24k' },
-  { id: 'udea',            label: 'Ciudad Universitaria',institution: 'Universidad de Antioquia',            city: 'Medellín, Colombia',    emoji: '🌿', students: '38k' },
-  { id: 'eafit',           label: 'Campus EAFIT',        institution: 'Universidad EAFIT',                   city: 'Medellín, Colombia',    emoji: '💡', students: '12k' },
-  { id: 'javeriana',       label: 'Sede Central',        institution: 'Pontificia Universidad Javeriana',    city: 'Bogotá, Colombia',      emoji: '⚖️', students: '20k' },
-  { id: 'los-andes',       label: 'Campus Norte',        institution: 'Universidad de los Andes',            city: 'Bogotá, Colombia',      emoji: '🔬', students: '18k' },
+  { id: 'itm-bello',     label: 'Campus Bello',         institution: 'Instituto Tecnológico Metropolitano', city: 'Medellín, Colombia',  emoji: '🏛️' },
+  { id: 'itm-robledo',   label: 'Campus Robledo',       institution: 'Instituto Tecnológico Metropolitano', city: 'Medellín, Colombia',  emoji: '⚗️' },
+  { id: 'unal-medellin', label: 'Sede Medellín',        institution: 'Universidad Nacional de Colombia',    city: 'Medellín, Colombia',  emoji: '🎓' },
+  { id: 'unal-bogota',   label: 'Sede Bogotá',          institution: 'Universidad Nacional de Colombia',    city: 'Bogotá, Colombia',    emoji: '🏙️' },
+  { id: 'udea',          label: 'Ciudad Universitaria', institution: 'Universidad de Antioquia',            city: 'Medellín, Colombia',  emoji: '🌿' },
+  { id: 'eafit',         label: 'Campus EAFIT',         institution: 'Universidad EAFIT',                   city: 'Medellín, Colombia',  emoji: '💡' },
+  { id: 'javeriana',     label: 'Sede Central',         institution: 'Pontificia Universidad Javeriana',    city: 'Bogotá, Colombia',    emoji: '⚖️' },
+  { id: 'los-andes',     label: 'Campus Norte',         institution: 'Universidad de los Andes',            city: 'Bogotá, Colombia',    emoji: '🔬' },
 ];
 
 export default function CampusSection() {
   const [selected, setSelected] = useState(null);
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(null);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/users/stats`)
+      .then((r) => r.json())
+      .then(setStats)
+      .catch(() => {});
+  }, []);
 
   const choose = (c) => {
     setSelected(c);
@@ -86,11 +94,32 @@ export default function CampusSection() {
           color: '#786b7d',
           textAlign: 'center',
           fontSize: '1.05rem',
-          marginBottom: 48,
+          marginBottom: stats ? 24 : 48,
           lineHeight: 1.7,
         }}>
-          Selecciona tu campus y conecta con miles de estudiantes que comparten tu espacio, tu institución y tus objetivos.
+          Selecciona tu campus y conecta con estudiantes que comparten tu espacio, tu institución y tus objetivos.
         </p>
+
+        {/* Stats reales de la plataforma */}
+        {stats && (
+          <div style={{
+            display: 'flex', justifyContent: 'center', gap: 32,
+            marginBottom: 40, flexWrap: 'wrap',
+          }}>
+            {[
+              { value: stats.usuarios,      label: 'usuarios activos' },
+              { value: stats.instituciones, label: 'universidades' },
+              { value: stats.conexiones,    label: 'conexiones' },
+            ].map(({ value, label }) => (
+              <div key={label} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 800, color: '#f1adc2', letterSpacing: '-0.03em', fontFamily: "'Syne', sans-serif" }}>
+                  {value.toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#786b7d', fontWeight: 500 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Dropdown */}
         <div style={{ position: 'relative' }}>
@@ -182,17 +211,6 @@ export default function CampusSection() {
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div style={{ fontSize: '0.75rem', color: '#786b7d' }}>{c.city}</div>
-                    <div style={{
-                      fontSize: '0.72rem',
-                      color: '#f1adc2',
-                      fontWeight: 600,
-                      background: 'rgba(241,173,194,0.15)',
-                      padding: '2px 8px',
-                      borderRadius: 100,
-                      marginTop: 2,
-                    }}>
-                      {c.students} estudiantes
-                    </div>
                   </div>
                 </button>
               ))}
@@ -218,7 +236,7 @@ export default function CampusSection() {
             <div>
               <p style={{ fontSize: '0.85rem', color: '#786b7d', margin: 0 }}>Explorando</p>
               <p style={{ fontSize: '1rem', fontWeight: 600, color: '#3c2f41', margin: '2px 0 0' }}>
-                {selected.label} · {selected.students} estudiantes
+                {selected.label} · {selected.institution}
               </p>
             </div>
             <button

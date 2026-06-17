@@ -15,12 +15,16 @@ import {
   uploadProfileBanner,
   deleteProfileBanner,
   bloquearUsuario,
-  desbloquearUsuario
+  desbloquearUsuario,
+  estadisticasPublicas,
 } from "../controllers/userController.js";
 import protegerRuta from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
+
+// ── Público (sin auth) ─────────────────────
+router.get("/stats", estadisticasPublicas);
 
 // ── Usuarios ───────────────────────────────
 router.get("/feed",    protegerRuta, feedUsuarios);

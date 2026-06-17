@@ -9,19 +9,30 @@ import Logo from "../ui/Logo";
 import AccountSwitcher from "./AccountSwitcher";
 import useAuthStore from "../../store/authStore";
 import { useTheme } from "../../context/ThemeContext";
+import api from "../../api/axios";
 
-const NAV_ITEMS = [
-  { icon: Home,          label: "Inicio",      path: "/feed" },
-  { icon: MessageCircle, label: "Mensajes",    path: "/chat" },
-  { icon: Bookmark,      label: "Guardados",   path: "/saved" },
-  { icon: Users,         label: "Conexiones",  path: "/connections" },
-  { icon: Inbox,         label: "Solicitudes", path: "/connections/pending" },
-];
-
-const MOBILE_ITEMS = [
-  ...NAV_ITEMS,
-  { icon: UserCircle, label: "Perfil", path: "/profile" },
-];
+function Badge({ count }) {
+  if (!count || count < 1) return null;
+  return (
+    <span style={{
+      position: "absolute", top: 2, right: 2,
+      minWidth: 18, height: 18,
+      background: "linear-gradient(135deg, #FF3D9E 0%, #FF6FB5 100%)",
+      color: "#fff",
+      fontSize: 10, fontWeight: 800,
+      borderRadius: 999,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "0 4px",
+      border: "2px solid var(--badge-border, #fff)",
+      lineHeight: 1,
+      boxShadow: "0 1px 4px rgba(255,61,158,0.4)",
+      zIndex: 20,
+      animation: "badge-pop 0.2s cubic-bezier(0.34,1.56,0.64,1)",
+    }}>
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -30,6 +41,39 @@ export default function Sidebar() {
   const usuario = useAuthStore((state) => state.usuario);
   const { colors } = useTheme();
 
+  const [pendingCount, setPendingCount]   = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  // Fetch badges
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchBadges = async () => {
+      try {
+        const [pendingRes, convsRes] = await Promise.all([
+          api.get("/connections/pending"),
+          api.get("/conversations"),
+        ]);
+        if (cancelled) return;
+
+        setPendingCount((pendingRes.data || []).length);
+
+        const convs = convsRes.data || [];
+        const totalUnread = convs.reduce((acc, conv) => {
+          const isA = conv.participantA?._id?.toString() === usuario?._id?.toString();
+          return acc + (isA ? (conv.unreadCountA || 0) : (conv.unreadCountB || 0));
+        }, 0);
+        setUnreadMessages(totalUnread);
+      } catch {
+        // Silent — badges are non-critical
+      }
+    };
+
+    fetchBadges();
+    const interval = setInterval(fetchBadges, 60_000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [usuario?._id]);
+
   useEffect(() => {
     if (!isExpanded && closeMenuRef.current) {
       closeMenuRef.current();
@@ -37,6 +81,19 @@ export default function Sidebar() {
   }, [isExpanded]);
 
   const isActive = (path) => location.pathname === path;
+
+  const NAV_ITEMS = [
+    { icon: Home,          label: "Inicio",      path: "/feed",                badge: 0 },
+    { icon: MessageCircle, label: "Mensajes",    path: "/chat",                badge: unreadMessages },
+    { icon: Bookmark,      label: "Guardados",   path: "/saved",               badge: 0 },
+    { icon: Users,         label: "Conexiones",  path: "/connections",         badge: 0 },
+    { icon: Inbox,         label: "Solicitudes", path: "/connections/pending", badge: pendingCount },
+  ];
+
+  const MOBILE_ITEMS = [
+    ...NAV_ITEMS,
+    { icon: UserCircle, label: "Perfil", path: "/profile", badge: 0 },
+  ];
 
   const itemStyle = (active) => ({
     color: active ? colors.pink : colors.textMuted,
@@ -63,7 +120,11 @@ export default function Sidebar() {
         animate={{ width: isExpanded ? 280 : 80 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="hidden md:flex fixed left-0 top-0 z-50 h-screen flex-col overflow-hidden"
-        style={{ background: colors.surface, borderRight: `1px solid ${colors.border}` }}
+        style={{
+          background: colors.surface,
+          borderRight: `1px solid ${colors.border}`,
+          "--badge-border": colors.surface,
+        }}
       >
         {/* Logo */}
         <div
@@ -75,7 +136,7 @@ export default function Sidebar() {
 
         {/* Nav items */}
         <nav className="flex-1 flex flex-col gap-1 py-4 px-3 overflow-hidden">
-          {NAV_ITEMS.map(({ icon: Icon, label, path }) => {
+          {NAV_ITEMS.map(({ icon: Icon, label, path, badge }) => {
             const active = isActive(path);
             return (
               <Link
@@ -93,7 +154,10 @@ export default function Sidebar() {
                     transition={{ type: "spring", stiffness: 380, damping: 32 }}
                   />
                 )}
-                <Icon className="h-5 w-5 flex-shrink-0 relative z-10" />
+                <span className="relative flex-shrink-0 z-10">
+                  <Icon className="h-5 w-5" />
+                  {!isExpanded && <Badge count={badge} />}
+                </span>
                 <span
                   className={`text-sm whitespace-nowrap relative z-10 transition-opacity duration-300 ${
                     isExpanded ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
@@ -101,12 +165,28 @@ export default function Sidebar() {
                 >
                   {label}
                 </span>
+                {isExpanded && badge > 0 && (
+                  <span style={{
+                    marginLeft: "auto",
+                    minWidth: 20, height: 20,
+                    background: "linear-gradient(135deg, #FF3D9E 0%, #FF6FB5 100%)",
+                    color: "#fff",
+                    fontSize: 11, fontWeight: 800,
+                    borderRadius: 999,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: "0 6px",
+                    flexShrink: 0,
+                    zIndex: 10,
+                  }}>
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
                 {!isExpanded && (
                   <span
                     className="absolute left-full ml-2 px-2 py-1 text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50"
                     style={tooltipStyle}
                   >
-                    {label}
+                    {label}{badge > 0 ? ` (${badge})` : ""}
                   </span>
                 )}
               </Link>
@@ -114,7 +194,7 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Footer: avatar + nombre + dropdown de cuentas */}
+        {/* Footer */}
         <div className="relative py-3 px-3" style={{ borderTop: `1px solid ${colors.border}` }}>
           <AccountSwitcher
             includeExtras
@@ -169,9 +249,13 @@ export default function Sidebar() {
       {/* Mobile Bottom Nav */}
       <nav
         className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden h-16"
-        style={{ background: colors.surface, borderTop: `1px solid ${colors.border}` }}
+        style={{
+          background: colors.surface,
+          borderTop: `1px solid ${colors.border}`,
+          "--badge-border": colors.surface,
+        }}
       >
-        {MOBILE_ITEMS.map(({ icon: Icon, label, path }) => {
+        {MOBILE_ITEMS.map(({ icon: Icon, label, path, badge }) => {
           const active = isActive(path);
           return (
             <Link
@@ -180,12 +264,22 @@ export default function Sidebar() {
               className="flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{ color: active ? colors.pink : colors.textMuted }}
             >
-              <Icon className="h-5 w-5" />
+              <span className="relative">
+                <Icon className="h-5 w-5" />
+                <Badge count={badge} />
+              </span>
               <span className="text-[10px]">{label}</span>
             </Link>
           );
         })}
       </nav>
+
+      <style>{`
+        @keyframes badge-pop {
+          0%   { transform: scale(0.5); opacity: 0; }
+          100% { transform: scale(1);   opacity: 1; }
+        }
+      `}</style>
     </>
   );
 }

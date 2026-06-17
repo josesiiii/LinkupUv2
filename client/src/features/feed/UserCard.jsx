@@ -9,7 +9,7 @@ export default function UserCard({
   item, yo,
   connectingIds, connectedIds,
   savingIds, savedIds,
-  onConectar, onGuardar,
+  onConectar, onGuardar, onDesguardar,
   fullscreen = false,
 }) {
   const perfil = item.usuario || item;
@@ -211,11 +211,11 @@ export default function UserCard({
               : <><UserPlus size={15} /> Conectar</>}
           </button>
 
-          {/* Guardar */}
+          {/* Guardar / Quitar guardado */}
           <button
-            disabled={savingIds.includes(id) || savedIds.includes(id)}
-            onClick={() => onGuardar(id)}
-            className={savedIds.includes(id) ? "" : "hover:scale-105 active:scale-95"}
+            disabled={savingIds.includes(id)}
+            onClick={() => savedIds.includes(id) ? onDesguardar?.(id) : onGuardar(id)}
+            className="hover:scale-105 active:scale-95"
             style={{
               height: fullscreen ? 48 : 42,
               padding: "0 18px",
@@ -230,7 +230,7 @@ export default function UserCard({
               color: savedIds.includes(id) ? "#FF3D9E" : "rgba(255,255,255,0.85)",
               fontSize: fullscreen ? 14 : 13,
               fontWeight: 600,
-              cursor: savedIds.includes(id) ? "not-allowed" : "pointer",
+              cursor: savingIds.includes(id) ? "wait" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
               transition: "all 150ms",
               flexShrink: 0,

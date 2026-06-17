@@ -6,9 +6,6 @@ import SavedProfile from "../models/SavedProfile.js";
 export const guardarPerfil = async (req, res) => {
 
   try {
-  console.log("=== SAVED DEBUG ===");
-  console.log("Body:", req.body);
-  console.log("Usuario:", req.usuario);
     const { savedUser } = req.body;
 
     // Evitar guardarse a sí mismo

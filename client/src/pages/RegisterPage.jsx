@@ -327,9 +327,9 @@ export default function RegisterPage() {
             zIndex: 1,
           }}
         >
-          {/* Logo centrado */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginBottom: 24 }}>
-            <Logo size={44} showText textSize="1.3rem" textColor={COLORS.textDark} />
+          {/* Logo centrado — punto focal visual */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28 }}>
+            <Logo size={72} showText={false} />
           </div>
 
           {/* Progress bar */}
@@ -380,12 +380,14 @@ export default function RegisterPage() {
                   <label style={labelStyle}>Contraseña</label>
                   <div style={{ position: "relative" }}>
                     <input type={showPwd ? "text" : "password"} placeholder="Mínimo 8 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} style={{ ...inputBase, paddingRight: 48 }} onFocus={focusIn} onBlur={focusOut} />
-                    <button type="button" onClick={() => setShowPwd((v) => !v)}
-                      style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", padding: 0, transition: "color 150ms" }}
+                    <button type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => setShowPwd((v) => !v)}
+                      style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", padding: 4, transition: "color 150ms", zIndex: 2 }}
                       onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.pink)}
                       onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.textMuted)}
                     >
-                      {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                      {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>

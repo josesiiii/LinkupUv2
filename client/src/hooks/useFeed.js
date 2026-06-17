@@ -5,7 +5,7 @@ import useAuthStore from "../store/authStore";
 
 export default function useFeed(filters = {}) {
   const { token } = useAuthStore();
-  const { campus, faculty } = filters;
+  const { myUniversity } = filters;
 
   const [usuarios,      setUsuarios]      = useState([]);
   const [loading,       setLoading]       = useState(true);
@@ -22,8 +22,7 @@ export default function useFeed(filters = {}) {
         setLoading(true);
         setError("");
         const params = {};
-        if (campus) params.campus = campus;
-        if (faculty) params.faculty = faculty;
+        if (myUniversity) params.filter = "myUniversity";
         const res = await api.get("/users/feed", { params });
         const data = Array.isArray(res.data)
           ? res.data
@@ -40,7 +39,7 @@ export default function useFeed(filters = {}) {
       }
     };
     cargar();
-  }, [token, campus, faculty]);
+  }, [token, myUniversity]);
 
   const handleConectar = async (id) => {
     setConnectingIds(p => [...p, id]);
@@ -66,10 +65,22 @@ export default function useFeed(filters = {}) {
     }
   };
 
+  const handleDesguardar = async (id) => {
+    setSavingIds(p => [...p, id]);
+    try {
+      await api.delete(`/savedprofiles/${id}`);
+      setSavedIds(p => p.filter(x => x !== id));
+    } catch (err) {
+      alert(err.response?.data?.message || "No se pudo quitar el guardado");
+    } finally {
+      setSavingIds(p => p.filter(x => x !== id));
+    }
+  };
+
   return {
     usuarios, loading, error,
     connectingIds, connectedIds,
     savingIds, savedIds,
-    handleConectar, handleGuardar
+    handleConectar, handleGuardar, handleDesguardar,
   };
 }

@@ -30,7 +30,6 @@ export default function StoriesRow() {
 
   const handleOwnClick = () => {
     if (usuario?.hasActiveStory) {
-      // Ver propias stories del feed si las hay
       const ownIndex = storiesFeed.findIndex(
         (g) => g.author?._id === usuario?._id
       );
@@ -64,7 +63,7 @@ export default function StoriesRow() {
           }}
         >
           <div style={{ position: "relative", width: 64, height: 64 }}>
-            {/* Anillo si tiene story activa */}
+            {}
             {usuario?.hasActiveStory ? (
               <div style={{ width: 64, height: 64, borderRadius: "50%", background: GRADIENT, padding: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: colors.surface, padding: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>

@@ -176,9 +176,9 @@ export default function LoginPage() {
             zIndex: 1,
           }}
         >
-          {/* Logo centrado */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginBottom: 24 }}>
-            <Logo size={44} showText textSize="1.3rem" textColor={COLORS.textDark} />
+          {/* Logo centrado — punto focal visual */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28 }}>
+            <Logo size={72} showText={false} />
           </div>
 
           {/* Eyebrow + título */}
@@ -265,12 +265,13 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", padding: 0, transition: "color 150ms" }}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setShowPassword((v) => !v)}
+                  style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", padding: 4, transition: "color 150ms", zIndex: 2 }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.pink)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.textMuted)}
                 >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>

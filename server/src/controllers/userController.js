@@ -11,7 +11,7 @@ const STRICT_CAMPUS_FILTER = false;
 
 // ALGORITMO DE COMPATIBILIDAD CON BREAKDOWN
 // Pesos: intereses 35% + objetivos 25% + facultad 15% + semestre 10% + conexiones mutuas 15%
-const calcCompatibility = (userA, userB, sharedConnectionsCount = 0) => {
+const calcCompatibility = (userA, userB, sharedConnectionsCount = 0, ignoreInstitution = false) => {
   let score = 0;
   const breakdown = {
     interests: 0,
@@ -24,7 +24,7 @@ const calcCompatibility = (userA, userB, sharedConnectionsCount = 0) => {
     sharedConnectionsCount: 0
   };
 
-  if (userA.institution?.toString() !== userB.institution?.toString()) return { score: 0, breakdown };
+  if (!ignoreInstitution && userA.institution?.toString() !== userB.institution?.toString()) return { score: 0, breakdown };
 
   if (STRICT_CAMPUS_FILTER) {
     const campusA = userA.currentCampus || userA.campus;
@@ -130,15 +130,6 @@ export const feedUsuarios = async (req, res) => {
     const limit = Math.min(20, parseInt(req.query.limit) || 10);
     const skip = (page - 1) * limit;
 
-    // Debug: Log de información del usuario actual
-    console.log("🔍 FEED DEBUG:", {
-      usuarioId: yo._id,
-      nombre: yo.fullName,
-      miInstitucion,
-      miCampus,
-      intereses: yo.interests?.length || 0,
-      objetivos: yo.objectives?.length || 0
-    });
 
     // Obtener conexiones ya existentes (pending o accepted)
     const conexionesExistentes = await Connection.find({
@@ -155,8 +146,8 @@ export const feedUsuarios = async (req, res) => {
     });
 
     // Obtener perfiles guardados
-    const perfilesGuardados = await SavedProfile.find({ from: yo._id }).select("to");
-    const perfilesGuardadosSet = new Set(perfilesGuardados.map(p => p.to.toString()));
+    const perfilesGuardados = await SavedProfile.find({ user: yo._id }).select("savedUser");
+    const perfilesGuardadosSet = new Set(perfilesGuardados.map(p => p.savedUser.toString()));
 
     // Mis conexiones aceptadas (para calcular conexiones mutuas con cada candidato)
     const misConexionesAceptadas = await Connection.find({
@@ -171,61 +162,49 @@ export const feedUsuarios = async (req, res) => {
     });
     misConectadosSet.delete(yo._id.toString());
 
-    // Búsqueda más flexible - primero intenta con filtros estrictos, luego más relajados
-    let candidatos = await User.find({
-      _id:         { $ne: yo._id },
-      institution: miInstitucion,
-      $or: [
-        { currentCampus: miCampus },
-        { campus:        miCampus }
-      ],
-      isActive:  true
-    }).select("-password -__v");
+    const filterMode = req.query.filter || "myUniversity";
 
-    console.log("📊 Candidatos encontrados (sin filtro de intereses):", candidatos.length);
-
-    // Si no hay candidatos, busca más ampliamente (solo institución)
-    if (candidatos.length === 0) {
+    let candidatos;
+    if (filterMode === "all") {
+      // Modo "Todos": mostrar usuarios de cualquier institución
+      candidatos = await User.find({
+        _id: { $ne: yo._id },
+        isActive: true
+      }).select("-password -__v");
+    } else {
+      // Modo "Mi Universidad": búsqueda por institución con fallback progresivo
       candidatos = await User.find({
         _id:         { $ne: yo._id },
         institution: miInstitucion,
-        isActive:  true
-      }).select("-password -__v");
-      
-      console.log("📊 Candidatos encontrados (solo institución):", candidatos.length);
-    }
-
-    // Si aún no hay, busca por campus sin importar institución
-    if (candidatos.length === 0 && miCampus) {
-      candidatos = await User.find({
-        _id: { $ne: yo._id },
         $or: [
           { currentCampus: miCampus },
           { campus:        miCampus }
         ],
-        isActive:  true
+        isActive: true
       }).select("-password -__v");
-      
-      console.log("📊 Candidatos encontrados (por campus):", candidatos.length);
-    }
 
-    // Si aún no hay, retorna todos los usuarios activos
-    if (candidatos.length === 0) {
-      candidatos = await User.find({
-        _id: { $ne: yo._id },
-        isActive:  true
-      }).select("-password -__v");
-      
-      console.log("📊 Candidatos encontrados (todos activos):", candidatos.length);
-    }
+      if (candidatos.length === 0) {
+        candidatos = await User.find({
+          _id:         { $ne: yo._id },
+          institution: miInstitucion,
+          isActive:    true
+        }).select("-password -__v");
+      }
 
-    // Filtro opcional de campus/facultad seleccionado desde el feed
-    const { campus: filtroCampus, faculty: filtroFaculty } = req.query;
-    if (filtroCampus) {
-      candidatos = candidatos.filter(u => (u.currentCampus || u.campus) === filtroCampus);
-    }
-    if (filtroFaculty) {
-      candidatos = candidatos.filter(u => u.faculty === filtroFaculty);
+      if (candidatos.length === 0 && miCampus) {
+        candidatos = await User.find({
+          _id: { $ne: yo._id },
+          $or: [{ currentCampus: miCampus }, { campus: miCampus }],
+          isActive: true
+        }).select("-password -__v");
+      }
+
+      if (candidatos.length === 0) {
+        candidatos = await User.find({
+          _id:      { $ne: yo._id },
+          isActive: true
+        }).select("-password -__v");
+      }
     }
 
     // Conexiones aceptadas de los candidatos, para calcular conexiones mutuas
@@ -264,7 +243,7 @@ export const feedUsuarios = async (req, res) => {
     const feed = candidatos
       .filter(usuario => !usuariosConectados.has(usuario._id.toString()))
       .map(usuario => {
-        const { score, breakdown } = calcCompatibility(yo, usuario, sharedConnectionsFor(usuario._id));
+        const { score, breakdown } = calcCompatibility(yo, usuario, sharedConnectionsFor(usuario._id), filterMode === "all");
         return {
           usuario,
           compatibilidad: score,
@@ -279,12 +258,10 @@ export const feedUsuarios = async (req, res) => {
     const totalCompatibles = candidatos
       .filter(usuario => !usuariosConectados.has(usuario._id.toString()))
       .map(usuario => {
-        const { score } = calcCompatibility(yo, usuario, sharedConnectionsFor(usuario._id));
+        const { score } = calcCompatibility(yo, usuario, sharedConnectionsFor(usuario._id), filterMode === "all");
         return { compatibilidad: score };
       })
       .filter(r => r.compatibilidad > 0).length;
-
-    console.log("✅ Feed final:", feed.length, "usuarios | Total compatible:", totalCompatibles);
 
     res.status(200).json({
       data: feed,
@@ -294,16 +271,8 @@ export const feedUsuarios = async (req, res) => {
         total: totalCompatibles,
         pages: Math.ceil(totalCompatibles / limit)
       },
-      debug: {
-        miInstitucion,
-        miCampus,
-        totalCandidatos: candidatos.length,
-        totalCompatibles: totalCompatibles,
-        conexionesTotales: conexionesExistentes.length
-      }
     });
   } catch (error) {
-    console.error("❌ Error en feedUsuarios:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -601,5 +570,23 @@ export const deleteProfileBanner = async (req, res) => {
     res.status(200).json({ success: true, message: "Banner eliminado" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ESTADÍSTICAS PÚBLICAS (sin autenticación, para landing page)
+export const estadisticasPublicas = async (req, res) => {
+  try {
+    const [totalUsuarios, instituciones, totalConexiones] = await Promise.all([
+      User.countDocuments({ isActive: true }),
+      User.distinct("institution", { institution: { $nin: [null, ""] } }),
+      Connection.countDocuments({ status: "accepted" }),
+    ]);
+    res.status(200).json({
+      usuarios: totalUsuarios,
+      instituciones: instituciones.filter(Boolean).length,
+      conexiones: totalConexiones,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

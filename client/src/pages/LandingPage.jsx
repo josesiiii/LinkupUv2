@@ -23,26 +23,36 @@ export default function LandingPage() {
       <Navbar />
 
       {/* Section 1 — Hero with WebGL shader */}
-      <Hero
-      
-        headline={{
-          line1: 'Conecta. Colabora.',
-          line2: 'Crece.',
-        }}
-        subtitle="Encuentra personas, proyectos y oportunidades dentro de tu comunidad universitaria."
-        buttons={{
-          primary: {
-            text: 'Crear cuenta gratis',
-            onClick: () => navigate('/register'),
-          },
-          secondary: {
-            text: 'Explorar la plataforma',
-            onClick: () => {
-              document.querySelector('#campus')?.scrollIntoView({ behavior: 'smooth' });
+      <div style={{ position: 'relative' }}>
+        <Hero
+          headline={{
+            line1: 'Conecta. Colabora.',
+            line2: 'Crece.',
+          }}
+          subtitle="Encuentra personas, proyectos y oportunidades dentro de tu comunidad universitaria."
+          buttons={{
+            primary: {
+              text: 'Crear cuenta gratis',
+              onClick: () => navigate('/register'),
             },
-          },
-        }}
-      />
+            secondary: {
+              text: 'Explorar la plataforma',
+              onClick: () => {
+                document.querySelector('#campus')?.scrollIntoView({ behavior: 'smooth' });
+              },
+            },
+          }}
+        />
+        {/* Transición premium Hero → CampusSection */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0, left: 0, right: 0,
+          height: 180,
+          background: 'linear-gradient(180deg, transparent 0%, rgba(253,242,248,0.6) 55%, #fdf2f8 100%)',
+          pointerEvents: 'none',
+          zIndex: 5,
+        }} />
+      </div>
 
       {/* Section 2 — Campus Discovery */}
       <CampusSection />

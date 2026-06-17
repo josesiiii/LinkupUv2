@@ -2,9 +2,6 @@ import Connection from "../models/Connection.js";
 import User from "../models/User.js";
 
 export const enviarConexion = async (req, res) => {
-  console.log("=== CONEXION DEBUG ===");
-  console.log("Body:", req.body);
-  console.log("Usuario:", req.usuario);
   try {
     const from = req.usuario._id;
     const { to } = req.body;
@@ -231,6 +228,32 @@ export const restaurarConexion = async (req, res) => {
     await conexion.save();
 
     res.status(200).json({ message: "Solicitud restaurada", conexion });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const eliminarConexion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuarioId = req.usuario._id;
+
+    const conexion = await Connection.findById(id);
+
+    if (!conexion) {
+      return res.status(404).json({ message: "Conexión no encontrada" });
+    }
+
+    if (
+      conexion.from.toString() !== usuarioId.toString() &&
+      conexion.to.toString() !== usuarioId.toString()
+    ) {
+      return res.status(403).json({ message: "No autorizado" });
+    }
+
+    await conexion.deleteOne();
+
+    res.status(200).json({ message: "Conexión eliminada" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
