@@ -129,6 +129,7 @@ export default function RegisterPage() {
   const [institution,    setInstitution]    = useState("");
   const [campuses,       setCampuses]       = useState([]);
   const [currentCampus,  setCurrentCampus]  = useState("");
+  const [faculties,      setFaculties]      = useState([]);
   const [loadingCampus,  setLoadingCampus]  = useState(false);
 
   // Paso 2
@@ -143,12 +144,13 @@ export default function RegisterPage() {
   const handleEmailBlur = async () => {
     if (!email.includes("@") || !email.includes(".")) return;
     setLoadingCampus(true);
-    setInstitution(""); setCampuses([]); setCurrentCampus("");
+    setInstitution(""); setCampuses([]); setCurrentCampus(""); setFaculties([]);
     try {
       const { data } = await api.get(`/institutions/campuses?email=${email}`);
       setInstitution(data.institution);
       setCampuses(data.campuses);
-    } catch { setInstitution(""); setCampuses([]); }
+      setFaculties(data.faculties ?? []);
+    } catch { setInstitution(""); setCampuses([]); setFaculties([]); }
     finally { setLoadingCampus(false); }
   };
 
@@ -446,16 +448,50 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div>
-                    <label style={labelStyle}>Carrera</label>
-                    <input type="text" placeholder="Ing. de Sistemas" value={career} onChange={(e) => setCareer(e.target.value)} style={{ ...inputBase, height: 46 }} onFocus={focusIn} onBlur={focusOut} />
+                {faculties.length > 0 ? (() => {
+                  const availableCareers = faculties.find(f => f.name === faculty)?.careers ?? [];
+                  return (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      <div>
+                        <label style={labelStyle}>Facultad</label>
+                        <select
+                          value={faculty}
+                          onChange={e => { setFaculty(e.target.value); setCareer(""); }}
+                          style={{ ...inputBase, height: 46, cursor: "pointer", appearance: "auto" }}
+                          onFocus={focusIn} onBlur={focusOut}
+                        >
+                          <option value="">Selecciona tu facultad</option>
+                          {faculties.map(f => <option key={f.name} value={f.name}>{f.name}</option>)}
+                        </select>
+                      </div>
+                      {availableCareers.length > 0 && (
+                        <div>
+                          <label style={labelStyle}>Carrera</label>
+                          <select
+                            value={career}
+                            onChange={e => setCareer(e.target.value)}
+                            style={{ ...inputBase, height: 46, cursor: "pointer", appearance: "auto" }}
+                            onFocus={focusIn} onBlur={focusOut}
+                          >
+                            <option value="">Selecciona tu carrera</option>
+                            {availableCareers.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })() : (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <div>
+                      <label style={labelStyle}>Carrera</label>
+                      <input type="text" placeholder="Ing. de Sistemas" value={career} onChange={(e) => setCareer(e.target.value)} style={{ ...inputBase, height: 46 }} onFocus={focusIn} onBlur={focusOut} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Facultad</label>
+                      <input type="text" placeholder="Ing. y Sistemas" value={faculty} onChange={(e) => setFaculty(e.target.value)} style={{ ...inputBase, height: 46 }} onFocus={focusIn} onBlur={focusOut} />
+                    </div>
                   </div>
-                  <div>
-                    <label style={labelStyle}>Facultad</label>
-                    <input type="text" placeholder="Ing. y Sistemas" value={faculty} onChange={(e) => setFaculty(e.target.value)} style={{ ...inputBase, height: 46 }} onFocus={focusIn} onBlur={focusOut} />
-                  </div>
-                </div>
+                )}
 
                 <div>
                   <label style={labelStyle}>Semestre</label>

@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import Connection from "../models/Connection.js";
 import SavedProfile from "../models/SavedProfile.js";
 import cloudinary from "../config/cloudinary.js";
+import { INSTITUTIONS } from "../config/institutions.js";
 
 // Si es true, usuarios de campus distinto dentro de la misma institución
 // quedan completamente excluidos del feed (compatibilidad = 0).
@@ -293,6 +294,45 @@ export const actualizarPerfil = async (req, res) => {
   try {
     const usuario = await User.findById(req.usuario._id);
     if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    // Validar institution
+    if (req.body.institution !== undefined && req.body.institution !== "") {
+      const instValida = Object.values(INSTITUTIONS).find(i => i.name === req.body.institution);
+      if (!instValida) return res.status(400).json({ message: "Institución inválida" });
+    }
+
+    // Validar currentCampus contra la institución resultante
+    if (req.body.currentCampus !== undefined && req.body.currentCampus !== "") {
+      const instName = req.body.institution ?? usuario.institution;
+      const instData = Object.values(INSTITUTIONS).find(i => i.name === instName);
+      if (instData && !instData.campuses.find(c => c.id === req.body.currentCampus)) {
+        return res.status(400).json({ message: "Campus inválido para esa institución" });
+      }
+    }
+
+    // Validar faculty contra la institución resultante
+    if (req.body.faculty !== undefined && req.body.faculty !== "") {
+      const instName = req.body.institution ?? usuario.institution;
+      const instData = Object.values(INSTITUTIONS).find(i => i.name === instName);
+      if (instData?.faculties?.length > 0) {
+        const facultyNames = instData.faculties.map(f => f.name);
+        if (!facultyNames.includes(req.body.faculty)) {
+          return res.status(400).json({ message: "Facultad inválida para esa institución" });
+        }
+      }
+    }
+
+    // Validar career contra la institución resultante
+    if (req.body.career !== undefined && req.body.career !== "") {
+      const instName = req.body.institution ?? usuario.institution;
+      const instData = Object.values(INSTITUTIONS).find(i => i.name === instName);
+      if (instData?.faculties?.length > 0) {
+        const allCareers = instData.faculties.flatMap(f => f.careers ?? []);
+        if (allCareers.length > 0 && !allCareers.includes(req.body.career)) {
+          return res.status(400).json({ message: "Carrera inválida para esa institución" });
+        }
+      }
+    }
 
     const campos = [
       "fullName", "bio", "career", "faculty",

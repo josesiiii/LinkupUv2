@@ -1,17 +1,15 @@
 import { verifyRecaptcha } from "../utils/recaptcha.js"
 
 export const checkRecaptcha = async (req, res, next) => {
+  if (process.env.BYPASS_RECAPTCHA === "true") return next()
+
   const { recaptchaToken } = req.body
 
-  try {
-    const result = await verifyRecaptcha(recaptchaToken)
+  const result = await verifyRecaptcha(recaptchaToken)
 
-    if (!result.success) {
-      return res.status(400).json({ message: result.error })
-    }
-
-    next()
-  } catch (error) {
-    return res.status(500).json({ message: "Error al verificar reCAPTCHA" })
+  if (!result.success) {
+    return res.status(400).json({ message: result.error })
   }
+
+  next()
 }

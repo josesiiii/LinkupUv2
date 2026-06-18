@@ -1,5 +1,5 @@
 // src/components/profile/EditProfileModal.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Modal from "../ui/Modal";
 import api from "../../api/axios";
@@ -8,11 +8,7 @@ import { useTheme } from "../../context/ThemeContext";
 
 const FIELDS = [
   { key: "fullName", label: "Nombre completo" },
-  { key: "institution", label: "Institución" },
-  { key: "career", label: "Carrera" },
-  { key: "faculty", label: "Facultad" },
-  { key: "currentCampus", label: "Campus" },
-  { key: "city", label: "Ciudad" },
+  { key: "city",     label: "Ciudad" },
 ];
 
 function TagInput({ label, values, onChange, colors, labelStyle, inputStyle }) {
@@ -71,20 +67,66 @@ export default function EditProfileModal({ open, onClose, usuario }) {
   const updateUsuario = useAuthStore((state) => state.updateUsuario);
 
   const [form, setForm] = useState(() => ({
-    fullName: usuario?.fullName || "",
-    institution: usuario?.institution || "",
-    career: usuario?.career || "",
-    faculty: usuario?.faculty || "",
+    fullName:      usuario?.fullName      || "",
+    institution:   usuario?.institution   || "",
+    faculty:       usuario?.faculty       || "",
+    career:        usuario?.career        || "",
     currentCampus: usuario?.currentCampus || "",
-    city: usuario?.city || "",
-    bio: usuario?.bio || "",
-    interests: usuario?.interests || [],
-    objectives: usuario?.objectives || [],
+    city:          usuario?.city          || "",
+    bio:           usuario?.bio           || "",
+    interests:     usuario?.interests     || [],
+    objectives:    usuario?.objectives    || [],
   }));
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [error,  setError]  = useState("");
+
+  const [institutions,        setInstitutions]        = useState([]);
+  const [loadingInstitutions, setLoadingInstitutions] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setLoadingInstitutions(true);
+    api.get("/institutions")
+      .then(res => setInstitutions(res.data.institutions || []))
+      .catch(() => {})
+      .finally(() => setLoadingInstitutions(false));
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        fullName:      usuario?.fullName      || "",
+        institution:   usuario?.institution   || "",
+        faculty:       usuario?.faculty       || "",
+        career:        usuario?.career        || "",
+        currentCampus: usuario?.currentCampus || "",
+        city:          usuario?.city          || "",
+        bio:           usuario?.bio           || "",
+        interests:     usuario?.interests     || [],
+        objectives:    usuario?.objectives    || [],
+      });
+      setError("");
+    }
+  }, [open, usuario]);
+
+  // Datos derivados — jerarquía: institución → campus / facultad → carrera
+  const selectedInstitution = institutions.find(i => i.name === form.institution);
+  const availableCampuses   = selectedInstitution?.campuses  ?? [];
+  const availableFaculties  = selectedInstitution?.faculties ?? []; // [{name, careers}]
+  const facultyNames        = availableFaculties.map(f => f.name);
+  const selectedFaculty     = availableFaculties.find(f => f.name === form.faculty);
+  const availableCareers    = selectedFaculty?.careers ?? [];
+  const careerNames         = availableCareers;
 
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+
+  const handleInstitutionChange = (value) => {
+    setForm(f => ({ ...f, institution: value, currentCampus: "", faculty: "", career: "" }));
+  };
+
+  const handleFacultyChange = (value) => {
+    setForm(f => ({ ...f, faculty: value, career: "" }));
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -107,6 +149,12 @@ export default function EditProfileModal({ open, onClose, usuario }) {
     fontFamily: "inherit",
   };
 
+  const selectStyle = {
+    ...inputStyle,
+    cursor: "pointer",
+    appearance: "auto",
+  };
+
   const labelStyle = {
     fontSize: 12, fontWeight: 600, color: colors.textMuted,
     textTransform: "uppercase", letterSpacing: "0.05em",
@@ -121,6 +169,91 @@ export default function EditProfileModal({ open, onClose, usuario }) {
           <input value={usuario?.email || ""} disabled style={{ ...inputStyle, opacity: 0.6, cursor: "not-allowed" }} />
         </div>
 
+        {/* Institución */}
+        <div>
+          <label style={labelStyle}>Institución</label>
+          <select
+            value={form.institution}
+            onChange={e => handleInstitutionChange(e.target.value)}
+            style={selectStyle}
+            disabled={loadingInstitutions}
+          >
+            <option value="">
+              {loadingInstitutions ? "Cargando instituciones..." : "Selecciona tu institución"}
+            </option>
+            {institutions.map(i => (
+              <option key={i.domain} value={i.name}>{i.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Campus — dependiente de institución */}
+        {availableCampuses.length > 0 && (
+          <div>
+            <label style={labelStyle}>Campus</label>
+            <select
+              value={form.currentCampus}
+              onChange={e => setField("currentCampus", e.target.value)}
+              style={selectStyle}
+            >
+              <option value="">Selecciona tu campus</option>
+              {form.currentCampus && !availableCampuses.find(c => c.id === form.currentCampus) && (
+                <option value={form.currentCampus} disabled>
+                  {form.currentCampus} (actualiza este valor)
+                </option>
+              )}
+              {availableCampuses.map(c => (
+                <option key={c.id} value={c.id}>{c.label} — {c.city}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Facultad — dependiente de institución */}
+        {availableFaculties.length > 0 && (
+          <div>
+            <label style={labelStyle}>Facultad</label>
+            <select
+              value={form.faculty}
+              onChange={e => handleFacultyChange(e.target.value)}
+              style={selectStyle}
+            >
+              <option value="">Selecciona tu facultad</option>
+              {form.faculty && !facultyNames.includes(form.faculty) && (
+                <option value={form.faculty} disabled>
+                  {form.faculty} (actualiza este valor)
+                </option>
+              )}
+              {availableFaculties.map(f => (
+                <option key={f.name} value={f.name}>{f.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Carrera — dependiente de facultad */}
+        {availableCareers.length > 0 && (
+          <div>
+            <label style={labelStyle}>Carrera</label>
+            <select
+              value={form.career}
+              onChange={e => setField("career", e.target.value)}
+              style={selectStyle}
+            >
+              <option value="">Selecciona tu carrera</option>
+              {form.career && !careerNames.includes(form.career) && (
+                <option value={form.career} disabled>
+                  {form.career} (actualiza este valor)
+                </option>
+              )}
+              {availableCareers.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Campos de texto libres */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
           {FIELDS.map(({ key, label }) => (
             <div key={key}>

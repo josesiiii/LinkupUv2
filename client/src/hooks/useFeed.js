@@ -22,7 +22,7 @@ export default function useFeed(filters = {}) {
         setLoading(true);
         setError("");
         const params = {};
-        if (myUniversity) params.filter = "myUniversity";
+        params.filter = myUniversity ? "myUniversity" : "all";
         const res = await api.get("/users/feed", { params });
         const data = Array.isArray(res.data)
           ? res.data

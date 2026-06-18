@@ -24,6 +24,10 @@ const decoded = jwt.verify(
       // Buscar usuario
       req.usuario = await User.findById(decoded.id).select("-password");
 
+      if (!req.usuario) {
+        return res.status(401).json({ message: "Usuario no encontrado o fue eliminado" });
+      }
+
       next();
 
     } else {

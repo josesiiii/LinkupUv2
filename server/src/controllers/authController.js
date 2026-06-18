@@ -55,6 +55,7 @@ export const registrarUsuario = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
 
     // 5. CREAR USUARIO
+    const validRoles = ["user", "admin"];
     const nuevoUsuario = await User.create({
       fullName,
       email,
@@ -69,7 +70,7 @@ export const registrarUsuario = async (req, res) => {
       currentCampus: validCampus.id,
       city:          city       || validCampus.city,
       department:    department || validCampus.department,
-      role:            role         || "user"
+      role:          validRoles.includes(role) ? role : "user"
     });
 
     // 6. TOKEN

@@ -1,7 +1,12 @@
 import express from "express";
-import { INSTITUTIONS } from "../config/institutions.js";
+import { INSTITUTIONS, INSTITUTION_LIST } from "../config/institutions.js";
 
 const router = express.Router();
+
+// GET /api/institutions — lista completa para selects en edición de perfil
+router.get("/", (req, res) => {
+  res.json({ institutions: INSTITUTION_LIST });
+});
 
 // GET /api/institutions/campuses?email=juan@itm.edu.co
 router.get("/campuses", (req, res) => {
@@ -24,16 +29,16 @@ router.get("/campuses", (req, res) => {
     ? institution.campuses.filter(c => c.city === city)
     : institution.campuses;
 
-  // Respuesta explícita con id y label diferenciados
   res.json({
     institution: institution.name,
     domain,
     campuses: campuses.map(c => ({
-      id:    c.id,      // ← este es el valor que debe enviar el frontend
-      label: c.label,   // ← este es el texto visible en el select
-      city:  c.city,
+      id:         c.id,
+      label:      c.label,
+      city:       c.city,
       department: c.department
-    }))
+    })),
+    faculties: institution.faculties ?? []
   });
 });
 
