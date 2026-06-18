@@ -90,7 +90,7 @@ export default function PublicProfilePage() {
 
   if (loading) return (
     <AppLayout>
-      <div style={{ maxWidth: 880, margin: "0 auto", padding: "24px 24px 64px" }}>
+      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "24px 24px 64px" }}>
         <p style={{ color: colors.textMuted, fontSize: 14 }}>Cargando perfil...</p>
       </div>
     </AppLayout>
@@ -98,7 +98,7 @@ export default function PublicProfilePage() {
 
   if (!perfil) return (
     <AppLayout>
-      <div style={{ maxWidth: 880, margin: "0 auto", padding: "24px 24px 64px" }}>
+      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "24px 24px 64px" }}>
         <p style={{ color: colors.textMuted, fontSize: 14 }}>No se encontró el perfil.</p>
       </div>
     </AppLayout>
@@ -106,7 +106,7 @@ export default function PublicProfilePage() {
 
   return (
     <AppLayout>
-      <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 24px 64px" }}>
+      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "0 24px 64px" }}>
 
         {/* Banner */}
         <div style={{
@@ -214,6 +214,26 @@ export default function PublicProfilePage() {
             <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Intereses</p>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {perfil.interests.map((i) => <Chip key={i} colors={colors}>{i}</Chip>)}
+            </div>
+          </div>
+        )}
+
+        {/* Galería compacta */}
+        {perfil.photos?.length > 0 && (
+          <div style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24, marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)" }}>
+            <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Fotos</p>
+            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4, scrollbarWidth: "none", msOverflowStyle: "none" }}>
+              {perfil.photos
+                .slice()
+                .sort((a, b) => a.order - b.order)
+                .map((photo) => (
+                  <img
+                    key={photo._id}
+                    src={photo.url}
+                    alt=""
+                    style={{ width: 96, height: 120, borderRadius: 12, objectFit: "cover", flexShrink: 0, display: "block" }}
+                  />
+                ))}
             </div>
           </div>
         )}

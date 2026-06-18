@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LIGHT_COLORS as C } from "../../styles/authTheme";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function AcademicSelect({
   options = [],
@@ -11,6 +11,7 @@ export default function AcademicSelect({
   placeholder = "Selecciona una opción",
   disabled = false,
 }) {
+  const { colors: C } = useTheme();
   const [open, setOpen]     = useState(false);
   const [query, setQuery]   = useState("");
   const containerRef        = useRef(null);
@@ -105,7 +106,7 @@ export default function AcademicSelect({
               top: "calc(100% + 6px)",
               left: 0,
               right: 0,
-              background: "#ffffff",
+              background: C.surface,
               border: `1.5px solid ${C.border}`,
               borderRadius: 14,
               boxShadow: "0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)",

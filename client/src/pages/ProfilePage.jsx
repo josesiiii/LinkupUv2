@@ -137,7 +137,7 @@ export default function ProfilePage() {
         onClose={() => setBannerCropSrc(null)}
       />
 
-      <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 24px 64px" }}>
+      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "0 24px 64px" }}>
 
         {/* Banner */}
         <div

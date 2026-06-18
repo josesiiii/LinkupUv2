@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Modal from "../ui/Modal";
+import AcademicSelect from "../ui/AcademicSelect";
 import api from "../../api/axios";
 import useAuthStore from "../../store/authStore";
 import { useTheme } from "../../context/ThemeContext";
@@ -149,12 +150,6 @@ export default function EditProfileModal({ open, onClose, usuario }) {
     fontFamily: "inherit",
   };
 
-  const selectStyle = {
-    ...inputStyle,
-    cursor: "pointer",
-    appearance: "auto",
-  };
-
   const labelStyle = {
     fontSize: 12, fontWeight: 600, color: colors.textMuted,
     textTransform: "uppercase", letterSpacing: "0.05em",
@@ -172,40 +167,32 @@ export default function EditProfileModal({ open, onClose, usuario }) {
         {/* Institución */}
         <div>
           <label style={labelStyle}>Institución</label>
-          <select
+          <AcademicSelect
+            options={institutions.map(i => i.name)}
             value={form.institution}
-            onChange={e => handleInstitutionChange(e.target.value)}
-            style={selectStyle}
+            onChange={handleInstitutionChange}
+            placeholder={loadingInstitutions ? "Cargando instituciones..." : "Selecciona tu institución"}
             disabled={loadingInstitutions}
-          >
-            <option value="">
-              {loadingInstitutions ? "Cargando instituciones..." : "Selecciona tu institución"}
-            </option>
-            {institutions.map(i => (
-              <option key={i.domain} value={i.name}>{i.name}</option>
-            ))}
-          </select>
+          />
         </div>
 
         {/* Campus — dependiente de institución */}
         {availableCampuses.length > 0 && (
           <div>
             <label style={labelStyle}>Campus</label>
-            <select
-              value={form.currentCampus}
-              onChange={e => setField("currentCampus", e.target.value)}
-              style={selectStyle}
-            >
-              <option value="">Selecciona tu campus</option>
-              {form.currentCampus && !availableCampuses.find(c => c.id === form.currentCampus) && (
-                <option value={form.currentCampus} disabled>
-                  {form.currentCampus} (actualiza este valor)
-                </option>
-              )}
-              {availableCampuses.map(c => (
-                <option key={c.id} value={c.id}>{c.label} — {c.city}</option>
-              ))}
-            </select>
+            <AcademicSelect
+              options={availableCampuses.map(c => `${c.label} — ${c.city}`)}
+              value={(() => {
+                if (!form.currentCampus) return "";
+                const found = availableCampuses.find(c => c.id === form.currentCampus);
+                return found ? `${found.label} — ${found.city}` : "";
+              })()}
+              onChange={(labelCity) => {
+                const found = availableCampuses.find(c => `${c.label} — ${c.city}` === labelCity);
+                if (found) setField("currentCampus", found.id);
+              }}
+              placeholder="Selecciona tu campus"
+            />
           </div>
         )}
 
@@ -213,21 +200,12 @@ export default function EditProfileModal({ open, onClose, usuario }) {
         {availableFaculties.length > 0 && (
           <div>
             <label style={labelStyle}>Facultad</label>
-            <select
+            <AcademicSelect
+              options={facultyNames}
               value={form.faculty}
-              onChange={e => handleFacultyChange(e.target.value)}
-              style={selectStyle}
-            >
-              <option value="">Selecciona tu facultad</option>
-              {form.faculty && !facultyNames.includes(form.faculty) && (
-                <option value={form.faculty} disabled>
-                  {form.faculty} (actualiza este valor)
-                </option>
-              )}
-              {availableFaculties.map(f => (
-                <option key={f.name} value={f.name}>{f.name}</option>
-              ))}
-            </select>
+              onChange={handleFacultyChange}
+              placeholder="Selecciona tu facultad"
+            />
           </div>
         )}
 
@@ -235,21 +213,12 @@ export default function EditProfileModal({ open, onClose, usuario }) {
         {availableCareers.length > 0 && (
           <div>
             <label style={labelStyle}>Carrera</label>
-            <select
+            <AcademicSelect
+              options={careerNames}
               value={form.career}
-              onChange={e => setField("career", e.target.value)}
-              style={selectStyle}
-            >
-              <option value="">Selecciona tu carrera</option>
-              {form.career && !careerNames.includes(form.career) && (
-                <option value={form.career} disabled>
-                  {form.career} (actualiza este valor)
-                </option>
-              )}
-              {availableCareers.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+              onChange={(v) => setField("career", v)}
+              placeholder="Selecciona tu carrera"
+            />
           </div>
         )}
 

@@ -40,7 +40,7 @@ function Badge({ count, color }) {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onExpandChange }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const closeMenuRef = useRef(null);
   const location = useLocation();
@@ -49,6 +49,10 @@ export default function Sidebar() {
 
   const [pendingCount, setPendingCount]   = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    onExpandChange?.(isExpanded);
+  }, [isExpanded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch badges
   useEffect(() => {
