@@ -27,6 +27,12 @@ const connectionSchema = new mongoose.Schema({
 
 });
 
+// Índices para las queries más frecuentes del feed y conexiones
+connectionSchema.index({ from: 1, status: 1 });
+connectionSchema.index({ to: 1, status: 1 });
+connectionSchema.index({ from: 1, to: 1 });
+connectionSchema.index({ status: 1 });
+
 const Connection = mongoose.model("Connection", connectionSchema);
 
 export default Connection;

@@ -74,6 +74,11 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
+// Query principal del chat: mensajes de una conversación en orden
+messageSchema.index({ conversation: 1, createdAt: 1 });
+// Mensajes fijados dentro de una conversación
+messageSchema.index({ conversation: 1, pinned: 1 });
+
 const Message = mongoose.model(
   "Message",
   messageSchema

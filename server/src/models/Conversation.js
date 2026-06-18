@@ -67,6 +67,13 @@ const conversationSchema = new mongoose.Schema(
   }
 );
 
+// Lookup de conversaciones por participante + orden cronológico
+conversationSchema.index({ participantA: 1, lastMessageAt: -1 });
+conversationSchema.index({ participantB: 1, lastMessageAt: -1 });
+// Para el OR query en obtenerConversaciones
+conversationSchema.index({ participantA: 1 });
+conversationSchema.index({ participantB: 1 });
+
 const Conversation = mongoose.model(
   "Conversation",
   conversationSchema

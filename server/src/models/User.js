@@ -158,7 +158,14 @@ const usuarioSchema = new mongoose.Schema(
 );
 
 // ── Índices ───────────────────────────────
-usuarioSchema.index({ institution: 1, currentCampus: 1 });
+// Consultas del feed: filtro principal
+usuarioSchema.index({ institution: 1, isActive: 1 });
+usuarioSchema.index({ institution: 1, currentCampus: 1, isActive: 1 });
+// Campo legacy (campus) soportado en fallback
+usuarioSchema.index({ campus: 1, isActive: 1 });
+// Búsqueda por nombre
+usuarioSchema.index({ fullName: 1 });
+// Filtro de intereses (algoritmo de compatibilidad)
 usuarioSchema.index({ interests: 1 });
 
 const User = mongoose.model("User", usuarioSchema);
