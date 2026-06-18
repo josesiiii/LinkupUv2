@@ -61,7 +61,7 @@ function ValueCard({ item, index }) {
 export default function CompaniesSection() {
   return (
     <section
-      id="empresas"
+      id="oportunidades"
       style={{
         padding: '100px 24px',
         background: 'linear-gradient(180deg, #fdf2f8 0%, #fde4ec 50%, #fdf2f8 100%)',

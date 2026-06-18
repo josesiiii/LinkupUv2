@@ -6,37 +6,112 @@ export const INSTITUTIONS = {
   "soy.sena.edu.co": {
     name: "Servicio Nacional de Aprendizaje (SENA)",
     campuses: [
-      { id: "sena-medellin-centro",     label: "Centro de Servicios y Gestión Empresarial",        city: "Medellín",     department: "Antioquia" },
-      { id: "sena-medellin-industrial", label: "Centro Industrial del Diseño y la Manufactura",     city: "Medellín",     department: "Antioquia" },
-      { id: "sena-bello",               label: "Centro Tecnológico del Mobiliario",                 city: "Bello",        department: "Antioquia" },
-      { id: "sena-bogota-industrial",   label: "Centro de Gestión Industrial",                      city: "Bogotá",       department: "Cundinamarca" },
-      { id: "sena-cali-industrial",     label: "Centro Industrial y Desarrollo Empresarial",        city: "Cali",         department: "Valle del Cauca" },
-      { id: "sena-barranquilla",        label: "Centro para el Desarrollo Agroempresarial",         city: "Barranquilla", department: "Atlántico" },
+      { id: "sena-comercio",     label: "Centro de Comercio",                                       city: "Medellín", department: "Antioquia" },
+      { id: "sena-salud",        label: "Centro de Servicios de Salud",                             city: "Medellín", department: "Antioquia" },
+      { id: "sena-gestion",      label: "Centro de Servicios y Gestión Empresarial",                city: "Medellín", department: "Antioquia" },
+      { id: "sena-textil",       label: "Centro Textil y de Gestión Industrial",                    city: "Itagüí",   department: "Antioquia" },
+      { id: "sena-manufactura",  label: "Centro de Tecnología de la Manufactura Avanzada",          city: "Medellín",   department: "Antioquia" },
+      { id: "sena-habitat",      label: "Centro para el Desarrollo del Hábitat y la Construcción",  city: "Medellín", department: "Antioquia" },
+      { id: "sena-moda",         label: "Centro de Formación en Diseño, Confección y Moda",         city: "Itagüí",   department: "Antioquia" },
+      { id: "sena-salada",       label: "Centro de Recursos Naturales Renovables La Salada",        city: "Caldas",   department: "Antioquia" },
+      { id: "sena-mobiliario",   label: "Centro Tecnológico del Mobiliario",                        city: "Bello",    department: "Antioquia" },
+      { id: "sena-complejo-sur", label: "Complejo Sur",                                             city: "Itagüí",   department: "Antioquia" },
     ],
     faculties: [
       {
-        name: "Centro de Servicios y Gestión Empresarial",
-        careers: ["Gestión Empresarial", "Marketing Digital", "Contabilidad y Finanzas", "Gestión de Talento Humano", "Servicio al Cliente"]
+        name: "Centro de Comercio",
+        careers: [
+          "Técnico en Venta de Productos y Servicios",
+          "Técnico en Operaciones Comerciales y Financieras",
+          "Tecnólogo en Gestión de Mercados",
+          "Tecnólogo en Gestión Logística",
+          "Técnico en Asistencia en Organización de Archivos",
+          "Técnico en Servicios Postales y Afines",
+        ]
       },
       {
-        name: "Centro Industrial del Diseño y la Manufactura",
-        careers: ["Automatización Industrial", "Diseño Industrial", "Mecatrónica", "Producción Industrial", "Diseño de Producto"]
+        name: "Centro de Servicios de Salud",
+        careers: [
+          "Técnico en Auxiliar de Enfermería",
+          "Técnico en Auxiliar Administrativo en Salud",
+          "Técnico en Atención Integral a la Primera Infancia",
+          "Técnico en Farmacia",
+          "Tecnólogo en Regencia de Farmacia",
+          "Técnico en Cosmetología y Estética Integral",
+        ]
+      },
+      {
+        name: "Centro de Servicios y Gestión Empresarial",
+        careers: [
+          "Técnico en Asistencia Administrativa",
+          "Técnico en Contabilización de Operaciones Comerciales y Financieras",
+          "Técnico en Programación de Software",
+          "Tecnólogo en Análisis y Desarrollo de Software",
+          "Tecnólogo en Gestión Empresarial",
+          "Tecnólogo en Gestión del Talento Humano",
+          "Tecnólogo en Negociación Internacional",
+          "Tecnólogo en Gestión de Redes de Datos",
+        ]
+      },
+      {
+        name: "Centro Textil y de Gestión Industrial",
+        careers: [
+          "Técnico en Confección Industrial",
+          "Técnico en Operación de Equipos de Producción Textil",
+          "Técnico en Tejeduría",
+          "Tecnólogo en Diseño para la Industria de la Moda",
+          "Tecnólogo en Gestión Industrial",
+        ]
+      },
+      {
+        name: "Centro de Tecnología de la Manufactura Avanzada",
+        careers: [
+          "Técnico en Electricidad Industrial",
+          "Técnico en Mantenimiento Electromecánico Industrial",
+          "Técnico en Operación de Equipos de Control Numérico",
+          "Técnico en Sistemas",
+          "Tecnólogo en Automatización Industrial",
+          "Tecnólogo en Mecatrónica Industrial",
+        ]
+      },
+      {
+        name: "Centro para el Desarrollo del Hábitat y la Construcción",
+        careers: [
+          "Técnico en Acabados de Construcción",
+          "Técnico en Construcción de Obras Civiles",
+          "Técnico en Electricidad Residencial y Comercial",
+          "Técnico en Instalaciones Hidrosanitarias",
+          "Tecnólogo en Gestión de Proyectos de Construcción",
+        ]
+      },
+      {
+        name: "Centro de Formación en Diseño, Confección y Moda",
+        careers: [
+          "Técnico en Bordado y Decoración Textil",
+          "Técnico en Confección Artística",
+          "Técnico en Patronaje y Confección para Moda",
+          "Tecnólogo en Diseño de Modas",
+        ]
+      },
+      {
+        name: "Centro de Recursos Naturales Renovables La Salada",
+        careers: [
+          "Técnico en Acuicultura",
+          "Técnico en Floricultura",
+          "Técnico en Guianza Turística",
+          "Técnico en Manejo Ambiental",
+          "Técnico en Producción Agropecuaria",
+          "Tecnólogo en Gestión de Recursos Naturales Renovables",
+        ]
       },
       {
         name: "Centro Tecnológico del Mobiliario",
-        careers: ["Diseño y Producción de Mobiliario", "Tapizado y Decoración", "Carpintería y Ebanistería"]
-      },
-      {
-        name: "Centro de Gestión Industrial",
-        careers: ["Tecnología en Electrónica", "Automatización Industrial", "Mecatrónica Industrial", "Electricidad Industrial"]
-      },
-      {
-        name: "Centro Industrial y Desarrollo Empresarial",
-        careers: ["Análisis y Desarrollo de Software", "Gestión de Redes de Datos", "Soporte Técnico", "Producción Multimedia", "Desarrollo Multimedia"]
-      },
-      {
-        name: "Centro para el Desarrollo Agroempresarial",
-        careers: ["Producción Agropecuaria", "Gestión de Empresas Agropecuarias", "Agronomía", "Acuicultura"]
+        careers: [
+          "Técnico en Acabado de Superficies de Madera",
+          "Técnico en Producción de Muebles y Madera",
+          "Técnico en Tapizado",
+          "Tecnólogo en Diseño y Fabricación de Muebles",
+        ]
       },
     ]
   },
@@ -45,26 +120,53 @@ export const INSTITUTIONS = {
   "itm.edu.co": {
     name: "Instituto Tecnológico Metropolitano",
     campuses: [
-      { id: "itm-robledo",     label: "Campus Robledo",     city: "Medellín", department: "Antioquia" },
       { id: "itm-fraternidad", label: "Campus Fraternidad", city: "Medellín", department: "Antioquia" },
-      { id: "itm-campo-amor", label: "Campus Campo Amor",  city: "Medellín", department: "Antioquia" },
+      { id: "itm-robledo",     label: "Campus Robledo",     city: "Medellín", department: "Antioquia" },
+      { id: "itm-floresta",    label: "Campus Floresta",    city: "Medellín", department: "Antioquia" },
+      { id: "itm-castilla",    label: "Campus Castilla",    city: "Medellín", department: "Antioquia" },
     ],
     faculties: [
       {
         name: "Facultad de Artes y Humanidades",
-        careers: ["Tecnología en Comunicación Gráfica", "Artes Plásticas y Visuales", "Tecnología en Gestión Cultural"]
+        careers: [
+          "Artes Plásticas y Visuales",
+          "Tecnología en Comunicación Gráfica",
+          "Tecnología en Gestión Cultural",
+          "Tecnología en Publicidad",
+        ]
       },
       {
         name: "Facultad de Ciencias Económicas y Administrativas",
-        careers: ["Administración de Empresas", "Contaduría Pública", "Ingeniería Financiera", "Tecnología en Gestión Administrativa", "Tecnología en Gestión Financiera"]
+        careers: [
+          "Administración Tecnológica",
+          "Contaduría Pública",
+          "Ingeniería Financiera",
+          "Tecnología en Gestión Administrativa",
+          "Tecnología en Gestión de Mercados",
+          "Tecnología en Gestión Financiera",
+        ]
       },
       {
         name: "Facultad de Ciencias Exactas y Aplicadas",
-        careers: ["Física Aplicada", "Matemáticas Aplicadas", "Biología Aplicada", "Química Aplicada"]
+        careers: [
+          "Biología Aplicada",
+          "Física Aplicada",
+          "Matemáticas Aplicadas",
+          "Química Aplicada",
+        ]
       },
       {
         name: "Facultad de Ingenierías",
-        careers: ["Ingeniería de Sistemas", "Ingeniería Electrónica", "Ingeniería Mecatrónica", "Ingeniería Industrial", "Ingeniería Civil", "Ingeniería Biomédica", "Tecnología en Desarrollo de Software", "Tecnología en Electrónica"]
+        careers: [
+          "Ingeniería Biomédica",
+          "Ingeniería de Sistemas",
+          "Ingeniería Electrónica",
+          "Ingeniería Industrial",
+          "Ingeniería Mecatrónica",
+          "Tecnología en Desarrollo de Software",
+          "Tecnología en Electromedicina",
+          "Tecnología en Electrónica",
+        ]
       },
     ]
   },
@@ -73,10 +175,16 @@ export const INSTITUTIONS = {
   "udea.edu.co": {
     name: "Universidad de Antioquia",
     campuses: [
-      { id: "udea-ciudadela", label: "Ciudad Universitaria",  city: "Medellín",             department: "Antioquia" },
-      { id: "udea-oriente",   label: "Seccional Oriente",     city: "El Carmen de Viboral", department: "Antioquia" },
-      { id: "udea-uraba",     label: "Seccional Urabá",       city: "Apartadó",             department: "Antioquia" },
-      { id: "udea-suroeste",  label: "Seccional Suroeste",    city: "Andes",                department: "Antioquia" },
+      { id: "udea-ciudad-universitaria", label: "Ciudad Universitaria",        city: "Medellín",             department: "Antioquia" },
+      { id: "udea-ciudadela-robledo",    label: "Ciudadela Robledo",           city: "Medellín",             department: "Antioquia" },
+      { id: "udea-area-salud",           label: "Área de la Salud",            city: "Medellín",             department: "Antioquia" },
+      { id: "udea-ciencias-agrarias",    label: "Campus de Ciencias Agrarias", city: "Medellín",             department: "Antioquia" },
+      { id: "udea-oriente",              label: "Seccional Oriente",           city: "El Carmen de Viboral", department: "Antioquia" },
+      { id: "udea-uraba",                label: "Seccional Urabá",             city: "Apartadó",             department: "Antioquia" },
+      { id: "udea-suroeste",             label: "Seccional Suroeste",          city: "Andes",                department: "Antioquia" },
+      { id: "udea-nordeste",             label: "Seccional Nordeste",          city: "Amalfi",               department: "Antioquia" },
+      { id: "udea-magdalena-medio",      label: "Seccional Magdalena Medio",   city: "Puerto Berrío",        department: "Antioquia" },
+      { id: "udea-bajo-cauca",           label: "Seccional Bajo Cauca",        city: "Caucasia",             department: "Antioquia" },
     ],
     faculties: [
       {
@@ -93,27 +201,27 @@ export const INSTITUTIONS = {
       },
       {
         name: "Facultad de Artes",
-        careers: ["Artes Plásticas", "Artes Visuales", "Música", "Teatro", "Educación Artística"]
+        careers: ["Artes Plásticas", "Artes Visuales", "Educación Artística", "Música", "Teatro"]
       },
       {
         name: "Facultad de Ciencias Agrarias",
-        careers: ["Zootecnia", "Ingeniería Agropecuaria", "Ingeniería Agroindustrial", "Ingeniería Forestal"]
+        careers: ["Ingeniería Agroindustrial", "Ingeniería Agropecuaria", "Ingeniería Forestal", "Zootecnia"]
       },
       {
         name: "Facultad de Ciencias Económicas",
-        careers: ["Economía", "Administración de Empresas", "Contaduría Pública", "Negocios Internacionales"]
+        careers: ["Administración de Empresas", "Contaduría Pública", "Economía", "Negocios Internacionales"]
       },
       {
         name: "Facultad de Ciencias Exactas y Naturales",
-        careers: ["Biología", "Física", "Matemáticas", "Química", "Estadística"]
+        careers: ["Biología", "Estadística", "Física", "Matemáticas", "Química"]
       },
       {
         name: "Facultad de Ciencias Farmacéuticas y Alimentarias",
-        careers: ["Farmacia", "Tecnología en Regencia de Farmacia", "Ingeniería de Alimentos"]
+        careers: ["Farmacia", "Ingeniería de Alimentos", "Tecnología en Regencia de Farmacia"]
       },
       {
         name: "Facultad de Ciencias Sociales y Humanas",
-        careers: ["Psicología", "Trabajo Social", "Sociología", "Historia", "Antropología", "Filosofía"]
+        careers: ["Antropología", "Filosofía", "Historia", "Psicología", "Sociología", "Trabajo Social"]
       },
       {
         name: "Facultad de Comunicaciones y Filología",
@@ -121,23 +229,36 @@ export const INSTITUTIONS = {
       },
       {
         name: "Facultad de Derecho y Ciencias Políticas",
-        careers: ["Derecho", "Ciencia Política"]
+        careers: ["Ciencia Política", "Derecho"]
       },
       {
         name: "Facultad de Educación",
-        careers: ["Educación", "Licenciatura en Matemáticas", "Licenciatura en Ciencias Naturales", "Licenciatura en Humanidades y Lengua Castellana"]
+        careers: [
+          "Educación",
+          "Licenciatura en Ciencias Naturales y Educación Ambiental",
+          "Licenciatura en Humanidades y Lengua Castellana",
+          "Licenciatura en Matemáticas",
+        ]
       },
       {
         name: "Facultad de Enfermería",
-        careers: ["Enfermería", "Administración en Salud"]
+        careers: ["Administración en Salud", "Enfermería"]
       },
       {
         name: "Facultad de Ingeniería",
-        careers: ["Ingeniería de Sistemas", "Ingeniería Civil", "Ingeniería Eléctrica", "Ingeniería Industrial", "Ingeniería Electrónica", "Ingeniería Química", "Ingeniería Sanitaria", "Ingeniería Ambiental"]
+        careers: [
+          "Ingeniería Civil",
+          "Ingeniería de Sistemas",
+          "Ingeniería Eléctrica",
+          "Ingeniería Electrónica",
+          "Ingeniería Industrial",
+          "Ingeniería Química",
+          "Ingeniería Sanitaria y Ambiental",
+        ]
       },
       {
         name: "Facultad de Medicina",
-        careers: ["Medicina", "Instrumentación Quirúrgica"]
+        careers: ["Instrumentación Quirúrgica", "Medicina"]
       },
       {
         name: "Facultad de Odontología",
@@ -145,11 +266,11 @@ export const INSTITUTIONS = {
       },
       {
         name: "Facultad de Salud Pública",
-        careers: ["Salud Pública", "Gerencia en Salud", "Regencia de Farmacia"]
+        careers: ["Gerencia en Salud", "Salud Pública", "Tecnología en Regencia de Farmacia"]
       },
       {
         name: "Instituto de Filosofía",
-        careers: ["Filosofía", "Humanidades"]
+        careers: ["Filosofía"]
       },
     ]
   },
@@ -180,83 +301,98 @@ export const INSTITUTIONS = {
   "unal.edu.co": {
     name: "Universidad Nacional de Colombia",
     campuses: [
-      { id: "unal-medellin",  label: "Sede Medellín",  city: "Medellín",  department: "Antioquia" },
-      { id: "unal-bogota",    label: "Sede Bogotá",    city: "Bogotá",    department: "Cundinamarca" },
-      { id: "unal-manizales", label: "Sede Manizales", city: "Manizales", department: "Caldas" },
-      { id: "unal-palmira",   label: "Sede Palmira",   city: "Palmira",   department: "Valle del Cauca" },
+      { id: "unal-el-volador", label: "Campus El Volador (Sede Medellín)", city: "Medellín",  department: "Antioquia" },
+      { id: "unal-del-rio",    label: "Campus del Río (Sede Medellín)",    city: "Medellín",  department: "Antioquia" },
+      { id: "unal-bogota",     label: "Sede Bogotá",                       city: "Bogotá",    department: "Cundinamarca" },
+      { id: "unal-manizales",  label: "Sede Manizales",                    city: "Manizales", department: "Caldas" },
+      { id: "unal-palmira",    label: "Sede Palmira",                      city: "Palmira",   department: "Valle del Cauca" },
     ],
     faculties: [
       {
         name: "Facultad de Arquitectura",
-        careers: ["Arquitectura", "Diseño Gráfico", "Diseño Industrial", "Diseño de la Comunicación Gráfica"]
+        careers: ["Arquitectura", "Diseño de la Comunicación Gráfica", "Diseño Gráfico", "Diseño Industrial"]
       },
       {
         name: "Facultad de Ciencias",
-        careers: ["Biología", "Física", "Geología", "Matemáticas", "Química", "Estadística", "Ciencias de la Computación"]
+        careers: ["Biología", "Ciencias de la Computación", "Estadística", "Física", "Geología", "Matemáticas", "Química"]
       },
       {
         name: "Facultad de Ciencias Agrarias",
-        careers: ["Agronomía", "Zootecnia", "Ingeniería Agronómica", "Ingeniería Agrícola", "Ingeniería Forestal"]
+        careers: ["Agronomía", "Ingeniería Agrícola y Ambiental", "Ingeniería Biológica", "Ingeniería Forestal", "Zootecnia"]
       },
       {
-        name: "Facultad de Ciencias Económicas",
-        careers: ["Economía", "Administración de Empresas", "Contaduría Pública"]
-      },
-      {
-        name: "Facultad de Ciencias Humanas",
-        careers: ["Antropología", "Historia", "Filosofía", "Geografía", "Psicología", "Sociología", "Trabajo Social", "Lingüística"]
-      },
-      {
-        name: "Facultad de Derecho, Ciencias Políticas y Sociales",
-        careers: ["Derecho", "Ciencia Política"]
-      },
-      {
-        name: "Facultad de Enfermería",
-        careers: ["Enfermería"]
-      },
-      {
-        name: "Facultad de Ingeniería",
-        careers: ["Ingeniería Civil", "Ingeniería de Sistemas", "Ingeniería Eléctrica", "Ingeniería Electrónica", "Ingeniería Industrial", "Ingeniería Mecánica", "Ingeniería Química", "Ingeniería Agrícola"]
-      },
-      {
-        name: "Facultad de Medicina",
-        careers: ["Medicina", "Terapia Ocupacional", "Nutrición y Dietética", "Fisioterapia"]
+        name: "Facultad de Ciencias Humanas y Económicas",
+        careers: ["Ciencia Política", "Economía", "Filosofía", "Historia", "Historia del Arte", "Sociología", "Trabajo Social"]
       },
       {
         name: "Facultad de Minas",
-        careers: ["Ingeniería de Minas y Metalurgia", "Ingeniería Ambiental", "Ingeniería Civil", "Ingeniería Eléctrica", "Ingeniería Geológica", "Ingeniería Industrial", "Ingeniería Mecánica", "Ingeniería Química", "Ingeniería de Sistemas"]
+        careers: [
+          "Ingeniería Administrativa",
+          "Ingeniería Civil",
+          "Ingeniería de Control",
+          "Ingeniería de Minas y Metalurgia",
+          "Ingeniería de Petróleos",
+          "Ingeniería de Sistemas e Informática",
+          "Ingeniería Eléctrica",
+          "Ingeniería Electrónica",
+          "Ingeniería Geológica",
+          "Ingeniería Industrial",
+          "Ingeniería Mecánica",
+          "Ingeniería Química",
+          "Ingeniería Sanitaria y Ambiental",
+        ]
       },
     ]
   },
 
   // ── UNIMINUTO ─────────────────────────────────────────────────────
   "uniminuto.edu.co": {
-    name: "UNIMINUTO",
+    name: "Corporación Universitaria Minuto de Dios (UNIMINUTO)",
     campuses: [
-      { id: "uniminuto-bello",  label: "Seccional Bello",       city: "Bello",  department: "Antioquia" },
-      { id: "uniminuto-bogota", label: "Sede Principal Bogotá", city: "Bogotá", department: "Cundinamarca" },
-      { id: "uniminuto-cali",   label: "Seccional Cali",        city: "Cali",   department: "Valle del Cauca" },
+      { id: "uniminuto-bello",   label: "Seccional Antioquia-Chocó (Bello)", city: "Bello",    department: "Antioquia" },
+      { id: "uniminuto-virtual", label: "Sede Virtual y Distancia",          city: "Medellín", department: "Antioquia" },
+      { id: "uniminuto-bogota",  label: "Sede Principal Bogotá",             city: "Bogotá",   department: "Cundinamarca" },
+      { id: "uniminuto-cali",    label: "Seccional Cali",                    city: "Cali",     department: "Valle del Cauca" },
     ],
     faculties: [
       {
         name: "Facultad de Ciencias de la Comunicación",
-        careers: ["Comunicación Social y Periodismo", "Publicidad y Mercadeo", "Diseño Gráfico"]
+        careers: ["Comunicación Social y Periodismo", "Diseño Gráfico", "Publicidad y Mercadeo"]
       },
       {
         name: "Facultad de Ciencias Empresariales",
-        careers: ["Administración de Empresas", "Contaduría Pública", "Economía", "Negocios Internacionales", "Administración en Salud"]
+        careers: [
+          "Administración de Empresas",
+          "Administración en Salud",
+          "Contaduría Pública",
+          "Economía",
+          "Negocios Internacionales",
+          "Tecnología en Gestión de Empresas",
+        ]
       },
       {
         name: "Facultad de Ciencias Humanas y Sociales",
-        careers: ["Psicología", "Trabajo Social", "Filosofía"]
+        careers: ["Filosofía", "Psicología", "Trabajo Social"]
       },
       {
         name: "Facultad de Educación",
-        careers: ["Licenciatura en Educación Básica", "Licenciatura en Educación Infantil", "Licenciatura en Humanidades y Lengua Castellana", "Licenciatura en Inglés como Lengua Extranjera"]
+        careers: [
+          "Licenciatura en Educación Básica con Énfasis en Tecnología e Informática",
+          "Licenciatura en Educación Infantil",
+          "Licenciatura en Educación Religiosa",
+          "Licenciatura en Humanidades y Lengua Castellana",
+          "Licenciatura en Inglés como Lengua Extranjera",
+        ]
       },
       {
         name: "Facultad de Ingeniería",
-        careers: ["Ingeniería de Sistemas", "Ingeniería Civil", "Ingeniería Agroecológica", "Tecnología en Informática", "Tecnología en Gestión de Redes"]
+        careers: [
+          "Ingeniería Agroecológica",
+          "Ingeniería Civil",
+          "Ingeniería de Sistemas",
+          "Tecnología en Gestión de Redes de Datos",
+          "Tecnología en Informática",
+        ]
       },
     ]
   },
@@ -301,10 +437,10 @@ export const INSTITUTIONS = {
   "upb.edu.co": {
     name: "Universidad Pontificia Bolivariana",
     campuses: [
-      { id: "upb-medellin",     label: "Campus Medellín",          city: "Medellín",     department: "Antioquia" },
-      { id: "upb-bucaramanga",  label: "Seccional Bucaramanga",    city: "Bucaramanga",  department: "Santander" },
-      { id: "upb-monteria",     label: "Seccional Montería",       city: "Montería",     department: "Córdoba" },
-      { id: "upb-palmira",      label: "Seccional Palmira",        city: "Palmira",      department: "Valle del Cauca" },
+      { id: "upb-medellin",    label: "Campus Medellín",       city: "Medellín",    department: "Antioquia" },
+      { id: "upb-bucaramanga", label: "Seccional Bucaramanga", city: "Bucaramanga", department: "Santander" },
+      { id: "upb-monteria",    label: "Seccional Montería",    city: "Montería",    department: "Córdoba" },
+      { id: "upb-palmira",     label: "Seccional Palmira",     city: "Palmira",     department: "Valle del Cauca" },
     ],
     faculties: [
       {

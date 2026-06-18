@@ -4,68 +4,42 @@ import SavedProfile from "../models/SavedProfile.js";
 import cloudinary from "../config/cloudinary.js";
 import { INSTITUTIONS } from "../config/institutions.js";
 
-// Si es true, usuarios de campus distinto dentro de la misma institución
-// quedan completamente excluidos del feed (compatibilidad = 0).
-// Si es false (recomendado), el campus ya no es un filtro duro: solo afecta
-// la puntuación de forma indirecta a través de facultad/conexiones mutuas.
-const STRICT_CAMPUS_FILTER = false;
-
-// ALGORITMO DE COMPATIBILIDAD CON BREAKDOWN
-// Pesos: intereses 35% + objetivos 25% + facultad 15% + semestre 10% + conexiones mutuas 15%
-const calcCompatibility = (userA, userB, sharedConnectionsCount = 0, ignoreInstitution = false) => {
+// ALGORITMO DE COMPATIBILIDAD
+// Intereses (max 30) + Objetivos (max 25) + Facultad (20) + Campus (15) + Institución (10) + Ciudad (5)
+// Mínimo garantizado: 1 — ningún perfil se excluye, solo se ordena por score.
+const calcCompatibility = (userA, userB) => {
   let score = 0;
-  const breakdown = {
-    interests: 0,
-    objectives: 0,
-    faculty: 0,
-    semester: 0,
-    mutualConnections: 0,
-    sharedInterests: [],
-    sharedObjectives: [],
-    sharedConnectionsCount: 0
-  };
 
-  if (!ignoreInstitution && userA.institution?.toString() !== userB.institution?.toString()) return { score: 0, breakdown };
+  // Intereses (max 30) — proporcional a coincidencias
+  const interestsA = userA.interests || [];
+  const interestsB = userB.interests || [];
+  const sharedInterests = interestsA.filter(i => interestsB.includes(i));
+  const maxInt = Math.max(interestsA.length, interestsB.length, 1);
+  score += Math.round((sharedInterests.length / maxInt) * 30);
 
-  if (STRICT_CAMPUS_FILTER) {
-    const campusA = userA.currentCampus || userA.campus;
-    const campusB = userB.currentCampus || userB.campus;
-    if (campusA !== campusB) return { score: 0, breakdown };
-  }
+  // Objetivos (max 25) — proporcional a coincidencias
+  const objectivesA = userA.objectives || [];
+  const objectivesB = userB.objectives || [];
+  const sharedObj = objectivesA.filter(o => objectivesB.includes(o));
+  const maxObj = Math.max(objectivesA.length, objectivesB.length, 1);
+  score += Math.round((sharedObj.length / maxObj) * 25);
 
-  // Intereses (35%)
-  const sharedInterests = userA.interests.filter(i => userB.interests.includes(i));
-  const maxInt = Math.max(userA.interests.length, userB.interests.length, 1);
-  breakdown.interests = Math.round((sharedInterests.length / maxInt) * 35);
-  breakdown.sharedInterests = sharedInterests;
-  score += breakdown.interests;
+  // Facultad (+20)
+  if (userA.faculty && userB.faculty && userA.faculty === userB.faculty) score += 20;
 
-  // Objetivos (25%)
-  const sharedObj = userA.objectives.filter(o => userB.objectives.includes(o));
-  const maxObj = Math.max(userA.objectives.length, userB.objectives.length, 1);
-  breakdown.objectives = Math.round((sharedObj.length / maxObj) * 25);
-  breakdown.sharedObjectives = sharedObj;
-  score += breakdown.objectives;
+  // Campus (+15)
+  const campusA = userA.currentCampus || userA.campus;
+  const campusB = userB.currentCampus || userB.campus;
+  if (campusA && campusB && campusA === campusB) score += 15;
 
-  // Facultad (15%)
-  if (userA.faculty && userB.faculty && userA.faculty === userB.faculty) {
-    breakdown.faculty = 15;
-    score += 15;
-  }
+  // Institución (+10)
+  if (userA.institution && userB.institution && userA.institution === userB.institution) score += 10;
 
-  // Semestre (10%, gradual según diferencia)
-  const semDiff = Math.abs((userA.semester || 1) - (userB.semester || 1));
-  if (semDiff === 0) breakdown.semester = 10;
-  else if (semDiff === 1) breakdown.semester = 6;
-  else if (semDiff <= 2) breakdown.semester = 3;
-  score += breakdown.semester;
+  // Ciudad (+5)
+  if (userA.city && userB.city && userA.city === userB.city) score += 5;
 
-  // Conexiones mutuas (15%): hasta 5 conexiones compartidas otorgan el máximo
-  breakdown.sharedConnectionsCount = sharedConnectionsCount;
-  breakdown.mutualConnections = Math.round((Math.min(sharedConnectionsCount, 5) / 5) * 15);
-  score += breakdown.mutualConnections;
-
-  return { score: Math.round(score), breakdown };
+  // Mínimo 1 — nunca excluir un perfil por score cero
+  return Math.max(score, 1);
 };
 
 // OBTENER TODOS LOS USUARIOS
@@ -150,18 +124,6 @@ export const feedUsuarios = async (req, res) => {
     const perfilesGuardados = await SavedProfile.find({ user: yo._id }).select("savedUser");
     const perfilesGuardadosSet = new Set(perfilesGuardados.map(p => p.savedUser.toString()));
 
-    // Mis conexiones aceptadas (para calcular conexiones mutuas con cada candidato)
-    const misConexionesAceptadas = await Connection.find({
-      status: "accepted",
-      $or: [{ from: yo._id }, { to: yo._id }]
-    }).select("from to");
-
-    const misConectadosSet = new Set();
-    misConexionesAceptadas.forEach(conn => {
-      misConectadosSet.add(conn.from.toString());
-      misConectadosSet.add(conn.to.toString());
-    });
-    misConectadosSet.delete(yo._id.toString());
 
     const filterMode = req.query.filter || "myUniversity";
 
@@ -208,69 +170,24 @@ export const feedUsuarios = async (req, res) => {
       }
     }
 
-    // Conexiones aceptadas de los candidatos, para calcular conexiones mutuas
-    const candidatoIds = candidatos.map(c => c._id);
-    const candidatosConexiones = await Connection.find({
-      status: "accepted",
-      $or: [
-        { from: { $in: candidatoIds } },
-        { to:   { $in: candidatoIds } }
-      ]
-    }).select("from to");
+    const sinConectar = candidatos.filter(u => !usuariosConectados.has(u._id.toString()));
 
-    const candidatoConectadosMap = new Map();
-    const candidatoIdsSet = new Set(candidatoIds.map(id => id.toString()));
-    candidatosConexiones.forEach(conn => {
-      const fromStr = conn.from.toString();
-      const toStr = conn.to.toString();
-      if (candidatoIdsSet.has(fromStr)) {
-        if (!candidatoConectadosMap.has(fromStr)) candidatoConectadosMap.set(fromStr, new Set());
-        candidatoConectadosMap.get(fromStr).add(toStr);
-      }
-      if (candidatoIdsSet.has(toStr)) {
-        if (!candidatoConectadosMap.has(toStr)) candidatoConectadosMap.set(toStr, new Set());
-        candidatoConectadosMap.get(toStr).add(fromStr);
-      }
-    });
-
-    const sharedConnectionsFor = (candidatoId) => {
-      const candidatoConectados = candidatoConectadosMap.get(candidatoId.toString());
-      if (!candidatoConectados) return 0;
-      let count = 0;
-      candidatoConectados.forEach(id => { if (misConectadosSet.has(id)) count++; });
-      return count;
-    };
-
-    const feed = candidatos
-      .filter(usuario => !usuariosConectados.has(usuario._id.toString()))
-      .map(usuario => {
-        const { score, breakdown } = calcCompatibility(yo, usuario, sharedConnectionsFor(usuario._id), filterMode === "all");
-        return {
-          usuario,
-          compatibilidad: score,
-          breakdown,
-          guardado: perfilesGuardadosSet.has(usuario._id.toString())
-        };
-      })
-      .filter(r => r.compatibilidad > 0)
+    const feed = sinConectar
+      .map(usuario => ({
+        usuario,
+        compatibilidad: calcCompatibility(yo, usuario),
+        guardado: perfilesGuardadosSet.has(usuario._id.toString()),
+      }))
       .sort((a, b) => b.compatibilidad - a.compatibilidad)
       .slice(skip, skip + limit);
-
-    const totalCompatibles = candidatos
-      .filter(usuario => !usuariosConectados.has(usuario._id.toString()))
-      .map(usuario => {
-        const { score } = calcCompatibility(yo, usuario, sharedConnectionsFor(usuario._id), filterMode === "all");
-        return { compatibilidad: score };
-      })
-      .filter(r => r.compatibilidad > 0).length;
 
     res.status(200).json({
       data: feed,
       pagination: {
         page,
         limit,
-        total: totalCompatibles,
-        pages: Math.ceil(totalCompatibles / limit)
+        total: sinConectar.length,
+        pages: Math.ceil(sinConectar.length / limit),
       },
     });
   } catch (error) {

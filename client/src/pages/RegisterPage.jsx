@@ -11,6 +11,7 @@ import Logo from "../components/ui/Logo";
 import RecaptchaField from "../components/RecaptchaField";
 import useResponsiveGlobeSize from "../hooks/useResponsiveGlobeSize";
 import { LIGHT_COLORS as COLORS, getInputBase, getLabelStyle, getFocusIn, getFocusOut } from "../styles/authTheme";
+import AcademicSelect from "../components/ui/AcademicSelect";
 
 const inputBase = getInputBase(COLORS);
 const labelStyle = getLabelStyle(COLORS);
@@ -397,13 +398,19 @@ export default function RegisterPage() {
                 {campuses.length > 0 && (
                   <div>
                     <label style={labelStyle}>Campus</label>
-                    <select value={currentCampus} onChange={(e) => setCurrentCampus(e.target.value)}
-                      style={{ ...inputBase, cursor: "pointer", appearance: "auto" }}
-                      onFocus={focusIn} onBlur={focusOut}
-                    >
-                      <option value="">Selecciona tu campus</option>
-                      {campuses.map((c) => <option key={c.id} value={c.id}>{c.label} — {c.city}</option>)}
-                    </select>
+                    <AcademicSelect
+                      options={campuses.map(c => `${c.label} — ${c.city}`)}
+                      value={(() => {
+                        if (!currentCampus) return "";
+                        const found = campuses.find(c => c.id === currentCampus);
+                        return found ? `${found.label} — ${found.city}` : "";
+                      })()}
+                      onChange={(labelCity) => {
+                        const found = campuses.find(c => `${c.label} — ${c.city}` === labelCity);
+                        if (found) setCurrentCampus(found.id);
+                      }}
+                      placeholder="Selecciona tu campus"
+                    />
                   </div>
                 )}
 
@@ -454,28 +461,22 @@ export default function RegisterPage() {
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                       <div>
                         <label style={labelStyle}>Facultad</label>
-                        <select
+                        <AcademicSelect
+                          options={faculties.map(f => f.name)}
                           value={faculty}
-                          onChange={e => { setFaculty(e.target.value); setCareer(""); }}
-                          style={{ ...inputBase, height: 46, cursor: "pointer", appearance: "auto" }}
-                          onFocus={focusIn} onBlur={focusOut}
-                        >
-                          <option value="">Selecciona tu facultad</option>
-                          {faculties.map(f => <option key={f.name} value={f.name}>{f.name}</option>)}
-                        </select>
+                          onChange={(v) => { setFaculty(v); setCareer(""); }}
+                          placeholder="Selecciona tu facultad"
+                        />
                       </div>
                       {availableCareers.length > 0 && (
                         <div>
                           <label style={labelStyle}>Carrera</label>
-                          <select
+                          <AcademicSelect
+                            options={availableCareers}
                             value={career}
-                            onChange={e => setCareer(e.target.value)}
-                            style={{ ...inputBase, height: 46, cursor: "pointer", appearance: "auto" }}
-                            onFocus={focusIn} onBlur={focusOut}
-                          >
-                            <option value="">Selecciona tu carrera</option>
-                            {availableCareers.map(c => <option key={c} value={c}>{c}</option>)}
-                          </select>
+                            onChange={setCareer}
+                            placeholder="Selecciona tu carrera"
+                          />
                         </div>
                       )}
                     </div>
@@ -495,14 +496,12 @@ export default function RegisterPage() {
 
                 <div>
                   <label style={labelStyle}>Semestre</label>
-                  <select value={semester} onChange={(e) => setSemester(e.target.value)}
-                    style={{ ...inputBase, height: 46, cursor: "pointer", appearance: "auto" }}
-                    onFocus={focusIn} onBlur={focusOut}
-                  >
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((s) => (
-                      <option key={s} value={s}>Semestre {s}</option>
-                    ))}
-                  </select>
+                  <AcademicSelect
+                    options={Array.from({ length: 12 }, (_, i) => `Semestre ${i + 1}`)}
+                    value={semester ? `Semestre ${semester}` : ""}
+                    onChange={(v) => setSemester(Number(v.replace("Semestre ", "")))}
+                    placeholder="Selecciona tu semestre"
+                  />
                 </div>
 
                 <div>

@@ -11,21 +11,27 @@ import useAuthStore from "../../store/authStore";
 import { useTheme } from "../../context/ThemeContext";
 import api from "../../api/axios";
 
-function Badge({ count }) {
+const BADGE_COLORS = {
+  chat:     "linear-gradient(135deg, #FF3D9E 0%, #FF3D3D 100%)",
+  pending:  "linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)",
+  default:  "linear-gradient(135deg, #FF3D9E 0%, #FF6FB5 100%)",
+};
+
+function Badge({ count, color }) {
   if (!count || count < 1) return null;
   return (
     <span style={{
-      position: "absolute", top: 2, right: 2,
-      minWidth: 18, height: 18,
-      background: "linear-gradient(135deg, #FF3D9E 0%, #FF6FB5 100%)",
+      position: "absolute", top: -5, right: -5,
+      minWidth: 20, height: 20,
+      background: color || BADGE_COLORS.default,
       color: "#fff",
-      fontSize: 10, fontWeight: 800,
+      fontSize: 11, fontWeight: 800,
       borderRadius: 999,
       display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "0 4px",
+      padding: "0 5px",
       border: "2px solid var(--badge-border, #fff)",
       lineHeight: 1,
-      boxShadow: "0 1px 4px rgba(255,61,158,0.4)",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
       zIndex: 20,
       animation: "badge-pop 0.2s cubic-bezier(0.34,1.56,0.64,1)",
     }}>
@@ -84,10 +90,10 @@ export default function Sidebar() {
 
   const NAV_ITEMS = [
     { icon: Home,          label: "Inicio",      path: "/feed",                badge: 0 },
-    { icon: MessageCircle, label: "Mensajes",    path: "/chat",                badge: unreadMessages },
+    { icon: MessageCircle, label: "Mensajes",    path: "/chat",                badge: unreadMessages,  badgeColor: BADGE_COLORS.chat },
     { icon: Bookmark,      label: "Guardados",   path: "/saved",               badge: 0 },
     { icon: Users,         label: "Conexiones",  path: "/connections",         badge: 0 },
-    { icon: Inbox,         label: "Solicitudes", path: "/connections/pending", badge: pendingCount },
+    { icon: Inbox,         label: "Solicitudes", path: "/connections/pending", badge: pendingCount,   badgeColor: BADGE_COLORS.pending },
     ...(usuario?.role === "admin"
       ? [{ icon: LayoutDashboard, label: "Admin", path: "/admin", badge: 0 }]
       : []),
@@ -139,7 +145,7 @@ export default function Sidebar() {
 
         {/* Nav items */}
         <nav className="flex-1 flex flex-col gap-1 py-4 px-3 overflow-hidden">
-          {NAV_ITEMS.map(({ icon: Icon, label, path, badge }) => {
+          {NAV_ITEMS.map(({ icon: Icon, label, path, badge, badgeColor }) => {
             const active = isActive(path);
             return (
               <Link
@@ -157,9 +163,9 @@ export default function Sidebar() {
                     transition={{ type: "spring", stiffness: 380, damping: 32 }}
                   />
                 )}
-                <span className="relative flex-shrink-0 z-10">
+                <span className="relative flex-shrink-0 z-10" style={{ overflow: "visible" }}>
                   <Icon className="h-5 w-5" />
-                  {!isExpanded && <Badge count={badge} />}
+                  {!isExpanded && <Badge count={badge} color={badgeColor} />}
                 </span>
                 <span
                   className={`text-sm whitespace-nowrap relative z-10 transition-opacity duration-300 ${
@@ -172,7 +178,7 @@ export default function Sidebar() {
                   <span style={{
                     marginLeft: "auto",
                     minWidth: 20, height: 20,
-                    background: "linear-gradient(135deg, #FF3D9E 0%, #FF6FB5 100%)",
+                    background: badgeColor || BADGE_COLORS.default,
                     color: "#fff",
                     fontSize: 11, fontWeight: 800,
                     borderRadius: 999,
@@ -258,7 +264,7 @@ export default function Sidebar() {
           "--badge-border": colors.surface,
         }}
       >
-        {MOBILE_ITEMS.map(({ icon: Icon, label, path, badge }) => {
+        {MOBILE_ITEMS.map(({ icon: Icon, label, path, badge, badgeColor }) => {
           const active = isActive(path);
           return (
             <Link
@@ -267,9 +273,9 @@ export default function Sidebar() {
               className="flex-1 flex flex-col items-center justify-center gap-0.5"
               style={{ color: active ? colors.pink : colors.textMuted }}
             >
-              <span className="relative">
+              <span className="relative" style={{ overflow: "visible" }}>
                 <Icon className="h-5 w-5" />
-                <Badge count={badge} />
+                <Badge count={badge} color={badgeColor} />
               </span>
               <span className="text-[10px]">{label}</span>
             </Link>

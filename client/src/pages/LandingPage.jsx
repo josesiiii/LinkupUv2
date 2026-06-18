@@ -97,7 +97,7 @@ export default function LandingPage() {
       <Navbar />
 
       {/* 01 — Hero con shader WebGL */}
-      <div style={{ position: 'relative' }}>
+      <div id="inicio" style={{ position: 'relative' }}>
         <Hero
           headline={{ line1: 'Conecta. Colabora.', line2: 'Crece.' }}
           subtitle="La red de networking universitario diseñada para Colombia. Encuentra personas, proyectos y oportunidades en tu comunidad académica."

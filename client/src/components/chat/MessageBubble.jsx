@@ -1,6 +1,6 @@
 // src/components/chat/MessageBubble.jsx
 import { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, Pencil, Trash2, Reply, Forward, Copy, Pin, PinOff, Star } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Reply, Forward, Copy, Pin, PinOff, Star, Check } from "lucide-react";
 import Avatar from "./Avatar";
 import Dropdown from "../ui/Dropdown";
 import { formatTime } from "./utils";
@@ -52,7 +52,7 @@ export default function MessageBubble({
     { id: "copy", label: "Copiar", icon: Copy, onClick: () => navigator.clipboard?.writeText(message.text), visible: !isDeleted },
     { id: "pin", label: isPinned ? "Desfijar mensaje" : "Fijar mensaje", icon: isPinned ? PinOff : Pin, onClick: () => onTogglePin?.(message, isPinned), visible: !isDeleted },
     { id: "star", label: isStarred ? "Quitar destacado" : "Destacar", icon: Star, onClick: () => onToggleStar?.(message, isStarred), visible: !isDeleted },
-    { id: "edit", label: isReadByOther ? "Editar (ya fue leído)" : "Editar", icon: Pencil, onClick: () => onEditStart?.(), visible: isOwn && !isDeleted, disabled: isReadByOther },
+    { id: "edit", label: "Editar", icon: Pencil, onClick: () => onEditStart?.(), visible: isOwn && !isDeleted && !isReadByOther },
     { id: "deleteForMe", label: "Eliminar para mí", icon: Trash2, onClick: () => onDeleteForMe?.(message._id) },
     { id: "deleteForEveryone", label: "Eliminar para todos", icon: Trash2, danger: true, onClick: () => onDeleteRequest?.(), visible: isOwn && !isDeleted },
   ].filter((a) => a.visible !== false);
@@ -177,7 +177,7 @@ export default function MessageBubble({
           </div>
         )}
 
-        {/* Timestamp + editado + indicadores */}
+        {/* Timestamp + editado + read receipts */}
         {!isEditing && !isConfirmingDelete && (
           <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3, padding: "0 4px" }}>
             {isPinned && <Pin size={11} color={colors.textMuted} />}
@@ -185,6 +185,12 @@ export default function MessageBubble({
             <span style={{ fontSize: 11, color: colors.textMuted }}>{formatTime(message.createdAt)}</span>
             {message.edited && !isDeleted && (
               <span style={{ fontSize: 11, color: colors.textMuted, fontStyle: "italic" }}>(editado)</span>
+            )}
+            {isOwn && !isDeleted && (
+              <span style={{ display: "flex", alignItems: "center" }}>
+                <Check size={11} strokeWidth={2.5} color={isReadByOther ? colors.pink : colors.textMuted} />
+                <Check size={11} strokeWidth={2.5} style={{ marginLeft: -5 }} color={isReadByOther ? colors.pink : colors.textMuted} />
+              </span>
             )}
           </div>
         )}

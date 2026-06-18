@@ -75,7 +75,7 @@ function FeatureCard({ f, index }) {
 export default function UniversitiesSection() {
   return (
     <section
-      id="universidades"
+      id="networking"
       style={{
         padding: '100px 24px',
         background: '#fdf2f8',
