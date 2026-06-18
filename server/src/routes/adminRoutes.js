@@ -4,13 +4,15 @@ import soloAdmin from "../middleware/soloAdmin.js";
 import {
   obtenerTodosUsuarios,
   eliminarUsuario,
-  toggleActivarUsuario
+  toggleActivarUsuario,
+  getEstadisticas,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
 
-router.get("/users",                protegerRuta, soloAdmin, obtenerTodosUsuarios);
-router.delete("/users/:id",         protegerRuta, soloAdmin, eliminarUsuario);
-router.patch("/users/:id/toggle",   protegerRuta, soloAdmin, toggleActivarUsuario);
+router.get("/stats",              protegerRuta, soloAdmin, getEstadisticas);
+router.get("/users",              protegerRuta, soloAdmin, obtenerTodosUsuarios);
+router.delete("/users/:id",       protegerRuta, soloAdmin, eliminarUsuario);
+router.patch("/users/:id/toggle", protegerRuta, soloAdmin, toggleActivarUsuario);
 
 export default router;

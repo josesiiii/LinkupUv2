@@ -1,296 +1,172 @@
-// src/components/landing/OpportunitiesSection.jsx
+// Para Empresas — reemplaza la sección de oportunidades hardcodeada
 import { useState } from 'react';
 
-const ITEMS = [
+const VALUE_PROPS = [
   {
-    id: 1,
-    type: 'Hackathon',
-    icon: '⚡',
-    title: 'HackITM 2025',
-    org: 'Instituto Tecnológico Metropolitano',
-    desc: '48h para construir soluciones con impacto social. Equipos de 3-5 personas. Premios en efectivo y mentoría.',
-    tags: ['Presencial', 'Medellín', 'Open'],
-    deadline: '20 Jun',
-    spots: '12 equipos',
+    icon: '🔍',
+    title: 'Talent Discovery',
+    desc: 'Filtra perfiles por carrera, habilidades, semestre e institución. Accede a talento universitario activo antes de que egrese.',
     accent: '#f1adc2',
-    featured: true,
   },
   {
-    id: 2,
-    type: 'Investigación',
-    icon: '🔬',
-    title: 'Grupo IA & Salud',
-    org: 'Universidad de Antioquia',
-    desc: 'Semillero de investigación en inteligencia artificial aplicada a diagnóstico médico. Publicaciones ISI.',
-    tags: ['Remoto', 'Postgrado', 'Abierto'],
-    deadline: 'Continuo',
-    spots: '3 cupos',
+    icon: '📢',
+    title: 'Employer Branding',
+    desc: 'Hazte visible dentro de la comunidad universitaria colombiana. Tu marca empleadora presente donde está el talento.',
     accent: '#d8b4fe',
-    featured: false,
   },
   {
-    id: 3,
-    type: 'Emprendimiento',
-    icon: '🚀',
-    title: 'EduFlow Startup',
-    org: 'Startup — Campus EAFIT',
-    desc: 'Buscamos co-fundador técnico para plataforma de microaprendizaje. Pre-seed. Equity disponible.',
-    tags: ['Híbrido', 'Equity', 'Series A'],
-    deadline: 'Cerrado pronto',
-    spots: '1 co-founder',
-    accent: '#f7c9d7',
-    featured: false,
-  },
-  {
-    id: 4,
-    type: 'Vacante',
-    icon: '💼',
-    title: 'Dev React Jr.',
-    org: 'MiTienda.co · Medellín',
-    desc: 'Posición part-time para estudiante de sistemas o afines. React, Tailwind, Node. Modalidad híbrida.',
-    tags: ['Part-time', 'Pago', 'Híbrido'],
-    deadline: '15 Jun',
-    spots: '2 posiciones',
+    icon: '📈',
+    title: 'Pipeline de talento',
+    desc: 'Construye relaciones con futuros profesionales desde hoy. Identifica, conecta y mantén contacto con perfiles de alto potencial.',
     accent: '#c4b5fd',
-    featured: false,
-  },
-  {
-    id: 5,
-    type: 'Proyecto',
-    icon: '🌱',
-    title: 'MapUrbe',
-    org: 'Proyecto independiente',
-    desc: 'App de mapeo ciudadano colaborativo. Stack: React Native + Firebase. Buscamos diseñador y backend.',
-    tags: ['Remoto', 'Open source', 'Voluntario'],
-    deadline: 'Abierto',
-    spots: '2 roles',
-    accent: '#f1adc2',
-    featured: false,
-  },
-  {
-    id: 6,
-    type: 'Investigación',
-    icon: '🤖',
-    title: 'NLP para Lenguas Nativas',
-    org: 'UNAL Bogotá',
-    desc: 'Proyecto de procesamiento de lenguaje natural para lenguas indígenas colombianas. Convocatoria Colciencias.',
-    tags: ['Presencial', 'Financiado', 'Bogotá'],
-    deadline: '30 Jun',
-    spots: '4 estudiantes',
-    accent: '#d8b4fe',
-    featured: false,
   },
 ];
 
-const TYPE_COLORS = {
-  'Hackathon':     { bg: 'rgba(241,173,194,0.12)', text: '#f1adc2' },
-  'Investigación': { bg: 'rgba(216,180,254,0.12)', text: '#d8b4fe' },
-  'Emprendimiento':{ bg: 'rgba(247,201,215,0.15)', text: '#e892b0' },
-  'Vacante':       { bg: 'rgba(196,181,253,0.12)', text: '#c4b5fd' },
-  'Proyecto':      { bg: 'rgba(241,173,194,0.12)', text: '#f1adc2' },
-};
+const METRICS = [
+  { value: '35%', label: 'de los estudiantes buscan prácticas o empleo mientras estudian' },
+  { value: '72%', label: 'de los profesionales valoran más el networking que el currículum en sus primeros empleos' },
+  { value: '4x', label: 'mayor tasa de retención en empresas que contrataron con networking universitario' },
+];
 
-function OpportunityCard({ item }) {
-  const [hovered, setHovered] = useState(false);
-  const typeStyle = TYPE_COLORS[item.type] || TYPE_COLORS['Proyecto'];
+const HOW_ITEMS = [
+  { step: '01', title: 'Crea tu perfil empresarial', desc: 'Presenta tu empresa, cultura y oportunidades disponibles.' },
+  { step: '02', title: 'Define tu perfil de talento', desc: 'Filtra por universidad, carrera, semestre e intereses específicos.' },
+  { step: '03', title: 'Conecta directamente', desc: 'Inicia conversaciones con candidatos calificados sin intermediarios.' },
+];
 
+function ValueCard({ item, index }) {
+  const [hov, setHov] = useState(false);
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
       style={{
-        background: 'rgba(255,255,255,0.65)',
+        background: 'rgba(255,255,255,0.75)',
         backdropFilter: 'blur(20px)',
-        border: hovered
-          ? `1px solid ${item.accent}60`
-          : '1px solid rgba(241,173,194,0.2)',
-        borderRadius: 24,
-        padding: '24px 24px 20px',
-        transition: 'all 280ms cubic-bezier(0.16,1,0.3,1)',
-        transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
-        boxShadow: hovered
-          ? `0 16px 40px ${item.accent}30, 0 4px 12px rgba(60,47,65,0.05)`
-          : '0 4px 16px rgba(241,173,194,0.08)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-        position: 'relative',
-        overflow: 'hidden',
+        border: hov ? `1px solid ${item.accent}60` : '1px solid rgba(241,173,194,0.2)',
+        borderRadius: 20,
+        padding: 28,
+        transition: 'all 260ms cubic-bezier(0.16,1,0.3,1)',
+        transform: hov ? 'translateY(-3px)' : 'translateY(0)',
+        boxShadow: hov ? `0 12px 32px ${item.accent}22` : '0 2px 12px rgba(60,47,65,0.04)',
       }}
     >
-      {item.featured && (
-        <div style={{
-          position: 'absolute', top: 16, right: 16,
-          padding: '3px 10px', borderRadius: 100,
-          background: 'linear-gradient(135deg, #f1adc2, #d8b4fe)',
-          fontSize: '0.68rem', fontWeight: 700, color: '#3c2f41',
-          letterSpacing: '0.04em', textTransform: 'uppercase',
-        }}>
-          Destacado
-        </div>
-      )}
-
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-          background: `${item.accent}20`,
-          border: `1px solid ${item.accent}40`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '1.2rem',
-        }}>
-          {item.icon}
-        </div>
-        <div style={{ flex: 1, minWidth: 0, paddingRight: item.featured ? 64 : 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-            <span style={{
-              fontSize: '0.7rem', fontWeight: 600,
-              background: typeStyle.bg, color: typeStyle.text,
-              padding: '2px 8px', borderRadius: 100,
-            }}>
-              {item.type}
-            </span>
-          </div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#3c2f41', lineHeight: 1.3 }}>
-            {item.title}
-          </div>
-          <div style={{ fontSize: '0.78rem', color: '#786b7d', marginTop: 1 }}>{item.org}</div>
-        </div>
-      </div>
-
-      <p style={{ fontSize: '0.83rem', color: '#5e4e63', lineHeight: 1.65, margin: 0 }}>
-        {item.desc}
-      </p>
-
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-        {item.tags.map(t => (
-          <span key={t} style={{
-            padding: '3px 9px', borderRadius: 100,
-            fontSize: '0.7rem', fontWeight: 500,
-            background: 'rgba(253,228,236,0.5)',
-            border: '1px solid rgba(241,173,194,0.25)',
-            color: '#786b7d',
-          }}>
-            {t}
-          </span>
-        ))}
-      </div>
-
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        paddingTop: 12,
-        borderTop: '1px solid rgba(241,173,194,0.15)',
-      }}>
-        <div style={{ display: 'flex', gap: 16 }}>
-          <div>
-            <div style={{ fontSize: '0.68rem', color: '#786b7d', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cierre</div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#3c2f41' }}>{item.deadline}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '0.68rem', color: '#786b7d', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cupos</div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#3c2f41' }}>{item.spots}</div>
-          </div>
-        </div>
-        <button style={{
-          padding: '8px 18px',
-          borderRadius: 100,
-          background: hovered ? item.accent : `${item.accent}18`,
-          border: `1px solid ${item.accent}40`,
-          color: hovered ? '#3c2f41' : '#5e4e63',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          cursor: 'pointer',
-          transition: 'all 180ms ease',
-          boxShadow: hovered ? `0 4px 14px ${item.accent}50` : 'none',
-        }}>
-          Ver más
-        </button>
-      </div>
+      <div style={{ fontSize: '1.8rem', marginBottom: 16 }}>{item.icon}</div>
+      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#3c2f41', marginBottom: 8 }}>{item.title}</h3>
+      <p style={{ fontSize: '0.85rem', color: '#786b7d', lineHeight: 1.65, margin: 0 }}>{item.desc}</p>
     </div>
   );
 }
 
-export default function OpportunitiesSection() {
-  const [filter, setFilter] = useState('Todos');
-  const filters = ['Todos', 'Hackathon', 'Investigación', 'Emprendimiento', 'Vacante', 'Proyecto'];
-
-  const filtered = filter === 'Todos' ? ITEMS : ITEMS.filter(i => i.type === filter);
-
+export default function CompaniesSection() {
   return (
     <section
-      id="oportunidades"
+      id="empresas"
       style={{
-        minHeight: '100vh',
         padding: '100px 24px',
-        background: 'linear-gradient(180deg, #fdf2f8 0%, #fde4ec 40%, #fdf2f8 100%)',
+        background: 'linear-gradient(180deg, #fdf2f8 0%, #fde4ec 50%, #fdf2f8 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      <div style={{
-        position: 'absolute', bottom: '5%', right: '-5%',
-        width: 450, height: 450,
-        background: 'radial-gradient(circle, rgba(196,181,253,0.15) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }}/>
+      <div style={{ position: 'absolute', bottom: '5%', right: '-5%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(196,181,253,0.12) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
-      <div style={{ maxWidth: 1080, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+      <div style={{ maxWidth: 1060, margin: '0 auto' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 64 }}>
           <span style={{
-            display: 'inline-block',
-            padding: '5px 16px', borderRadius: 100,
-            background: 'rgba(196,181,253,0.15)',
-            border: '1px solid rgba(196,181,253,0.4)',
-            fontSize: '0.78rem', fontWeight: 600,
-            color: '#c4b5fd', letterSpacing: '0.08em',
-            textTransform: 'uppercase', marginBottom: 14,
+            display: 'inline-block', padding: '5px 16px', borderRadius: 100,
+            background: 'rgba(196,181,253,0.15)', border: '1px solid rgba(196,181,253,0.4)',
+            fontSize: '0.78rem', fontWeight: 600, color: '#c4b5fd',
+            letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16,
           }}>
-            04 — Oportunidades
+            Para Empresas
           </span>
           <h2 style={{
-            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-            fontWeight: 800, color: '#3c2f41',
-            letterSpacing: '-0.03em', marginBottom: 12,
-            fontFamily: "'Syne', sans-serif", lineHeight: 1.1,
+            fontSize: 'clamp(2rem, 4vw, 3.2rem)', fontWeight: 800, color: '#3c2f41',
+            letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 16,
+            fontFamily: "'Syne', sans-serif",
           }}>
-            Tu próximo gran proyecto te espera
+            Accede al talento universitario colombiano
           </h2>
-          <p style={{ color: '#786b7d', fontSize: '1.05rem', maxWidth: 500, margin: '0 auto', lineHeight: 1.7 }}>
-            Hackathons, investigación, emprendimientos y vacantes estudiantiles en un solo lugar.
+          <p style={{ color: '#786b7d', fontSize: '1.05rem', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>
+            Conecta tu empresa con estudiantes y recién graduados de las principales universidades del país. Sin intermediarios, sin ruido.
           </p>
         </div>
 
-        {/* Filter pills */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 40 }}>
-          {filters.map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              style={{
-                padding: '7px 18px', borderRadius: 100,
-                fontSize: '0.83rem', fontWeight: 500,
-                border: '1px solid',
-                cursor: 'pointer',
-                transition: 'all 180ms ease',
-                background: filter === f ? '#f1adc2' : 'rgba(255,255,255,0.55)',
-                backdropFilter: 'blur(12px)',
-                borderColor: filter === f ? '#f1adc2' : 'rgba(241,173,194,0.3)',
-                color: filter === f ? '#3c2f41' : '#786b7d',
-                boxShadow: filter === f ? '0 2px 10px rgba(241,173,194,0.4)' : 'none',
-              }}
-            >
-              {f}
-            </button>
+        {/* Value props */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 72 }}>
+          {VALUE_PROPS.map((item, i) => <ValueCard key={i} item={item} index={i} />)}
+        </div>
+
+        {/* Métricas */}
+        <div style={{
+          background: 'rgba(255,255,255,0.6)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(241,173,194,0.2)',
+          borderRadius: 24,
+          padding: '40px 48px',
+          marginBottom: 72,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 32,
+        }}>
+          {METRICS.map((m, i) => (
+            <div key={i} style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: '#f1adc2', fontFamily: "'Syne', sans-serif", letterSpacing: '-0.02em', marginBottom: 8 }}>
+                {m.value}
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#786b7d', lineHeight: 1.6, margin: 0 }}>{m.label}</p>
+            </div>
           ))}
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: 20,
-        }}>
-          {filtered.map(item => (
-            <OpportunityCard key={item.id} item={item} />
-          ))}
+        {/* Cómo funciona para empresas */}
+        <div style={{ marginBottom: 60 }}>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#3c2f41', textAlign: 'center', marginBottom: 40, fontFamily: "'Syne', sans-serif" }}>
+            Así de simple
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
+            {HOW_ITEMS.map((item, i) => (
+              <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                  background: 'rgba(241,173,194,0.15)', border: '1px solid rgba(241,173,194,0.4)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.72rem', fontWeight: 800, color: '#f1adc2', letterSpacing: '0.04em',
+                }}>
+                  {item.step}
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#3c2f41', marginBottom: 4 }}>{item.title}</h4>
+                  <p style={{ fontSize: '0.83rem', color: '#786b7d', lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div style={{ textAlign: 'center' }}>
+          <a
+            href="mailto:empresas@linkup.dev"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '14px 36px', borderRadius: 100,
+              background: 'linear-gradient(135deg, #c4b5fd 0%, #f1adc2 100%)',
+              color: '#3c2f41', fontWeight: 700, fontSize: '0.95rem',
+              textDecoration: 'none',
+              boxShadow: '0 4px 24px rgba(196,181,253,0.4)',
+              transition: 'transform 180ms ease, box-shadow 180ms ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(196,181,253,0.5)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(196,181,253,0.4)'; }}
+          >
+            Hablar con el equipo →
+          </a>
+          <p style={{ fontSize: '0.8rem', color: '#786b7d', marginTop: 12 }}>
+            Respondemos en menos de 24 horas
+          </p>
         </div>
       </div>
     </section>

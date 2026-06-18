@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Home, MessageCircle, Bookmark, Users, Inbox, UserCircle, ChevronUp,
+  Home, MessageCircle, Bookmark, Users, Inbox, UserCircle, ChevronUp, LayoutDashboard,
 } from "lucide-react";
 import Logo from "../ui/Logo";
 import AccountSwitcher from "./AccountSwitcher";
@@ -88,6 +88,9 @@ export default function Sidebar() {
     { icon: Bookmark,      label: "Guardados",   path: "/saved",               badge: 0 },
     { icon: Users,         label: "Conexiones",  path: "/connections",         badge: 0 },
     { icon: Inbox,         label: "Solicitudes", path: "/connections/pending", badge: pendingCount },
+    ...(usuario?.role === "admin"
+      ? [{ icon: LayoutDashboard, label: "Admin", path: "/admin", badge: 0 }]
+      : []),
   ];
 
   const MOBILE_ITEMS = [

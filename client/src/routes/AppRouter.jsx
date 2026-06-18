@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
+import AdminRoute from "./AdminRoute";
 
 // ── Páginas públicas ────────────────────────────────────────────────
 const LandingPage  = lazy(() => import("../pages/LandingPage"));
@@ -20,6 +21,7 @@ const ChatPage                = lazy(() => import("../pages/ChatPage"));
 const ConnectionsPage         = lazy(() => import("../pages/ConnectionsPage"));
 const PendingConnectionsPage  = lazy(() => import("../pages/PendingConnectionsPage"));
 const PublicProfilePage       = lazy(() => import("../pages/PublicProfilePage"));
+const AdminPage               = lazy(() => import("../pages/AdminPage"));
 
 // ── Fallback de carga ───────────────────────────────────────────────
 // Se muestra mientras el chunk de la página se descarga (~100-300ms la primera vez).
@@ -127,6 +129,16 @@ function AppRouter() {
               <ProtectedRoute>
                 <PublicProfilePage />
               </ProtectedRoute>
+            }
+          />
+
+          {/* Panel de administración */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminPage />
+              </AdminRoute>
             }
           />
 
