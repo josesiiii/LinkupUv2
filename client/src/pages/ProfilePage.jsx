@@ -8,6 +8,7 @@ import EditProfileModal from "../components/profile/EditProfileModal";
 import GalleryEditor from "../components/profile/GalleryEditor";
 import StoryViewer from "../components/stories/StoryViewer";
 import StoryUploader from "../components/stories/StoryUploader";
+import ImageCropModal from "../components/ui/ImageCropModal";
 import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 import useStories from "../hooks/useStories";
@@ -54,6 +55,7 @@ export default function ProfilePage() {
   const { theme, colors } = useTheme();
   const [editOpen, setEditOpen] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerCropSrc, setBannerCropSrc] = useState(null);
   const bannerInputRef = useRef(null);
   const [amigos, setAmigos] = useState([]);
   const [loadingAmigos, setLoadingAmigos] = useState(true);
@@ -68,11 +70,19 @@ export default function ProfilePage() {
       .finally(() => setLoadingAmigos(false));
   }, [usuario?._id]);
 
-  const handleBannerChange = async (e) => {
+  const handleBannerChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = "";
+    const reader = new FileReader();
+    reader.onload = () => setBannerCropSrc(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleBannerCropSave = async (blob) => {
     setBannerUploading(true);
     try {
+      const file = new File([blob], "banner.jpg", { type: "image/jpeg" });
       const form = new FormData();
       form.append("image", file);
       const res = await api.post("/users/profile-banner", form);
@@ -81,7 +91,7 @@ export default function ProfilePage() {
       alert("No se pudo subir el banner.");
     } finally {
       setBannerUploading(false);
-      e.target.value = "";
+      setBannerCropSrc(null);
     }
   };
 
@@ -118,6 +128,15 @@ export default function ProfilePage() {
 
   return (
     <AppLayout>
+      <ImageCropModal
+        image={bannerCropSrc}
+        aspectRatio={16 / 9}
+        cropShape="rect"
+        title="Editar banner"
+        onSave={handleBannerCropSave}
+        onClose={() => setBannerCropSrc(null)}
+      />
+
       <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 24px 64px" }}>
 
         {/* Banner */}

@@ -144,7 +144,7 @@ export default function Sidebar() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 flex flex-col gap-1 py-4 px-3 overflow-hidden">
+        <nav className="flex-1 flex flex-col gap-3 py-4 px-3 overflow-hidden">
           {NAV_ITEMS.map(({ icon: Icon, label, path, badge, badgeColor }) => {
             const active = isActive(path);
             return (
