@@ -91,9 +91,14 @@ function LineChart({ data = [], color = C.pink, h = 160 }) {
         {pts.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={2.5} fill={color} />)}
       </svg>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-        {[data[0], data[Math.floor(data.length / 2)], data.at(-1)].map((d, i) => (
-          <span key={i} style={{ fontSize: 10, color: C.muted }}>{d?._id?.slice(5)}</span>
-        ))}
+        {(() => {
+          const n = data.length;
+          const cnt = Math.min(n, 5);
+          const idxs = cnt <= 1 ? [0] : Array.from({ length: cnt }, (_, i) => Math.round((i / (cnt - 1)) * (n - 1)));
+          return idxs.map((idx, i) => (
+            <span key={i} style={{ fontSize: 10, color: C.muted }}>{data[idx]?._id?.slice(5)}</span>
+          ));
+        })()}
       </div>
     </div>
   );
@@ -206,7 +211,7 @@ function SmallStat({ label, value, color = C.dark }) {
   return (
     <Card style={{ padding: "14px 18px" }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 20, fontWeight: 800, color }}>{typeof value === "number" ? value.toLocaleString("es-CO") : "—"}</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color }}>{typeof value === "number" ? value.toLocaleString("es-CO") : (value ?? "—")}</div>
     </Card>
   );
 }
@@ -419,34 +424,72 @@ function UserTable({ users, compact, onToggle, onDelete, actionLoading }) {
   );
 }
 
-function AnalyticsView({ stats, mobile }) {
+function AnalyticsView({ stats, mobile, dateRange, setDateRange }) {
   if (!stats) return <Loading />;
   const { timeSeries: ts, breakdowns: bd, overview: o } = stats;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Selector de período */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <span style={{ fontSize: 12, color: C.muted, fontWeight: 600 }}>Período:</span>
+        {[7, 30, 90].map(d => (
+          <button
+            key={d}
+            onClick={() => setDateRange(d)}
+            style={{
+              padding: "6px 14px", borderRadius: 20, border: `1px solid ${dateRange === d ? C.pink : C.border}`,
+              background: dateRange === d ? C.pinkL : C.card,
+              color: dateRange === d ? C.pink : C.muted,
+              fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all .15s",
+            }}
+          >
+            {d === 7 ? "7 días" : d === 30 ? "30 días" : "90 días"}
+          </button>
+        ))}
+      </div>
+
+      {/* Series temporales principales */}
       <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 14 }}>
         <Card>
-          <CardHeader title="Crecimiento de usuarios" sub="Registros por día · últimos 30 días" />
+          <CardHeader title="Crecimiento de usuarios" sub={`Registros por día · últimos ${dateRange} días`} />
           <div style={{ padding: "16px 22px 18px" }}>
             <LineChart data={ts.crecimientoUsuarios} color={C.pink} h={160} />
           </div>
         </Card>
         <Card>
-          <CardHeader title="Actividad de conexiones" sub="Solicitudes enviadas por día" />
+          <CardHeader title="Actividad de conexiones" sub={`Solicitudes enviadas por día · últimos ${dateRange} días`} />
           <div style={{ padding: "16px 22px 18px" }}>
             <LineChart data={ts.actividadConexiones} color={C.lav} h={160} />
           </div>
         </Card>
       </div>
 
+      {/* Métricas rápidas de calidad */}
+      <div style={{ display: "grid", gridTemplateColumns: mobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 12 }}>
+        <SmallStat label="Tasa de lectura"       value={`${o.tasaLectura}%`}       color={C.green} />
+        <SmallStat label="Adopción foto perfil"   value={`${o.adoptionFoto}%`}      color={C.lav} />
+        <SmallStat label="Completitud perfil"     value={`${o.completitudPerfil}%`}  color={C.amber} />
+        <SmallStat label="Conexiones rechazadas"  value={o.conexionesRechazadas}     color={C.red} />
+      </div>
+
+      {/* Actividad de mensajería */}
       <Card>
-        <CardHeader title="Actividad de mensajería" sub="Mensajes enviados por día · últimos 30 días" />
+        <CardHeader title="Actividad de mensajería" sub={`Mensajes enviados por día · últimos ${dateRange} días`} />
         <div style={{ padding: "16px 22px 18px" }}>
           <DailyBars data={ts.actividadMensajes} color="#f1adc2" h={90} />
         </div>
       </Card>
 
+      {/* Actividad de guardados */}
+      <Card>
+        <CardHeader title="Perfiles guardados" sub={`Guardados por día · últimos ${dateRange} días`} />
+        <div style={{ padding: "16px 22px 18px" }}>
+          <DailyBars data={ts.actividadGuardados} color={C.lav} h={90} />
+        </div>
+      </Card>
+
+      {/* Breakdowns demográficos */}
       <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 14 }}>
         <Card>
           <CardHeader title="Usuarios por institución" sub="Distribución por universidad registrada" />
@@ -490,23 +533,59 @@ function AnalyticsView({ stats, mobile }) {
         </Card>
       </div>
 
-      {/* Métricas de conexiones */}
-      <Card>
-        <CardHeader title="Estado de conexiones" sub="Distribución global" />
-        <div style={{ padding: "18px 22px", display: "grid", gridTemplateColumns: mobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16 }}>
-          {[
-            { label: "Aceptadas", value: o.conexionesAceptadas, color: C.green, pct: o.tasaAceptacion },
-            { label: "Pendientes", value: o.conexionesPendientes, color: C.amber, pct: o.totalConexiones ? Math.round((o.conexionesPendientes / o.totalConexiones) * 100) : 0 },
-            { label: "Tasa aceptación", value: `${o.tasaAceptacion}%`, color: C.pink },
-            { label: "Total solicitudes", value: o.totalConexiones, color: C.lav },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color }}>{typeof value === "number" ? value.toLocaleString("es-CO") : value}</div>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      {/* Estado de conexiones + Historias por tipo */}
+      <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 14 }}>
+        <Card>
+          <CardHeader title="Estado de conexiones" sub="Distribución global de solicitudes" />
+          <div style={{ padding: "18px 22px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+            {[
+              { label: "Aceptadas",        value: o.conexionesAceptadas,   color: C.green },
+              { label: "Pendientes",        value: o.conexionesPendientes,  color: C.amber },
+              { label: "Rechazadas",        value: o.conexionesRechazadas,  color: C.red },
+              { label: "Tasa aceptación",   value: `${o.tasaAceptacion}%`, color: C.pink },
+            ].map(({ label, value, color }) => (
+              <div key={label} style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color }}>{typeof value === "number" ? value.toLocaleString("es-CO") : value}</div>
+                <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <CardHeader title="Historias por tipo" sub="Imagen vs video publicados" />
+          <div style={{ padding: "18px 22px" }}>
+            {bd.historiasPorTipo.length ? (() => {
+              const total = bd.historiasPorTipo.reduce((s, d) => s + d.count, 0);
+              const tipos = { image: 0, video: 0 };
+              bd.historiasPorTipo.forEach(d => { if (d._id in tipos) tipos[d._id] = d.count; });
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {[
+                    { label: "Imágenes", count: tipos.image, color: C.pink },
+                    { label: "Videos",   count: tipos.video, color: C.lav },
+                  ].map(({ label, count, color }) => (
+                    <div key={label}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                        <span style={{ fontSize: 12, color: C.muted, fontWeight: 600 }}>{label}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: C.dark }}>
+                          {count} ({total > 0 ? Math.round((count / total) * 100) : 0}%)
+                        </span>
+                      </div>
+                      <div style={{ height: 8, background: "rgba(0,0,0,0.05)", borderRadius: 999 }}>
+                        <div style={{ height: "100%", width: `${total > 0 ? (count / total) * 100 : 0}%`, background: color, borderRadius: 999 }} />
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ textAlign: "center", fontSize: 11, color: C.muted }}>
+                    {total} historias publicadas en total
+                  </div>
+                </div>
+              );
+            })() : <p style={{ color: C.muted, fontSize: 13, textAlign: "center", padding: "20px 0" }}>Sin historias publicadas</p>}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -684,6 +763,7 @@ export default function AdminPage() {
   }, []);
 
   const [view, setView]                   = useState("dashboard");
+  const [dateRange, setDateRange]         = useState(30);
   const [stats, setStats]                 = useState(null);
   const [loadingStats, setLoadingStats]   = useState(true);
   const [users, setUsers]                 = useState([]);
@@ -696,13 +776,15 @@ export default function AdminPage() {
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError]                 = useState(null);
 
-  // Fetch estadísticas (solo una vez)
+  // Fetch estadísticas — se refetch al cambiar el rango de fechas
   useEffect(() => {
-    api.get("/admin/stats")
+    setStats(null);
+    setLoadingStats(true);
+    api.get(`/admin/stats?days=${dateRange}`)
       .then(r => setStats(r.data))
       .catch(() => setError("No se pudieron cargar las estadísticas."))
       .finally(() => setLoadingStats(false));
-  }, []);
+  }, [dateRange]);
 
   // Fetch usuarios con búsqueda/filtros
   const fetchUsers = useCallback(() => {
@@ -772,7 +854,7 @@ export default function AdminPage() {
             </p>
           </div>
           <button
-            onClick={() => { setStats(null); setLoadingStats(true); api.get("/admin/stats").then(r => setStats(r.data)).finally(() => setLoadingStats(false)); }}
+            onClick={() => { setStats(null); setLoadingStats(true); api.get(`/admin/stats?days=${dateRange}`).then(r => setStats(r.data)).finally(() => setLoadingStats(false)); }}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 9, border: `1px solid ${C.border}`, background: C.card, color: C.muted, fontSize: 12, fontWeight: 600, cursor: "pointer" }}
           >
             <RefreshCw size={12} />
@@ -794,7 +876,7 @@ export default function AdminPage() {
               <>
                 {view === "dashboard"    && <DashboardView    stats={stats} usersPreview={users} goToUsers={() => setView("users")} mobile={mobile} />}
                 {view === "users"        && <UsersView        users={users} total={usersTotal} pages={usersPages} page={usersPage} search={search} onSearch={setSearch} statusFilter={statusFilter} onStatus={setStatusFilter} onToggle={handleToggle} onDelete={handleDelete} actionLoading={actionLoading} loadingUsers={loadingUsers} onPage={setUsersPage} />}
-                {view === "analytics"    && <AnalyticsView    stats={stats} mobile={mobile} />}
+                {view === "analytics"    && <AnalyticsView    stats={stats} mobile={mobile} dateRange={dateRange} setDateRange={setDateRange} />}
                 {view === "universities" && <UniversitiesView stats={stats} />}
               </>
             )
