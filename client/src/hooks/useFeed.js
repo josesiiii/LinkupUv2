@@ -2,10 +2,16 @@
 import { useState, useEffect } from "react";
 import api from "../api/axios";
 import useAuthStore from "../store/authStore";
+import useSavedProfilesStore from "../store/savedProfilesStore";
 
 export default function useFeed(filters = {}) {
-  const { token } = useAuthStore();
+  const { token, usuario } = useAuthStore();
   const { myUniversity } = filters;
+
+  const savedIds = useSavedProfilesStore((s) => s.savedIds);
+  const fetchSaved = useSavedProfilesStore((s) => s.fetchSaved);
+  const saveProfile = useSavedProfilesStore((s) => s.save);
+  const unsaveProfile = useSavedProfilesStore((s) => s.unsave);
 
   const [usuarios,      setUsuarios]      = useState([]);
   const [loading,       setLoading]       = useState(true);
@@ -13,7 +19,6 @@ export default function useFeed(filters = {}) {
   const [connectingIds, setConnectingIds] = useState([]);
   const [connectedIds,  setConnectedIds]  = useState([]);
   const [savingIds,     setSavingIds]     = useState([]);
-  const [savedIds,      setSavedIds]      = useState([]);
 
   useEffect(() => {
     if (!token) return;
@@ -28,10 +33,6 @@ export default function useFeed(filters = {}) {
           ? res.data
           : res.data?.data || res.data?.usuarios || res.data?.users || [];
         setUsuarios(data);
-        const saved = data
-          .filter((item) => item?.guardado)
-          .map((item) => item.usuario?._id || item._id);
-        setSavedIds(saved);
       } catch (err) {
         setError(err.response?.data?.message || "Error al cargar el feed");
       } finally {
@@ -40,6 +41,12 @@ export default function useFeed(filters = {}) {
     };
     cargar();
   }, [token, myUniversity]);
+
+  // La fuente de verdad de "guardado" vive en savedProfilesStore, no en el feed —
+  // se rehidrata desde el backend una vez por usuario autenticado.
+  useEffect(() => {
+    if (usuario?._id) fetchSaved(usuario._id);
+  }, [usuario?._id, fetchSaved]);
 
   const handleConectar = async (id) => {
     setConnectingIds(p => [...p, id]);
@@ -56,8 +63,7 @@ export default function useFeed(filters = {}) {
   const handleGuardar = async (id) => {
     setSavingIds(p => [...p, id]);
     try {
-      await api.post("/savedprofiles", { savedUser: id });
-      setSavedIds(p => [...p, id]);
+      await saveProfile(id);
     } catch (err) {
       alert(err.response?.data?.message || "No se pudo guardar el perfil");
     } finally {
@@ -68,8 +74,7 @@ export default function useFeed(filters = {}) {
   const handleDesguardar = async (id) => {
     setSavingIds(p => [...p, id]);
     try {
-      await api.delete(`/savedprofiles/${id}`);
-      setSavedIds(p => p.filter(x => x !== id));
+      await unsaveProfile(id);
     } catch (err) {
       alert(err.response?.data?.message || "No se pudo quitar el guardado");
     } finally {

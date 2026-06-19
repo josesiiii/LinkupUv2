@@ -5,13 +5,15 @@ import {
   obtenerMensajes,
   editarMensaje,
   obtenerConversaciones,
-  reenviarMensaje
+  reenviarMensaje,
+  buscarChat
 } from "../controllers/messageController.js";
 
 const router = express.Router();
 
 router.post("/",                    protegerRuta, enviarMensaje);
 router.post("/forward",             protegerRuta, reenviarMensaje);
+router.get("/search",               protegerRuta, buscarChat);
 router.get("/conversations",        protegerRuta, obtenerConversaciones);
 router.get("/conversation/:id",     protegerRuta, obtenerMensajes);
 router.put("/:id",                  protegerRuta, editarMensaje);

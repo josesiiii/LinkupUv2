@@ -100,7 +100,7 @@ export default function registerChatSocket(io) {
       socket.leave(roomId);
     });
 
-    socket.on("message:send", async ({ roomId, text, replyTo }) => {
+    socket.on("message:send", async ({ roomId, text, replyTo, clientTempId }) => {
       try {
         if (!text?.trim()) return;
 
@@ -179,6 +179,7 @@ export default function registerChatSocket(io) {
           roomId,
           conversationId: conversation._id,
           replyTo: replyToData,
+          clientTempId: clientTempId || null,
         });
       } catch (error) {
         console.error("Error en message:send:", error.message);

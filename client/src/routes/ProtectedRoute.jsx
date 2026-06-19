@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import api from "../api/axios";
 import useAuthStore from "../store/authStore";
+import useSavedProfilesStore from "../store/savedProfilesStore";
 import { LIGHT_COLORS as COLORS } from "../styles/authTheme";
 
 function ProtectedRoute({ children }) {
@@ -23,6 +24,7 @@ function ProtectedRoute({ children }) {
         if (!active) return;
         setAuth(res.data, token);
         setValid(true);
+        if (res.data?._id) useSavedProfilesStore.getState().fetchSaved(res.data._id);
       })
       .catch(() => {
         if (!active) return;

@@ -24,6 +24,8 @@ export default function MessageBubble({
   const isReadByOther = isOwn && message.readBy?.some(
     (id) => id?.toString() === otherParticipant?._id?.toString()
   );
+  // Enviado (optimista, pre-eco del servidor) → entregado (persistido, sin leer) → leído
+  const messageStatus = !isOwn ? null : message.isOptimistic ? "sent" : isReadByOther ? "read" : "delivered";
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -186,10 +188,15 @@ export default function MessageBubble({
             {message.edited && !isDeleted && (
               <span style={{ fontSize: 11, color: colors.textMuted, fontStyle: "italic" }}>(editado)</span>
             )}
-            {isOwn && !isDeleted && (
+            {isOwn && !isDeleted && messageStatus === "sent" && (
               <span style={{ display: "flex", alignItems: "center" }}>
-                <Check size={11} strokeWidth={2.5} color={isReadByOther ? colors.pink : colors.textMuted} />
-                <Check size={11} strokeWidth={2.5} style={{ marginLeft: -5 }} color={isReadByOther ? colors.pink : colors.textMuted} />
+                <Check size={11} strokeWidth={2.5} color={colors.textMuted} />
+              </span>
+            )}
+            {isOwn && !isDeleted && messageStatus !== "sent" && (
+              <span style={{ display: "flex", alignItems: "center" }}>
+                <Check size={11} strokeWidth={2.5} color={messageStatus === "read" ? colors.pink : colors.textMuted} />
+                <Check size={11} strokeWidth={2.5} style={{ marginLeft: -5 }} color={messageStatus === "read" ? colors.pink : colors.textMuted} />
               </span>
             )}
           </div>

@@ -8,12 +8,14 @@ import ProfileCard from "../components/profile/ProfileCard";
 import Dropdown from "../components/ui/Dropdown";
 import api from "../api/axios";
 import useAuthStore from "../store/authStore";
+import useSavedProfilesStore from "../store/savedProfilesStore";
 import { useTheme } from "../context/ThemeContext";
 
 export default function SavedPage() {
   const navigate = useNavigate();
   const { theme, colors } = useTheme();
   const usuario = useAuthStore((state) => state.usuario);
+  const unsaveProfile = useSavedProfilesStore((s) => s.unsave);
   const [guardados, setGuardados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -30,7 +32,7 @@ export default function SavedPage() {
   const handleQuitar = async (savedUserId) => {
     setRemovingIds((p) => [...p, savedUserId]);
     try {
-      await api.delete(`/savedprofiles/${savedUserId}`);
+      await unsaveProfile(savedUserId);
       setGuardados((prev) => prev.filter((g) => g.savedUser?._id !== savedUserId));
     } catch {
       // silent — item stays in list if API fails

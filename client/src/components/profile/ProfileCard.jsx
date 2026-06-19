@@ -1,4 +1,5 @@
 // src/components/profile/ProfileCard.jsx
+import StoryRingAvatar from "../ui/StoryRingAvatar";
 
 export default function ProfileCard({ user, colors, theme, footer, onClick }) {
   return (
@@ -25,23 +26,14 @@ export default function ProfileCard({ user, colors, theme, footer, onClick }) {
         e.currentTarget.style.boxShadow = "0 1px 10px rgba(0,0,0,0.05)";
       }}
     >
-      {user?.profilePicture ? (
-        <img
-          src={user.profilePicture}
-          alt={user?.fullName}
-          style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: `2px solid ${colors.border}` }}
-        />
-      ) : (
-        <div
-          style={{
-            width: 72, height: 72, borderRadius: "50%", background: colors.gradient,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#fff", fontWeight: 700, fontSize: 26,
-          }}
-        >
-          {user?.fullName?.charAt(0)?.toUpperCase() || "?"}
-        </div>
-      )}
+      <StoryRingAvatar
+        userId={user?._id}
+        name={user?.fullName}
+        src={user?.profilePicture}
+        size={72}
+        shape="circle"
+        fallbackHasStory={user?.hasActiveStory}
+      />
 
       <div style={{ minWidth: 0, width: "100%" }}>
         <p style={{ margin: "0 0 2px 0", fontSize: 15, fontWeight: 700, color: colors.textDark, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

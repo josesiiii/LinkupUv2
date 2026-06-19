@@ -15,7 +15,10 @@ import ChatInput from "./ChatInput";
 import Avatar from "./Avatar";
 import Modal from "../ui/Modal";
 import ContactProfileModal from "./ContactProfileModal";
+import ChatSearch from "./ChatSearch";
 import { getOtherParticipant, formatPresence, isInList } from "./utils";
+
+const HIGHLIGHT_MS = 600;
 
 export default function ChatLayout() {
   const { colors } = useTheme();
@@ -45,10 +48,14 @@ export default function ChatLayout() {
   const [forwardTarget, setForwardTarget] = useState(null);
   const [forwardConnections, setForwardConnections] = useState([]);
   const [profileModalUser, setProfileModalUser] = useState(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
+  const [highlightedConversationId, setHighlightedConversationId] = useState(null);
+  const [pendingHighlightMessageId, setPendingHighlightMessageId] = useState(null);
 
   const typingLockRef = useRef(false);
   const typingUnlockTimeoutRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const messageRefs = useRef(new Map());
 
   const {
     conversations,
@@ -164,6 +171,37 @@ export default function ChatLayout() {
     setDraftText("");
     setMobileView("chat");
   };
+
+  // Resultado de búsqueda → abre la conversación y resalta la fila en el sidebar
+  const handleSearchSelectConversation = (conv) => {
+    handleSelectConversation(conv);
+    setHighlightedConversationId(conv._id);
+    setTimeout(() => setHighlightedConversationId(null), HIGHLIGHT_MS);
+  };
+
+  // Resultado de búsqueda → abre la conversación del mensaje y deja pendiente
+  // el scroll+resaltado hasta que los mensajes de esa conversación carguen.
+  const handleSearchSelectMessage = (msg) => {
+    const conversationId = msg.conversation?._id || msg.conversation;
+    const conv = conversations.find((c) => c._id === conversationId);
+    if (!conv) return;
+    handleSelectConversation(conv);
+    setHighlightedConversationId(conv._id);
+    setTimeout(() => setHighlightedConversationId(null), HIGHLIGHT_MS);
+    setPendingHighlightMessageId(msg._id);
+  };
+
+  // Cuando el mensaje pendiente aparece en la conversación activa, hace scroll y lo resalta.
+  useEffect(() => {
+    if (!pendingHighlightMessageId) return;
+    const el = messageRefs.current.get(pendingHighlightMessageId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedMessageId(pendingHighlightMessageId);
+    setPendingHighlightMessageId(null);
+    const timeout = setTimeout(() => setHighlightedMessageId(null), HIGHLIGHT_MS);
+    return () => clearTimeout(timeout);
+  }, [pendingHighlightMessageId, messages]);
 
   const handleBackToList = () => {
     setMobileView("list");
@@ -290,6 +328,12 @@ export default function ChatLayout() {
             </button>
           ))}
         </div>
+        <ChatSearch
+          colors={colors}
+          currentUser={currentUser}
+          onSelectConversation={handleSearchSelectConversation}
+          onSelectMessage={handleSearchSelectMessage}
+        />
         <div style={{ flex: 1, overflowY: "auto", padding: "0 8px 12px", display: "flex", flexDirection: "column", gap: 4 }}>
           {visibleConversations.length === 0 && (
             <div style={{ padding: "24px 12px", textAlign: "center", color: colors.textMuted, fontSize: 13 }}>
@@ -308,6 +352,7 @@ export default function ChatLayout() {
                 onClick={() => handleSelectConversation(conv)}
                 colors={colors}
                 presence={presence[persona?._id]}
+                highlighted={conv._id === highlightedConversationId}
                 disablePin={pinnedCount >= 3 && !isPinned}
                 onPin={handlePin}
                 onUnpin={handleUnpin}
@@ -359,6 +404,7 @@ export default function ChatLayout() {
                   online={!!presence[otherParticipant?._id]?.online}
                   showStatus={!!otherParticipant?._id}
                   hasStory={!!otherParticipant?.hasActiveStory}
+                  userId={otherParticipant?._id}
                 />
               </div>
               <div
@@ -400,29 +446,42 @@ export default function ChatLayout() {
             {/* Mensajes */}
             <div className="chat-messages-scroll" style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
               {visibleMessages.map((message) => (
-                <MessageBubble
+                <div
                   key={message._id}
-                  message={message}
-                  currentUser={currentUser}
-                  otherParticipant={otherParticipant}
-                  colors={colors}
-                  isEditing={editingMessageId === message._id}
-                  draftText={draftText}
-                  onEditChange={setDraftText}
-                  onEditStart={() => handleEditStart(message)}
-                  onEditSave={handleEditSave}
-                  onEditCancel={handleEditCancel}
-                  isConfirmingDelete={deletingConfirmId === message._id}
-                  onDeleteRequest={() => handleDeleteRequest(message._id)}
-                  onDeleteConfirm={() => handleDeleteConfirm(message._id)}
-                  onDeleteCancel={handleDeleteCancel}
-                  onReply={handleReply}
-                  onForwardOpen={handleForwardOpen}
-                  onTogglePin={handleTogglePin}
-                  onToggleStar={handleToggleStar}
-                  onDeleteForMe={handleDeleteForMe}
-                  onAvatarClick={(userId) => navigate(`/users/${userId}`)}
-                />
+                  ref={(el) => {
+                    if (el) messageRefs.current.set(message._id, el);
+                    else messageRefs.current.delete(message._id);
+                  }}
+                  style={{
+                    borderRadius: 18,
+                    transition: "background 400ms ease, box-shadow 400ms ease",
+                    background: highlightedMessageId === message._id ? colors.pinkLight : "transparent",
+                    boxShadow: highlightedMessageId === message._id ? `0 0 0 3px ${colors.pink}33` : "none",
+                  }}
+                >
+                  <MessageBubble
+                    message={message}
+                    currentUser={currentUser}
+                    otherParticipant={otherParticipant}
+                    colors={colors}
+                    isEditing={editingMessageId === message._id}
+                    draftText={draftText}
+                    onEditChange={setDraftText}
+                    onEditStart={() => handleEditStart(message)}
+                    onEditSave={handleEditSave}
+                    onEditCancel={handleEditCancel}
+                    isConfirmingDelete={deletingConfirmId === message._id}
+                    onDeleteRequest={() => handleDeleteRequest(message._id)}
+                    onDeleteConfirm={() => handleDeleteConfirm(message._id)}
+                    onDeleteCancel={handleDeleteCancel}
+                    onReply={handleReply}
+                    onForwardOpen={handleForwardOpen}
+                    onTogglePin={handleTogglePin}
+                    onToggleStar={handleToggleStar}
+                    onDeleteForMe={handleDeleteForMe}
+                    onAvatarClick={(userId) => navigate(`/users/${userId}`)}
+                  />
+                </div>
               ))}
               <TypingIndicator isTyping={isTyping} userName={typingUserName} colors={colors} />
               <div ref={messagesEndRef} />

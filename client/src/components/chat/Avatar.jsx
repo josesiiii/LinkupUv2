@@ -1,15 +1,20 @@
 // src/components/chat/Avatar.jsx
 import { getInitials } from "./utils";
+import useStoryRingState from "../../hooks/useStoryRingState";
 
 const STORY_GRADIENT = "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)";
 
-export default function Avatar({ name, src, size = 40, colors, online = false, showStatus = false, hasStory = false, onStoryClick }) {
+export default function Avatar({ name, src, size = 40, colors, online = false, showStatus = false, hasStory = false, userId, onStoryClick }) {
+  const { hasActiveStory, seen } = useStoryRingState(userId, hasStory);
+  const ringActive = hasActiveStory;
+  const ringColor = seen ? colors.border : STORY_GRADIENT;
+
   const statusDotColor = online ? "#2ecc71" : "#9a9a9a";
-  const ringPad = hasStory ? 3 : 0;
-  const imgSize = hasStory ? size - ringPad * 2 - 4 : size;
+  const ringPad = ringActive ? 3 : 0;
+  const imgSize = ringActive ? size - ringPad * 2 - 4 : size;
 
   const handleClick = (e) => {
-    if (hasStory && onStoryClick) {
+    if (ringActive && onStoryClick) {
       e.stopPropagation();
       onStoryClick();
     }
@@ -18,14 +23,14 @@ export default function Avatar({ name, src, size = 40, colors, online = false, s
   return (
     <div
       style={{ position: "relative", flexShrink: 0, width: size, height: size }}
-      onClick={hasStory && onStoryClick ? handleClick : undefined}
-      title={hasStory ? "Ver historia" : undefined}
+      onClick={ringActive && onStoryClick ? handleClick : undefined}
+      title={ringActive ? "Ver historia" : undefined}
     >
       {/* Story ring */}
-      {hasStory ? (
+      {ringActive ? (
         <div style={{
           width: size, height: size, borderRadius: "50%",
-          background: STORY_GRADIENT, padding: ringPad,
+          background: ringColor, padding: ringPad,
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: onStoryClick ? "pointer" : "default",
         }}>

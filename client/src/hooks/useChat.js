@@ -114,10 +114,18 @@ export default function useChat({ roomId, currentUser }) {
 
     const handleNewMessage = (payload) => {
       if (payload.roomId === roomIdRef.current) {
-        setMessages((prev) => [
-          ...prev,
-          normalizeMessage(payload, payload.conversationId),
-        ]);
+        const incoming = normalizeMessage(payload, payload.conversationId);
+        setMessages((prev) => {
+          if (payload.clientTempId) {
+            const idx = prev.findIndex((m) => m.clientTempId === payload.clientTempId);
+            if (idx !== -1) {
+              const next = [...prev];
+              next[idx] = incoming;
+              return next;
+            }
+          }
+          return [...prev, incoming];
+        });
       }
 
       if (!conversationsRef.current.some((c) => c.roomId === payload.roomId)) {
@@ -282,9 +290,31 @@ export default function useChat({ roomId, currentUser }) {
   const sendMessage = useCallback(
     (text, replyToId) => {
       if (!socket || !roomId || !text.trim() || !currentUser?._id) return;
-      socket.emit("message:send", { roomId, text: text.trim(), senderId: currentUser._id, replyTo: replyToId || null });
+      const trimmed = text.trim();
+      const clientTempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+      // Inserción optimista — aparece de inmediato con un solo check (estado "sent")
+      // hasta que el servidor confirma el mensaje vía el eco de message:new.
+      setMessages((prev) => [
+        ...prev,
+        {
+          _id: clientTempId,
+          clientTempId,
+          conversation: activeConversationId,
+          sender: { _id: currentUser._id, name: currentUser.name, avatar: currentUser.avatar },
+          text: trimmed,
+          createdAt: new Date().toISOString(),
+          readBy: [currentUser._id],
+          isOptimistic: true,
+        },
+      ]);
+
+      socket.emit("message:send", {
+        roomId, text: trimmed, senderId: currentUser._id,
+        replyTo: replyToId || null, clientTempId,
+      });
     },
-    [socket, roomId, currentUser?._id]
+    [socket, roomId, currentUser, activeConversationId]
   );
 
   const deleteMessageForMe = useCallback(

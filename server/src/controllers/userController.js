@@ -178,7 +178,10 @@ export const feedUsuarios = async (req, res) => {
         compatibilidad: calcCompatibility(yo, usuario),
         guardado: perfilesGuardadosSet.has(usuario._id.toString()),
       }))
-      .sort((a, b) => b.compatibilidad - a.compatibilidad)
+      .sort((a, b) =>
+        b.compatibilidad - a.compatibilidad ||
+        a.usuario._id.toString().localeCompare(b.usuario._id.toString())
+      )
       .slice(skip, skip + limit);
 
     res.status(200).json({

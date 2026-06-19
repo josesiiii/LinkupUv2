@@ -8,7 +8,7 @@ const RADIUS = 32;
 const optimizeUrl = (url) =>
   url?.replace("/upload/", "/upload/w_800,q_auto,f_auto/") || "";
 
-export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
+export default function PhotoCarousel({ photos = [], profilePicture = "", compact = false, aspectRatio = "9 / 16" }) {
   const fotos =
     photos.length > 0
       ? [...photos].sort((a, b) => a.order - b.order).map((p) => p.url)
@@ -36,7 +36,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
         position: "relative",
         width: "100%",
         height: "100%",
-        aspectRatio: "9 / 16",
+        aspectRatio,
         overflow: "visible",
         borderRadius: RADIUS,
         perspective: "1200px",
@@ -110,8 +110,8 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
         })}
       </div>
 
-      {/* Dots indicadores — solo visibles cuando hay varias fotos */}
-      {fotos.length > 1 && (
+      {/* Dots indicadores — solo visibles cuando hay varias fotos (oculto en modo compacto) */}
+      {!compact && fotos.length > 1 && (
         <div
           style={{
             position: "absolute",
@@ -143,8 +143,8 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
         </div>
       )}
 
-      {/* Flechas de navegación — solo visibles cuando hay varias fotos */}
-      {fotos.length > 1 && (
+      {/* Flechas de navegación — solo visibles cuando hay varias fotos (oculto en modo compacto) */}
+      {!compact && fotos.length > 1 && (
         <>
           <button
             type="button"
@@ -199,21 +199,23 @@ export default function PhotoCarousel({ photos = [], profilePicture = "" }) {
         </>
       )}
 
-      {/* Gradiente inferior — oscurece para que la info sea legible */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "45%",
-          background:
-            "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)",
-          zIndex: 11,
-          borderRadius: "inherit",
-          pointerEvents: "none",
-        }}
-      />
+      {/* Gradiente inferior — oscurece para que la info sea legible (oculto en modo compacto, no hay info superpuesta) */}
+      {!compact && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "45%",
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)",
+            zIndex: 11,
+            borderRadius: "inherit",
+            pointerEvents: "none",
+          }}
+        />
+      )}
     </div>
   );
 }

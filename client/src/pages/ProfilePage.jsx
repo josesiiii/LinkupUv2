@@ -9,6 +9,7 @@ import GalleryEditor from "../components/profile/GalleryEditor";
 import StoryViewer from "../components/stories/StoryViewer";
 import StoryUploader from "../components/stories/StoryUploader";
 import ImageCropModal from "../components/ui/ImageCropModal";
+import StoryRingAvatar from "../components/ui/StoryRingAvatar";
 import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 import useStories from "../hooks/useStories";
@@ -45,8 +46,6 @@ const InfoCard = ({ label, value, theme, colors }) => (
     <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: colors.textDark }}>{value || "—"}</p>
   </div>
 );
-
-const GRADIENT = "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -191,36 +190,15 @@ export default function ProfilePage() {
           </button>
 
           <div style={{ position: "relative", flexShrink: 0 }}>
-            <div
+            <StoryRingAvatar
+              userId={usuario?._id}
+              name={usuario?.fullName}
+              src={usuario?.profilePicture}
+              size={96}
+              shape="squircle"
+              fallbackHasStory={usuario?.hasActiveStory}
               onClick={handleAvatarClick}
-              style={{
-                cursor: "pointer",
-                borderRadius: 24, overflow: "hidden",
-                padding: usuario?.hasActiveStory ? 3 : 0,
-                background: usuario?.hasActiveStory ? GRADIENT : "transparent",
-                display: "inline-block"
-              }}
-            >
-              <div style={{ borderRadius: 20, overflow: "hidden", padding: usuario?.hasActiveStory ? 2 : 0, background: usuario?.hasActiveStory ? colors.surface : "transparent" }}>
-                {usuario?.profilePicture ? (
-                  <img
-                    src={usuario.profilePicture}
-                    alt={usuario?.fullName}
-                    style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", border: usuario?.hasActiveStory ? "none" : `2px solid ${colors.border}`, display: "block" }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: 96, height: 96, borderRadius: 20, background: colors.gradient,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      color: "#fff", fontWeight: 700, fontSize: 36,
-                    }}
-                  >
-                    {usuario?.fullName?.charAt(0)?.toUpperCase() || "?"}
-                  </div>
-                )}
-              </div>
-            </div>
+            />
             <AvatarEditButton hasPhoto={!!usuario?.profilePicture} />
           </div>
 

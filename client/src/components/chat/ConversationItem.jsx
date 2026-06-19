@@ -10,7 +10,7 @@ import { formatRelativeTime, getOtherParticipant, getUnreadCount, isInList } fro
 export default function ConversationItem({
   conversation, currentUser, isActive, onClick, colors, presence,
   onArchive, onUnarchive, onPin, onUnpin, onMute, onUnmute,
-  onMarkRead, onDelete, onBlock, disablePin, onViewProfile,
+  onMarkRead, onDelete, onBlock, disablePin, onViewProfile, highlighted = false,
 }) {
   const persona = getOtherParticipant(conversation, currentUser._id);
   const unread = getUnreadCount(conversation, currentUser._id);
@@ -57,8 +57,9 @@ export default function ConversationItem({
         display: "flex", alignItems: "center", gap: 12,
         padding: "12px 14px", borderRadius: 16,
         cursor: "pointer",
-        background: isActive ? colors.pinkLight : "transparent",
-        transition: "background 150ms",
+        background: highlighted ? colors.pinkLight : isActive ? colors.pinkLight : "transparent",
+        boxShadow: highlighted ? `0 0 0 2px ${colors.pink}55` : "none",
+        transition: "background 400ms ease, box-shadow 400ms ease",
       }}
       onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = colors.surfaceAlt; }}
       onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
@@ -69,7 +70,7 @@ export default function ConversationItem({
         onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.8"; }}
         onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
       >
-        <Avatar name={persona?.name} src={persona?.avatar} size={46} colors={colors} online={online} showStatus hasStory={!!persona?.hasActiveStory} />
+        <Avatar name={persona?.name} src={persona?.avatar} size={46} colors={colors} online={online} showStatus hasStory={!!persona?.hasActiveStory} userId={persona?._id} />
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -86,7 +87,10 @@ export default function ConversationItem({
           margin: "2px 0 0 0", fontSize: 13, color: colors.textMuted,
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>
-          {isMuted && "🔇 "}{conversation.lastMessage || "Sin mensajes aún"}
+          {isMuted && "🔇 "}
+          {conversation.lastMessage
+            ? <>{conversation.lastMessageSender?._id === currentUser._id && "Tú: "}{conversation.lastMessage}</>
+            : "Sin mensajes aún"}
         </p>
       </div>
 

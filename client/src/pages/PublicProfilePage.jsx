@@ -8,9 +8,9 @@ import useAuthStore from "../store/authStore";
 import { useTheme } from "../context/ThemeContext";
 import useStories from "../hooks/useStories";
 import StoryViewer from "../components/stories/StoryViewer";
+import StoryRingAvatar from "../components/ui/StoryRingAvatar";
+import PhotoCarousel from "../features/feed/PhotoCarousel";
 import api from "../api/axios";
-
-const STORY_GRADIENT = "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)";
 
 const Chip = ({ children, colors, tone = "pink" }) => (
   <span style={{
@@ -128,27 +128,17 @@ export default function PublicProfilePage() {
         {/* Header */}
         <div style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 32, marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)", position: "relative", display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
 
-          {/* Avatar */}
+          {/* Avatar — circular, con anillo de historia sincronizado (Feed/Chat/Perfil) */}
           <div style={{ flexShrink: 0 }}>
-            {perfil.hasActiveStory ? (
-              <div onClick={handleOpenStory} style={{ cursor: "pointer", borderRadius: 24, overflow: "hidden", padding: 3, background: STORY_GRADIENT, display: "inline-block" }} title="Ver historia">
-                <div style={{ borderRadius: 20, overflow: "hidden", padding: 2, background: colors.surface, display: "flex" }}>
-                  {perfil.profilePicture ? (
-                    <img src={perfil.profilePicture} style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", display: "block" }} />
-                  ) : (
-                    <div style={{ width: 96, height: 96, borderRadius: 20, background: "#FF3D9E", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 36 }}>
-                      {perfil.fullName?.charAt(0)?.toUpperCase() || "?"}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : perfil.profilePicture ? (
-              <img src={perfil.profilePicture} style={{ width: 96, height: 96, borderRadius: 20, objectFit: "cover", border: `2px solid ${colors.border}` }} />
-            ) : (
-              <div style={{ width: 96, height: 96, borderRadius: 20, background: "#FF3D9E", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 36 }}>
-                {perfil.fullName?.charAt(0)?.toUpperCase() || "?"}
-              </div>
-            )}
+            <StoryRingAvatar
+              userId={perfil._id}
+              name={perfil.fullName}
+              src={perfil.profilePicture}
+              size={96}
+              shape="circle"
+              fallbackHasStory={perfil.hasActiveStory}
+              onClick={perfil.hasActiveStory ? handleOpenStory : undefined}
+            />
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -218,22 +208,12 @@ export default function PublicProfilePage() {
           </div>
         )}
 
-        {/* Galería compacta */}
+        {/* Galería compacta — carrusel inmersivo del Feed en variante compacta, solo visual */}
         {perfil.photos?.length > 0 && (
           <div style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 24, marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)" }}>
             <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Fotos</p>
-            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4, scrollbarWidth: "none", msOverflowStyle: "none" }}>
-              {perfil.photos
-                .slice()
-                .sort((a, b) => a.order - b.order)
-                .map((photo) => (
-                  <img
-                    key={photo._id}
-                    src={photo.url}
-                    alt=""
-                    style={{ width: 96, height: 120, borderRadius: 12, objectFit: "cover", flexShrink: 0, display: "block" }}
-                  />
-                ))}
+            <div style={{ width: "100%", maxWidth: 320, margin: "0 auto" }}>
+              <PhotoCarousel photos={perfil.photos} compact aspectRatio="4 / 5" />
             </div>
           </div>
         )}

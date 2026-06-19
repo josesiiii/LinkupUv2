@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Trash2, Eye, Volume2, VolumeX, ChevronLeft, ChevronRight } from "lucide-react";
-import { useTheme } from "../../context/ThemeContext";
+import { X, Trash2, Eye, Volume2, VolumeX, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import api from "../../api/axios";
 
 const STORY_DURATION = 5000;
+const HOLD_THRESHOLD = 180;
 
 function timeAgo(date) {
   const diff = Math.floor((Date.now() - new Date(date)) / 1000);
@@ -27,21 +28,28 @@ export default function StoryViewer({
   onDelete,
   ownStories = []
 }) {
-  const { colors } = useTheme();
   const usuario = useAuthStore((s) => s.usuario);
+  const navigate = useNavigate();
 
   const [paused, setPaused] = useState(false);
+  const [persistentPause, setPersistentPause] = useState(false);
   const [muted, setMuted] = useState(true);
   const [progress, setProgress] = useState(0);
   const [showViewers, setShowViewers] = useState(false);
   const [viewers, setViewers] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const effectivePaused = paused || persistentPause;
+
   const timerRef = useRef(null);
   const startTimeRef = useRef(null);
   const elapsedRef = useRef(0);
   const viewedInSession = useRef(new Set());
   const videoRef = useRef(null);
+  const effectivePausedRef = useRef(effectivePaused);
+  effectivePausedRef.current = effectivePaused;
+  const holdTimerRef = useRef(null);
+  const isHoldRef = useRef(false);
 
   // Determinar si estamos viendo stories propias o del feed
   const isOwnMode = storiesFeed.length === 0 && ownStories.length > 0;
@@ -83,7 +91,8 @@ export default function StoryViewer({
     }
   }, [open, currentStory?._id]);
 
-  // Timer para imágenes
+  // Timer para imágenes — se crea una sola vez por story (no se reinicia al pausar/reanudar,
+  // así el progreso se conserva correctamente; el propio tick decide si avanzar o no).
   useEffect(() => {
     if (!open || !currentStory) return;
     if (currentStory.mediaType === "video") return;
@@ -94,7 +103,7 @@ export default function StoryViewer({
     startTimeRef.current = Date.now();
 
     const tick = () => {
-      if (paused) return;
+      if (effectivePausedRef.current) return;
       const elapsed = elapsedRef.current + (Date.now() - startTimeRef.current);
       const pct = Math.min((elapsed / STORY_DURATION) * 100, 100);
       setProgress(pct);
@@ -106,17 +115,16 @@ export default function StoryViewer({
 
     timerRef.current = setInterval(tick, 50);
     return () => clearInterval(timerRef.current);
-  }, [open, activeAuthorIndex, activeStoryIndex, paused]);
+  }, [open, activeAuthorIndex, activeStoryIndex, currentStory?._id, currentStory?.mediaType]);
 
-  // Pausa/reanuda
+  // Pausa/reanuda — solo contabiliza el tiempo transcurrido, sin tocar el intervalo.
   useEffect(() => {
-    if (paused) {
+    if (effectivePaused) {
       elapsedRef.current += Date.now() - (startTimeRef.current || Date.now());
-      clearInterval(timerRef.current);
     } else {
       startTimeRef.current = Date.now();
     }
-  }, [paused]);
+  }, [effectivePaused]);
 
   // Reset al cambiar story
   useEffect(() => {
@@ -124,6 +132,7 @@ export default function StoryViewer({
     elapsedRef.current = 0;
     setShowViewers(false);
     setConfirmDelete(false);
+    setPersistentPause(false);
   }, [activeAuthorIndex, activeStoryIndex]);
 
   // Cargar viewers si es story propia
@@ -133,6 +142,40 @@ export default function StoryViewer({
       .then((r) => setViewers(r.data || []))
       .catch(() => setViewers([]));
   }, [open, currentStory?._id, isOwn]);
+
+  const clearHoldTimer = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  };
+
+  const handlePointerDown = () => {
+    isHoldRef.current = false;
+    clearHoldTimer();
+    holdTimerRef.current = setTimeout(() => {
+      isHoldRef.current = true;
+      setPaused(true);
+    }, HOLD_THRESHOLD);
+  };
+
+  const handlePointerUp = () => {
+    clearHoldTimer();
+    if (isHoldRef.current) {
+      isHoldRef.current = false;
+      setPaused(false);
+    } else {
+      setPersistentPause((p) => !p);
+    }
+  };
+
+  const handlePointerLeave = () => {
+    clearHoldTimer();
+    if (isHoldRef.current) {
+      isHoldRef.current = false;
+      setPaused(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!currentStory) return;
@@ -158,9 +201,9 @@ export default function StoryViewer({
             background: "#000",
             display: "flex", alignItems: "center", justifyContent: "center"
           }}
-          onPointerDown={() => setPaused(true)}
-          onPointerUp={() => setPaused(false)}
-          onPointerLeave={() => setPaused(false)}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerLeave}
         >
           {/* Contenido 9:16 */}
           <div style={{ position: "relative", height: "100vh", aspectRatio: "9/16", maxWidth: "100vw", overflow: "hidden" }}>
@@ -204,7 +247,18 @@ export default function StoryViewer({
 
             {/* Header */}
             <div style={{ position: "absolute", top: 20, left: 12, right: 12, display: "flex", alignItems: "center", justifyContent: "space-between", zIndex: 10 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: 10, cursor: !isOwn && currentAuthor?._id ? "pointer" : "default" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isOwn && currentAuthor?._id) {
+                    onClose();
+                    navigate(`/users/${currentAuthor._id}`);
+                  }
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onPointerUp={(e) => e.stopPropagation()}
+              >
                 {currentAuthor?.profilePicture ? (
                   <img src={currentAuthor.profilePicture} style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid #fff" }} />
                 ) : (
@@ -222,38 +276,72 @@ export default function StoryViewer({
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setPersistentPause((p) => !p); }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onPointerUp={(e) => e.stopPropagation()}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#fff", padding: 4 }}
+                  title={persistentPause ? "Reanudar" : "Pausar"}
+                >
+                  {persistentPause ? <Play size={20} /> : <Pause size={20} />}
+                </button>
                 {currentStory.mediaType === "video" && (
-                  <button onClick={(e) => { e.stopPropagation(); setMuted((m) => !m); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#fff", padding: 4 }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setMuted((m) => !m); }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onPointerUp={(e) => e.stopPropagation()}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "#fff", padding: 4 }}
+                  >
                     {muted ? <VolumeX size={20} /> : <Volume2 size={20} />}
                   </button>
                 )}
-                <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#fff", padding: 4 }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onClose(); }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onPointerUp={(e) => e.stopPropagation()}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#fff", padding: 4 }}
+                >
                   <X size={22} />
                 </button>
               </div>
             </div>
 
-            {/* Zonas de navegación */}
+            {/* Zonas de navegación — stopPropagation en pointer events para que un tap de
+                navegación nunca dispare la lógica de pausa del wrapper */}
             <button
               onClick={(e) => { e.stopPropagation(); goPrev(); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
               style={{ position: "absolute", left: 0, top: 0, width: "35%", height: "100%", background: "transparent", border: "none", cursor: "pointer", zIndex: 5 }}
             />
             <button
               onClick={(e) => { e.stopPropagation(); goNext(); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
               style={{ position: "absolute", right: 0, top: 0, width: "35%", height: "100%", background: "transparent", border: "none", cursor: "pointer", zIndex: 5 }}
             />
 
             {/* Flechas desktop */}
             {(activeStoryIndex > 0 || activeAuthorIndex > 0) && (
               <div style={{ position: "absolute", left: -48, top: "50%", transform: "translateY(-50%)", zIndex: 20 }}>
-                <button onClick={(e) => { e.stopPropagation(); goPrev(); }} style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onPointerUp={(e) => e.stopPropagation()}
+                  style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}
+                >
                   <ChevronLeft size={22} />
                 </button>
               </div>
             )}
             {(activeStoryIndex < totalStories - 1 || (!isOwnMode && activeAuthorIndex < storiesFeed.length - 1)) && (
               <div style={{ position: "absolute", right: -48, top: "50%", transform: "translateY(-50%)", zIndex: 20 }}>
-                <button onClick={(e) => { e.stopPropagation(); goNext(); }} style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); goNext(); }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onPointerUp={(e) => e.stopPropagation()}
+                  style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}
+                >
                   <ChevronRight size={22} />
                 </button>
               </div>
@@ -266,6 +354,8 @@ export default function StoryViewer({
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowViewers((v) => !v); }}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onPointerUp={(e) => e.stopPropagation()}
                       style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 20, padding: "8px 14px", color: "#fff", cursor: "pointer", fontSize: 13 }}
                     >
                       <Eye size={16} />
@@ -273,6 +363,8 @@ export default function StoryViewer({
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); }}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onPointerUp={(e) => e.stopPropagation()}
                       style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}
                     >
                       <Trash2 size={18} />
@@ -280,10 +372,20 @@ export default function StoryViewer({
                   </div>
                 ) : (
                   <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-                    <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }} style={{ flex: 1, padding: "10px 0", borderRadius: 12, background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", cursor: "pointer", fontWeight: 600 }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onPointerUp={(e) => e.stopPropagation()}
+                      style={{ flex: 1, padding: "10px 0", borderRadius: 12, background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", cursor: "pointer", fontWeight: 600 }}
+                    >
                       Cancelar
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(); }} style={{ flex: 1, padding: "10px 0", borderRadius: 12, background: "#FF3D9E", border: "none", color: "#fff", cursor: "pointer", fontWeight: 600 }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onPointerUp={(e) => e.stopPropagation()}
+                      style={{ flex: 1, padding: "10px 0", borderRadius: 12, background: "#FF3D9E", border: "none", color: "#fff", cursor: "pointer", fontWeight: 600 }}
+                    >
                       Eliminar
                     </button>
                   </div>

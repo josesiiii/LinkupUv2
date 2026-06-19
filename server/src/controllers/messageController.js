@@ -165,6 +165,49 @@ export const editarMensaje = async (req, res) => {
   }
 };
 
+// Escapa caracteres especiales de regex para que el término de búsqueda
+// se trate como texto literal, no como patrón.
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// BUSCADOR GLOBAL: usuarios/conversaciones por nombre + mensajes por texto
+export const buscarChat = async (req, res) => {
+  try {
+    const q = (req.query.q || "").trim();
+    if (!q) return res.status(200).json({ conversations: [], messages: [] });
+
+    const regex = new RegExp(escapeRegex(q), "i");
+
+    const conversaciones = await Conversation.find({
+      $or: [{ participantA: req.usuario._id }, { participantB: req.usuario._id }]
+    })
+      .populate("participantA", "fullName profilePicture")
+      .populate("participantB", "fullName profilePicture");
+
+    const conversacionesCoincidentes = conversaciones.filter((c) => {
+      const otro = c.participantA._id.toString() === req.usuario._id.toString() ? c.participantB : c.participantA;
+      return regex.test(otro?.fullName || "");
+    });
+
+    const conversationIds = conversaciones.map((c) => c._id);
+    const mensajes = await Message.find({
+      conversation: { $in: conversationIds },
+      text: regex,
+      deletedForEveryone: { $ne: true },
+      deletedFor: { $ne: req.usuario._id }
+    })
+      .populate("sender", "fullName")
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.status(200).json({
+      conversations: conversacionesCoincidentes,
+      messages: mensajes
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // OBTENER CONVERSACIONES DEL USUARIO
 export const obtenerConversaciones = async (req, res) => {
   try {

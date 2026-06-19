@@ -6,8 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import api from "../../api/axios";
 import { formatPresence } from "./utils";
-
-const STORY_GRADIENT = "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)";
+import StoryRingAvatar from "../ui/StoryRingAvatar";
 
 export default function ContactProfileModal({ open, onClose, userId, presence, onOpenStory }) {
   const { colors, theme } = useTheme();
@@ -27,7 +26,6 @@ export default function ContactProfileModal({ open, onClose, userId, presence, o
   if (!open) return null;
 
   const presenceText = presence ? formatPresence(presence) : "⚫ Desconectado";
-  const hasStory = perfil?.hasActiveStory;
 
   return (
     <AnimatePresence>
@@ -69,29 +67,15 @@ export default function ContactProfileModal({ open, onClose, userId, presence, o
             {/* Avatar superpuesto */}
             <div style={{ padding: "0 20px 20px", position: "relative" }}>
               <div style={{ marginTop: -40, marginBottom: 12 }}>
-                {hasStory ? (
-                  <div
-                    onClick={() => { onClose(); onOpenStory?.(userId); }}
-                    style={{ width: 80, height: 80, borderRadius: "50%", background: STORY_GRADIENT, padding: 3, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-                    title="Ver historia"
-                  >
-                    <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: colors.surface, padding: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {perfil?.profilePicture ? (
-                        <img src={perfil.profilePicture} style={{ width: 68, height: 68, borderRadius: "50%", objectFit: "cover" }} />
-                      ) : (
-                        <div style={{ width: 68, height: 68, borderRadius: "50%", background: "#FF3D9E", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 28 }}>
-                          {(perfil?.fullName || "U").charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : perfil?.profilePicture ? (
-                  <img src={perfil.profilePicture} style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: `3px solid ${colors.surface}` }} />
-                ) : (
-                  <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#FF3D9E", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 30, border: `3px solid ${colors.surface}` }}>
-                    {(perfil?.fullName || "U").charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <StoryRingAvatar
+                  userId={perfil?._id}
+                  name={perfil?.fullName}
+                  src={perfil?.profilePicture}
+                  size={80}
+                  shape="circle"
+                  fallbackHasStory={perfil?.hasActiveStory}
+                  onClick={perfil?.hasActiveStory ? () => { onClose(); onOpenStory?.(userId); } : undefined}
+                />
               </div>
 
               {loading && <p style={{ color: colors.textMuted, fontSize: 14, margin: 0 }}>Cargando perfil...</p>}

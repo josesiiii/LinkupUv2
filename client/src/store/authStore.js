@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { resetSocket } from "../lib/socket";
+import useSavedProfilesStore from "./savedProfilesStore";
+import useStoryRingStore from "./storyRingStore";
 
 const safeParse = (raw, fallback) => {
   if (!raw || raw === "undefined") return fallback;
@@ -43,6 +45,8 @@ const useAuthStore = create((set, get) => ({
     localStorage.setItem("token", account.token);
 
     resetSocket();
+    useSavedProfilesStore.getState().reset();
+    useStoryRingStore.getState().reset();
     set({ usuario: account.usuario, token: account.token });
   },
 
@@ -56,11 +60,15 @@ const useAuthStore = create((set, get) => ({
       localStorage.setItem("usuario", JSON.stringify(next.usuario));
       localStorage.setItem("token", next.token);
       resetSocket();
+      useSavedProfilesStore.getState().reset();
+      useStoryRingStore.getState().reset();
       set({ usuario: next.usuario, token: next.token, accounts: remaining });
     } else {
       localStorage.removeItem("usuario");
       localStorage.removeItem("token");
       resetSocket();
+      useSavedProfilesStore.getState().reset();
+      useStoryRingStore.getState().reset();
       set({ usuario: null, token: null, accounts: [] });
     }
   },
@@ -89,6 +97,8 @@ const useAuthStore = create((set, get) => ({
       localStorage.removeItem("usuario");
       localStorage.removeItem("token");
       resetSocket();
+      useSavedProfilesStore.getState().reset();
+      useStoryRingStore.getState().reset();
       set({ usuario: null, token: null, accounts: [] });
     }
   },

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import api from "../api/axios";
 import useAuthStore from "../store/authStore";
+import useStoryRingStore from "../store/storyRingStore";
 
 export default function useStories() {
   const updateUsuario = useAuthStore((s) => s.updateUsuario);
@@ -17,7 +18,9 @@ export default function useStories() {
     try {
       setLoading(true);
       const res = await api.get("/stories/feed");
-      setStoriesFeed(Array.isArray(res.data) ? res.data : []);
+      const feed = Array.isArray(res.data) ? res.data : [];
+      setStoriesFeed(feed);
+      useStoryRingStore.getState().hydrateFromFeed(feed);
     } catch {
       setStoriesFeed([]);
     } finally {
@@ -87,6 +90,27 @@ export default function useStories() {
   }, [fetchFeed, updateUsuario]);
 
   const handleView = useCallback(async (storyId) => {
+    // Actualización optimista local + propagación instantánea al store
+    // compartido, para que el anillo cambie a gris sin esperar un refetch.
+    let allSeenForAuthor = null;
+    let authorId = null;
+
+    setStoriesFeed((feed) => {
+      const next = feed.map((group) => {
+        const hasTarget = group.stories.some((s) => s._id === storyId);
+        if (!hasTarget) return group;
+        authorId = group.author?._id;
+        const stories = group.stories.map((s) => (s._id === storyId ? { ...s, seen: true } : s));
+        allSeenForAuthor = stories.every((s) => s.seen);
+        return { ...group, stories };
+      });
+      return next;
+    });
+
+    if (authorId && allSeenForAuthor !== null) {
+      useStoryRingStore.getState().setSeen(authorId, allSeenForAuthor);
+    }
+
     try {
       await api.post(`/stories/${storyId}/view`);
     } catch {
