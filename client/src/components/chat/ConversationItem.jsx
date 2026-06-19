@@ -1,20 +1,25 @@
 // src/components/chat/ConversationItem.jsx
+import { useRef, useState } from "react";
 import {
   MoreVertical, Trash2, Archive, ArchiveRestore,
-  Pin, PinOff, CheckCheck, BellOff, Bell, Ban, User,
+  Pin, PinOff, CheckCheck, BellOff, Bell, Ban, User, Eye,
 } from "lucide-react";
 import Avatar from "./Avatar";
 import Dropdown from "../ui/Dropdown";
+import PortalDropdown from "../ui/PortalDropdown";
 import { formatRelativeTime, getOtherParticipant, getUnreadCount, isInList } from "./utils";
 
 export default function ConversationItem({
   conversation, currentUser, isActive, onClick, colors, presence,
   onArchive, onUnarchive, onPin, onUnpin, onMute, onUnmute,
-  onMarkRead, onDelete, onBlock, disablePin, onViewProfile, highlighted = false,
+  onMarkRead, onDelete, onBlock, disablePin, onViewProfile, onViewStory, highlighted = false,
 }) {
   const persona = getOtherParticipant(conversation, currentUser._id);
   const unread = getUnreadCount(conversation, currentUser._id);
   const online = !!presence?.online;
+
+  const avatarAnchorRef = useRef(null);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
 
   const isArchived = isInList(conversation.archivedBy, currentUser._id);
   const isPinned = isInList(conversation.pinnedBy, currentUser._id);
@@ -65,13 +70,31 @@ export default function ConversationItem({
       onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
     >
       <div
-        onClick={(e) => { e.stopPropagation(); onViewProfile?.(persona); }}
+        ref={avatarAnchorRef}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (persona?.hasActiveStory && onViewStory) {
+            setAvatarMenuOpen((v) => !v);
+          } else {
+            onViewProfile?.(persona);
+          }
+        }}
         style={{ cursor: "pointer", flexShrink: 0, borderRadius: "50%", transition: "opacity 150ms" }}
         onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.8"; }}
         onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
       >
         <Avatar name={persona?.name} src={persona?.avatar} size={46} colors={colors} online={online} showStatus hasStory={!!persona?.hasActiveStory} userId={persona?._id} />
       </div>
+      <PortalDropdown
+        open={avatarMenuOpen}
+        onClose={() => setAvatarMenuOpen(false)}
+        anchorRef={avatarAnchorRef}
+        align="left"
+        items={[
+          { label: "Ver historia", icon: Eye, onClick: () => onViewStory?.(persona?._id) },
+          { label: "Ver perfil", icon: User, onClick: () => onViewProfile?.(persona) },
+        ]}
+      />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>

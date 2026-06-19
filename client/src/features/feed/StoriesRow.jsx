@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useAuthStore from "../../store/authStore";
 import useStories from "../../hooks/useStories";
 import StoryCircle from "./StoryCircle";
@@ -11,28 +11,37 @@ export default function StoriesRow() {
   const {
     storiesFeed, loading,
     viewerOpen, activeAuthorIndex, activeStoryIndex,
-    uploaderOpen,
-    fetchFeed,
+    uploaderOpen, ownStories,
+    fetchFeed, fetchOwnStories, setViewerOpen,
     openViewer, closeViewer,
     openUploader, closeUploader,
     handleUpload, handleView, handleDelete,
     setActiveAuthorIndex, setActiveStoryIndex
   } = useStories();
 
+  const [viewingOwn, setViewingOwn] = useState(false);
+
   useEffect(() => {
     fetchFeed();
   }, [fetchFeed]);
 
+  const handleViewMyStory = async () => {
+    if (!usuario?.hasActiveStory) return;
+    const stories = await fetchOwnStories(usuario._id);
+    if (stories?.length > 0) {
+      setViewingOwn(true);
+      setViewerOpen(true);
+    }
+  };
+
+  const closeViewerAndReset = () => {
+    closeViewer();
+    setViewingOwn(false);
+  };
+
   const handleOwnClick = () => {
     if (usuario?.hasActiveStory) {
-      const ownIndex = storiesFeed.findIndex(
-        (g) => g.author?._id === usuario?._id
-      );
-      if (ownIndex !== -1) {
-        openViewer(ownIndex);
-      } else {
-        openUploader();
-      }
+      handleViewMyStory();
     } else {
       openUploader();
     }
@@ -47,14 +56,14 @@ export default function StoriesRow() {
         }}
         className="stories-row"
       >
-        {/* Tu historia — misma dimensión/anillo que las ajenas vía StoryCircle */}
+        {/* Tu historia */}
         <StoryCircle
           user={usuario}
           seen={false}
           onClick={handleOwnClick}
           size="md"
           isOwn
-          onViewMyStory={handleOwnClick}
+          onViewMyStory={handleViewMyStory}
           onUploadStory={openUploader}
         />
 
@@ -74,9 +83,10 @@ export default function StoriesRow() {
 
       <StoryViewer
         open={viewerOpen}
-        onClose={closeViewer}
-        storiesFeed={storiesFeed}
-        activeAuthorIndex={activeAuthorIndex}
+        onClose={closeViewerAndReset}
+        storiesFeed={viewingOwn ? [] : storiesFeed}
+        ownStories={viewingOwn ? ownStories : []}
+        activeAuthorIndex={viewingOwn ? 0 : activeAuthorIndex}
         activeStoryIndex={activeStoryIndex}
         setActiveAuthorIndex={setActiveAuthorIndex}
         setActiveStoryIndex={setActiveStoryIndex}

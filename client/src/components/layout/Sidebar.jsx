@@ -45,6 +45,7 @@ export default function Sidebar({ onExpandChange }) {
   const closeMenuRef = useRef(null);
   const location = useLocation();
   const usuario = useAuthStore((state) => state.usuario);
+  const setAccountBadges = useAuthStore((state) => state.setAccountBadges);
   const { colors } = useTheme();
 
   const [pendingCount, setPendingCount]   = useState(0);
@@ -66,7 +67,8 @@ export default function Sidebar({ onExpandChange }) {
         ]);
         if (cancelled) return;
 
-        setPendingCount((pendingRes.data || []).length);
+        const pending = (pendingRes.data || []).length;
+        setPendingCount(pending);
 
         const convs = convsRes.data || [];
         const totalUnread = convs.reduce((acc, conv) => {
@@ -74,6 +76,7 @@ export default function Sidebar({ onExpandChange }) {
           return acc + (isA ? (conv.unreadCountA || 0) : (conv.unreadCountB || 0));
         }, 0);
         setUnreadMessages(totalUnread);
+        if (usuario?._id) setAccountBadges(usuario._id, { pending, unread: totalUnread });
       } catch {
         // Silent — badges are non-critical
       }
@@ -281,7 +284,7 @@ export default function Sidebar({ onExpandChange }) {
                 <Icon className="h-5 w-5" />
                 <Badge count={badge} color={badgeColor} />
               </span>
-              <span className="text-[10px]">{label}</span>
+              <span className="text-[10px] hidden sm:block">{label}</span>
             </Link>
           );
         })}

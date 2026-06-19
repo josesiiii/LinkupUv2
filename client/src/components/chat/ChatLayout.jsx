@@ -2,7 +2,7 @@
 // Fase 2: conectado a datos reales vía Socket.io + REST (useChat).
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Pin, X } from "lucide-react";
+import { ArrowLeft, Pin, X, Eye, User } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import useAuthStore from "../../store/authStore";
 import useChat from "../../hooks/useChat";
@@ -14,6 +14,8 @@ import TypingIndicator from "./TypingIndicator";
 import ChatInput from "./ChatInput";
 import Avatar from "./Avatar";
 import Modal from "../ui/Modal";
+import PortalDropdown from "../ui/PortalDropdown";
+import StoryViewer from "../stories/StoryViewer";
 import ContactProfileModal from "./ContactProfileModal";
 import ChatSearch from "./ChatSearch";
 import { getOtherParticipant, formatPresence, isInList } from "./utils";
@@ -48,6 +50,14 @@ export default function ChatLayout() {
   const [forwardTarget, setForwardTarget] = useState(null);
   const [forwardConnections, setForwardConnections] = useState([]);
   const [profileModalUser, setProfileModalUser] = useState(null);
+
+  // Story viewer integrado al chat
+  const [chatStoriesFeed, setChatStoriesFeed] = useState([]);
+  const [chatStoryViewerOpen, setChatStoryViewerOpen] = useState(false);
+  const [chatStoryAuthorIdx, setChatStoryAuthorIdx] = useState(0);
+  const [chatStoryIdx, setChatStoryIdx] = useState(0);
+  const [headerAvatarMenuOpen, setHeaderAvatarMenuOpen] = useState(false);
+  const headerAvatarRef = useRef(null);
   const [highlightedMessageId, setHighlightedMessageId] = useState(null);
   const [highlightedConversationId, setHighlightedConversationId] = useState(null);
   const [pendingHighlightMessageId, setPendingHighlightMessageId] = useState(null);
@@ -282,6 +292,24 @@ export default function ChatLayout() {
   const handleMarkRead = (id) => updateConversation(id, "markRead");
   const handleBlockUser = (userId) => blockUser(userId);
 
+  const handleOpenStory = async (userId) => {
+    try {
+      const res = await api.get("/stories/feed");
+      const feed = Array.isArray(res.data) ? res.data : [];
+      const idx = feed.findIndex((g) => g.author?._id === userId);
+      if (idx >= 0) {
+        setChatStoriesFeed(feed);
+        setChatStoryAuthorIdx(idx);
+        setChatStoryIdx(0);
+        setChatStoryViewerOpen(true);
+      }
+    } catch {}
+  };
+
+  const handleChatStoryView = async (storyId) => {
+    try { await api.post(`/stories/${storyId}/view`); } catch {}
+  };
+
   const handleDeleteConversation = async (id) => {
     const conv = conversations.find((c) => c._id === id);
     const ok = await removeConversation(id);
@@ -364,6 +392,7 @@ export default function ChatLayout() {
                 onDelete={handleDeleteConversation}
                 onBlock={handleBlockUser}
                 onViewProfile={(persona) => navigate(`/users/${persona._id}`)}
+                onViewStory={handleOpenStory}
               />
             );
           })}
@@ -393,8 +422,16 @@ export default function ChatLayout() {
                 <ArrowLeft size={20} />
               </button>
               <div
-                style={{ cursor: otherParticipant?._id ? "pointer" : "default", lineHeight: 0 }}
-                onClick={otherParticipant?._id ? () => navigate(`/users/${otherParticipant._id}`) : undefined}
+                ref={headerAvatarRef}
+                style={{ cursor: otherParticipant?._id ? "pointer" : "default", lineHeight: 0, position: "relative" }}
+                onClick={() => {
+                  if (!otherParticipant?._id) return;
+                  if (otherParticipant?.hasActiveStory) {
+                    setHeaderAvatarMenuOpen((v) => !v);
+                  } else {
+                    navigate(`/users/${otherParticipant._id}`);
+                  }
+                }}
               >
                 <Avatar
                   name={otherParticipant?.name}
@@ -407,6 +444,16 @@ export default function ChatLayout() {
                   userId={otherParticipant?._id}
                 />
               </div>
+              <PortalDropdown
+                open={headerAvatarMenuOpen}
+                onClose={() => setHeaderAvatarMenuOpen(false)}
+                anchorRef={headerAvatarRef}
+                align="left"
+                items={[
+                  { label: "Ver historia", icon: Eye, onClick: () => handleOpenStory(otherParticipant?._id) },
+                  { label: "Ver perfil", icon: User, onClick: () => navigate(`/users/${otherParticipant?._id}`) },
+                ]}
+              />
               <div
                 style={{ cursor: otherParticipant?._id ? "pointer" : "default" }}
                 onClick={otherParticipant?._id ? () => navigate(`/users/${otherParticipant._id}`) : undefined}
@@ -536,7 +583,20 @@ export default function ChatLayout() {
         onClose={() => setProfileModalUser(null)}
         userId={profileModalUser?._id}
         presence={profileModalUser?._id ? presence[profileModalUser._id] : null}
-        onOpenStory={(uid) => { setProfileModalUser(null); navigate(`/users/${uid}`); }}
+        onOpenStory={(uid) => { setProfileModalUser(null); handleOpenStory(uid); }}
+      />
+
+      <StoryViewer
+        open={chatStoryViewerOpen}
+        onClose={() => setChatStoryViewerOpen(false)}
+        storiesFeed={chatStoriesFeed}
+        ownStories={[]}
+        activeAuthorIndex={chatStoryAuthorIdx}
+        activeStoryIndex={chatStoryIdx}
+        setActiveAuthorIndex={setChatStoryAuthorIdx}
+        setActiveStoryIndex={setChatStoryIdx}
+        onView={handleChatStoryView}
+        onDelete={() => {}}
       />
 
       <style>{`

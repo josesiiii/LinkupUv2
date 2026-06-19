@@ -63,7 +63,7 @@ export default function ConnectionsPage() {
 
   return (
     <AppLayout>
-      <div style={{ maxWidth: 880, margin: "0 auto", padding: "0 24px 64px" }}>
+      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "20px 24px 64px" }}>
         <h1 style={{ margin: "0 0 24px 0", fontSize: 28, fontWeight: 700, color: colors.textDark, fontFamily: "'Inter', sans-serif", letterSpacing: "-0.02em" }}>
           Amigos
         </h1>

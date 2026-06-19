@@ -1,8 +1,9 @@
 // src/pages/ProfilePage.jsx
 import { useState, useRef, useEffect } from "react";
-import { Pencil, Camera } from "lucide-react";
+import { Pencil, Camera, Trash2, Edit3, Images } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
+import PortalDropdown from "../components/ui/PortalDropdown";
 import AvatarEditButton from "../components/profile/AvatarEditButton";
 import EditProfileModal from "../components/profile/EditProfileModal";
 import GalleryEditor from "../components/profile/GalleryEditor";
@@ -55,7 +56,11 @@ export default function ProfilePage() {
   const [editOpen, setEditOpen] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
   const [bannerCropSrc, setBannerCropSrc] = useState(null);
+  const [bannerMenuOpen, setBannerMenuOpen] = useState(false);
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+  const [galleryRefreshKey, setGalleryRefreshKey] = useState(0);
   const bannerInputRef = useRef(null);
+  const bannerMenuRef = useRef(null);
   const [amigos, setAmigos] = useState([]);
   const [loadingAmigos, setLoadingAmigos] = useState(true);
 
@@ -94,6 +99,16 @@ export default function ProfilePage() {
     }
   };
 
+  const handleBannerDelete = async () => {
+    if (!window.confirm("¿Eliminar el banner?")) return;
+    try {
+      await api.delete("/users/profile-banner");
+      updateUsuario({ profileBanner: null });
+    } catch {
+      alert("No se pudo eliminar el banner.");
+    }
+  };
+
   const {
     viewerOpen, activeAuthorIndex, activeStoryIndex,
     uploaderOpen, ownStories,
@@ -129,40 +144,62 @@ export default function ProfilePage() {
     <AppLayout>
       <ImageCropModal
         image={bannerCropSrc}
-        aspectRatio={16 / 9}
+        aspectRatio={4}
         cropShape="rect"
         title="Editar banner"
         onSave={handleBannerCropSave}
         onClose={() => setBannerCropSrc(null)}
       />
 
-      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "0 24px 64px" }}>
+      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "20px 24px 64px" }}>
 
         {/* Banner */}
         <div
-          onClick={() => !bannerUploading && bannerInputRef.current?.click()}
           style={{
             position: "relative", height: 160, borderRadius: 24, marginBottom: 16,
             background: usuario?.profileBanner
               ? `url(${usuario.profileBanner}) center/cover`
               : `linear-gradient(135deg, ${colors.pinkLight}, #e0d4ff)`,
-            cursor: bannerUploading ? "wait" : "pointer",
             border: `1px solid ${colors.border}`,
             overflow: "hidden",
           }}
         >
-          <div style={{
-            position: "absolute", inset: 0, background: "rgba(0,0,0,0)", display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "background 200ms",
-          }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.25)"; e.currentTarget.children[0].style.opacity = "1"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0)"; e.currentTarget.children[0].style.opacity = "0"; }}
-          >
-            <div style={{ opacity: 0, display: "flex", alignItems: "center", gap: 8, color: "#fff", fontWeight: 600, fontSize: 14, transition: "opacity 200ms" }}>
-              <Camera size={18} /> {bannerUploading ? "Subiendo..." : "Cambiar banner"}
-            </div>
-          </div>
           <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleBannerChange} />
+
+          {/* Botón de acción — bottom-right del banner */}
+          <div ref={bannerMenuRef} style={{ position: "absolute", bottom: 12, right: 12 }}>
+            <button
+              onClick={() => setBannerMenuOpen((v) => !v)}
+              disabled={bannerUploading}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 12px", borderRadius: 20, border: "none",
+                background: "rgba(0,0,0,0.45)", color: "#fff",
+                fontSize: 12, fontWeight: 600, cursor: bannerUploading ? "wait" : "pointer",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <Camera size={14} />
+              {bannerUploading ? "Subiendo..." : "Editar"}
+            </button>
+          </div>
+
+          <PortalDropdown
+            open={bannerMenuOpen}
+            onClose={() => setBannerMenuOpen(false)}
+            anchorRef={bannerMenuRef}
+            align="right"
+            items={[
+              {
+                label: usuario?.profileBanner ? "Cambiar banner" : "Agregar banner",
+                icon: Edit3,
+                onClick: () => bannerInputRef.current?.click(),
+              },
+              ...(usuario?.profileBanner
+                ? [{ label: "Eliminar banner", icon: Trash2, danger: true, onClick: handleBannerDelete }]
+                : []),
+            ]}
+          />
         </div>
 
         {/* Header */}
@@ -276,9 +313,50 @@ export default function ProfilePage() {
             boxShadow: "0 1px 10px rgba(0,0,0,0.05)",
           }}
         >
-          <p style={{ margin: "0 0 12px 0", fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Galería</p>
-          <GalleryEditor />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>Galería</p>
+            <button
+              onClick={() => setGalleryModalOpen(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "5px 12px", borderRadius: 20,
+                border: `1px solid ${colors.border}`, background: "transparent",
+                color: colors.pink, fontSize: 12, fontWeight: 600, cursor: "pointer",
+              }}
+            >
+              <Images size={13} /> Editar galería
+            </button>
+          </div>
+          <GalleryEditor readOnly key={galleryRefreshKey} />
         </div>
+
+        {/* Modal de galería */}
+        {galleryModalOpen && (
+          <div
+            onClick={() => { setGalleryModalOpen(false); setGalleryRefreshKey((k) => k + 1); }}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: colors.surface, border: `1px solid ${colors.border}`,
+                borderRadius: 24, padding: 28, width: "100%", maxWidth: 540,
+                maxHeight: "90vh", overflowY: "auto",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: colors.textDark }}>Editar galería</h3>
+                <button
+                  onClick={() => { setGalleryModalOpen(false); setGalleryRefreshKey((k) => k + 1); }}
+                  style={{ border: "none", background: "transparent", cursor: "pointer", color: colors.textMuted, display: "flex" }}
+                >
+                  <span style={{ fontSize: 20, lineHeight: 1 }}>×</span>
+                </button>
+              </div>
+              <GalleryEditor />
+            </div>
+          </div>
+        )}
 
         {/* Amigos */}
         <div

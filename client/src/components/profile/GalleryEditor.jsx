@@ -1,18 +1,20 @@
 // src/components/profile/GalleryEditor.jsx
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, Pencil } from "lucide-react";
 import api from "../../api/axios";
 import ImageCropModal from "../ui/ImageCropModal";
 import { useTheme } from "../../context/ThemeContext";
 
 const MAX_PHOTOS = 4;
 
-export default function GalleryEditor() {
+export default function GalleryEditor({ readOnly = false }) {
   const { colors } = useTheme();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const fileInputRef = useRef(null);
+  const replaceInputRef = useRef(null);
   const [cropSrc, setCropSrc] = useState(null);
+  const [replaceId, setReplaceId] = useState(null);
 
   const load = () => {
     api.get("/users/my-photos")
@@ -27,7 +29,15 @@ export default function GalleryEditor() {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result);
+    reader.readAsDataURL(file);
+  };
 
+  const handleReplaceFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
     const reader = new FileReader();
     reader.onload = () => setCropSrc(reader.result);
     reader.readAsDataURL(file);
@@ -39,12 +49,20 @@ export default function GalleryEditor() {
     formData.append("image", file);
 
     try {
-      const res = await api.post("/users/photos", formData);
-      setPhotos((res.data.photos || []).slice().sort((a, b) => a.order - b.order));
+      if (replaceId) {
+        // Delete old photo first, then upload new one
+        await api.delete(`/users/photos/${replaceId}`);
+        const res = await api.post("/users/photos", formData);
+        setPhotos((res.data.photos || []).slice().sort((a, b) => a.order - b.order));
+      } else {
+        const res = await api.post("/users/photos", formData);
+        setPhotos((res.data.photos || []).slice().sort((a, b) => a.order - b.order));
+      }
     } catch (err) {
       alert(err.response?.data?.message || "No se pudo subir la foto");
     } finally {
       setCropSrc(null);
+      setReplaceId(null);
     }
   };
 
@@ -75,15 +93,35 @@ export default function GalleryEditor() {
 
   if (loading) return null;
 
+  // Readonly mode — simple photo grid, no editing controls
+  if (readOnly) {
+    if (photos.length === 0) {
+      return (
+        <p style={{ fontSize: 13, color: colors.textMuted, margin: 0 }}>
+          Sin fotos en la galería.
+        </p>
+      );
+    }
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 10 }}>
+        {photos.map((photo) => (
+          <div key={photo._id} style={{ borderRadius: 14, overflow: "hidden", aspectRatio: "1", background: colors.surfaceAlt }}>
+            <img src={photo.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <>
       <ImageCropModal
         image={cropSrc}
         aspectRatio={4 / 5}
         cropShape="rect"
-        title="Editar foto de galería"
+        title={replaceId ? "Reemplazar foto" : "Editar foto de galería"}
         onSave={handleCropSave}
-        onClose={() => setCropSrc(null)}
+        onClose={() => { setCropSrc(null); setReplaceId(null); }}
       />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 12 }}>
@@ -98,7 +136,14 @@ export default function GalleryEditor() {
                 background: "linear-gradient(to bottom, rgba(0,0,0,0.35), transparent 35%, transparent 65%, rgba(0,0,0,0.35))",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <button
+                  onClick={() => { setReplaceId(photo._id); replaceInputRef.current?.click(); }}
+                  title="Reemplazar foto"
+                  style={{ width: 26, height: 26, borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.5)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  <Pencil size={12} />
+                </button>
                 <button
                   onClick={() => handleDelete(photo._id)}
                   style={{ width: 26, height: 26, borderRadius: "50%", border: "none", background: "rgba(0,0,0,0.5)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
@@ -141,6 +186,7 @@ export default function GalleryEditor() {
         )}
 
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: "none" }} />
+        <input ref={replaceInputRef} type="file" accept="image/*" onChange={handleReplaceFileSelect} style={{ display: "none" }} />
 
         <style>{`
           .linkup-gallery-tile:hover .linkup-gallery-overlay { opacity: 1; }

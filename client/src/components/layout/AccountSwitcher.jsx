@@ -12,6 +12,7 @@ export default function AccountSwitcher({ trigger, includeExtras = false, panelS
   const accounts = useAuthStore((state) => state.accounts);
   const switchAccount = useAuthStore((state) => state.switchAccount);
   const removeAccount = useAuthStore((state) => state.removeAccount);
+  const accountBadges = useAuthStore((state) => state.accountBadges);
   const { theme, toggleTheme, colors } = useTheme();
   const closeFnRef = useRef(null);
 
@@ -33,30 +34,43 @@ export default function AccountSwitcher({ trigger, includeExtras = false, panelS
   };
 
   const items = [
-    ...accounts.map((acc) => ({
-      render: ({ close }) => (
-        <button
-          key={acc.usuario._id}
-          onClick={() => { handleSwitchAccount(acc.usuario._id); close(); }}
-          className="flex items-center gap-3 px-3 py-2.5 text-sm w-full text-left"
-          style={{ color: colors.textDark, background: "transparent", border: "none", cursor: "pointer" }}
-          title={!isExpanded ? acc.usuario.fullName : undefined}
-        >
-          {acc.usuario.profilePicture ? (
-            <img src={acc.usuario.profilePicture} alt={acc.usuario.fullName} className="h-7 w-7 rounded-full object-cover flex-shrink-0" />
-          ) : (
-            <div className="h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold" style={{ background: colors.pinkLight, color: colors.pink }}>
-              {(acc.usuario.fullName || "U").charAt(0).toUpperCase()}
+    ...accounts.map((acc) => {
+      const isActive = acc.usuario._id === usuario?._id;
+      const badges = accountBadges[acc.usuario._id];
+      const hasDot = !isActive && ((badges?.pending > 0) || (badges?.unread > 0));
+      return {
+        render: ({ close }) => (
+          <button
+            key={acc.usuario._id}
+            onClick={() => { handleSwitchAccount(acc.usuario._id); close(); }}
+            className="flex items-center gap-3 px-3 py-2.5 text-sm w-full text-left"
+            style={{ color: colors.textDark, background: "transparent", border: "none", cursor: "pointer" }}
+            title={!isExpanded ? acc.usuario.fullName : undefined}
+          >
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              {acc.usuario.profilePicture ? (
+                <img src={acc.usuario.profilePicture} alt={acc.usuario.fullName} className="h-7 w-7 rounded-full object-cover" />
+              ) : (
+                <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: colors.pinkLight, color: colors.pink }}>
+                  {(acc.usuario.fullName || "U").charAt(0).toUpperCase()}
+                </div>
+              )}
+              {hasDot && (
+                <div style={{ position: "absolute", top: -2, right: -2, width: 9, height: 9, borderRadius: "50%", background: "#FF3D9E", border: `2px solid ${colors.surface}` }} />
+              )}
             </div>
-          )}
-          {isExpanded && <span className="flex-1 truncate">{acc.usuario.fullName}</span>}
-          {isExpanded && acc.usuario._id === usuario?._id && <Check className="h-4 w-4 flex-shrink-0" style={{ color: colors.pink }} />}
-          {!isExpanded && acc.usuario._id === usuario?._id && (
-            <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: colors.pink }} />
-          )}
-        </button>
-      ),
-    })),
+            {isExpanded && <span className="flex-1 truncate">{acc.usuario.fullName}</span>}
+            {isExpanded && isActive && <Check className="h-4 w-4 flex-shrink-0" style={{ color: colors.pink }} />}
+            {isExpanded && !isActive && hasDot && (
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF3D9E", flexShrink: 0 }} />
+            )}
+            {!isExpanded && isActive && (
+              <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: colors.pink }} />
+            )}
+          </button>
+        ),
+      };
+    }),
     {
       icon: Plus,
       label: "Agregar cuenta",

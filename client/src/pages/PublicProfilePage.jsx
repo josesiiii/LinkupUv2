@@ -1,7 +1,7 @@
 // src/pages/PublicProfilePage.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MessageCircle, UserPlus, UserCheck, ArrowLeft, Users, UserCheck2, X } from "lucide-react";
+import { MessageCircle, UserPlus, UserCheck, ArrowLeft, Users, UserCheck2, X, UserMinus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import AppLayout from "../components/layout/AppLayout";
 import useAuthStore from "../store/authStore";
@@ -30,6 +30,7 @@ export default function PublicProfilePage() {
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState(null);
+  const [connectionId, setConnectionId] = useState(null);
   const [socialInfo, setSocialInfo] = useState({ totalConnections: 0, mutualFriends: [] });
   const [mutualModal, setMutualModal] = useState(false);
 
@@ -54,11 +55,12 @@ export default function PublicProfilePage() {
     ])
       .then(([userRes, connRes, socialRes]) => {
         setPerfil(userRes.data);
-        const accepted = (connRes.data || []).some((c) => {
+        const connection = (connRes.data || []).find((c) => {
           const other = c.from?._id === usuario?._id ? c.to : c.from;
           return other?._id === id;
         });
-        setConnectionStatus(accepted ? "connected" : "none");
+        setConnectionStatus(connection ? "connected" : "none");
+        setConnectionId(connection?._id || null);
         setSocialInfo(socialRes.data || { totalConnections: 0, mutualFriends: [] });
       })
       .catch(() => setPerfil(null))
@@ -84,6 +86,18 @@ export default function PublicProfilePage() {
     }
   };
 
+  const handleDisconnect = async () => {
+    if (!connectionId) return;
+    if (!window.confirm("¿Eliminar esta conexión?")) return;
+    try {
+      await api.delete(`/connections/${connectionId}`);
+      setConnectionStatus("none");
+      setConnectionId(null);
+    } catch (err) {
+      alert(err.response?.data?.message || "No se pudo eliminar la conexión.");
+    }
+  };
+
   const cardStyle = theme === "dark"
     ? { background: colors.surface }
     : { background: "rgba(255,255,255,0.45)", backdropFilter: "blur(20px)" };
@@ -106,7 +120,7 @@ export default function PublicProfilePage() {
 
   return (
     <AppLayout>
-      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "0 24px 64px" }}>
+      <div style={{ maxWidth: "90%", margin: "0 auto", padding: "20px 24px 64px" }}>
 
         {/* Banner */}
         <div style={{
@@ -126,7 +140,7 @@ export default function PublicProfilePage() {
         </div>
 
         {/* Header */}
-        <div style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 32, marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)", position: "relative", display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
+        <div className="pub-profile-header" style={{ ...cardStyle, border: `1px solid ${colors.border}`, borderRadius: 24, padding: 32, marginBottom: 24, boxShadow: "0 1px 10px rgba(0,0,0,0.05)", position: "relative", display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
 
           {/* Avatar — circular, con anillo de historia sincronizado (Feed/Chat/Perfil) */}
           <div style={{ flexShrink: 0 }}>
@@ -153,14 +167,22 @@ export default function PublicProfilePage() {
           </div>
 
           {/* Actions */}
-          <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+          <div className="pub-profile-actions" style={{ display: "flex", gap: 10, flexShrink: 0, flexWrap: "wrap" }}>
             {connectionStatus === "connected" ? (
-              <button
-                onClick={() => navigate(`/chat?with=${perfil._id}`)}
-                style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 12, border: "none", background: "#FF3D9E", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 14 }}
-              >
-                <MessageCircle size={16} /> Mensaje
-              </button>
+              <>
+                <button
+                  onClick={() => navigate(`/chat?with=${perfil._id}`)}
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 12, border: "none", background: "#FF3D9E", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 14 }}
+                >
+                  <MessageCircle size={16} /> Mensaje
+                </button>
+                <button
+                  onClick={handleDisconnect}
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 12, border: `1px solid ${colors.border}`, background: "transparent", color: colors.textMuted, cursor: "pointer", fontWeight: 600, fontSize: 14 }}
+                >
+                  <UserMinus size={16} /> Eliminar conexión
+                </button>
+              </>
             ) : connectionStatus === "pending" ? (
               <button disabled style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 12, border: `1px solid ${colors.border}`, background: "transparent", color: colors.textMuted, fontWeight: 600, fontSize: 14, cursor: "default" }}>
                 <UserCheck size={16} /> Solicitud enviada
@@ -246,6 +268,14 @@ export default function PublicProfilePage() {
         onView={handleView}
         onDelete={handleDelete}
       />
+
+      <style>{`
+        @media (max-width: 480px) {
+          .pub-profile-header { padding: 20px !important; flex-direction: column; align-items: flex-start !important; }
+          .pub-profile-actions { width: 100%; }
+          .pub-profile-actions button { flex: 1; justify-content: center; }
+        }
+      `}</style>
 
       {/* Modal amigos en común */}
       <AnimatePresence>

@@ -81,11 +81,11 @@ export default function StoryViewer({
     }
   };
 
-  // Marcar como vista
+  // Marcar como vista — nunca contar al propio autor
   useEffect(() => {
     if (!open || !currentStory) return;
     const id = currentStory._id?.toString();
-    if (id && !viewedInSession.current.has(id)) {
+    if (id && !viewedInSession.current.has(id) && !isOwn) {
       viewedInSession.current.add(id);
       onView?.(id);
     }
@@ -193,9 +193,10 @@ export default function StoryViewer({
     <AnimatePresence>
       {open && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.97 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
           style={{
             position: "fixed", inset: 0, zIndex: 200,
             background: "#000",

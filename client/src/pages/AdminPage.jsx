@@ -213,7 +213,7 @@ function SmallStat({ label, value, color = C.dark }) {
 
 // ─── Vistas ────────────────────────────────────────────────────────────────
 
-function DashboardView({ stats, usersPreview, goToUsers }) {
+function DashboardView({ stats, usersPreview, goToUsers, mobile }) {
   if (!stats) return <Loading />;
   const { overview: o, timeSeries: ts, breakdowns: bd } = stats;
 
@@ -228,7 +228,7 @@ function DashboardView({ stats, usersPreview, goToUsers }) {
       </div>
 
       {/* Gráficos */}
-      <div style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "3fr 2fr", gap: 14 }}>
         <Card>
           <CardHeader title="Crecimiento de usuarios" sub="Últimos 30 días" />
           <div style={{ padding: "16px 22px 18px" }}>
@@ -244,7 +244,7 @@ function DashboardView({ stats, usersPreview, goToUsers }) {
       </div>
 
       {/* Stats secundarios */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: mobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 12 }}>
         <SmallStat label="Historias activas"      value={o.totalHistorias}      color={C.amber} />
         <SmallStat label="Perfiles guardados"      value={o.totalGuardados}      color="#6366f1" />
         <SmallStat label="Solicitudes pendientes"  value={o.conexionesPendientes} color={C.pink} />
@@ -419,13 +419,13 @@ function UserTable({ users, compact, onToggle, onDelete, actionLoading }) {
   );
 }
 
-function AnalyticsView({ stats }) {
+function AnalyticsView({ stats, mobile }) {
   if (!stats) return <Loading />;
   const { timeSeries: ts, breakdowns: bd, overview: o } = stats;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 14 }}>
         <Card>
           <CardHeader title="Crecimiento de usuarios" sub="Registros por día · últimos 30 días" />
           <div style={{ padding: "16px 22px 18px" }}>
@@ -447,7 +447,7 @@ function AnalyticsView({ stats }) {
         </div>
       </Card>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 14 }}>
         <Card>
           <CardHeader title="Usuarios por institución" sub="Distribución por universidad registrada" />
           <div style={{ padding: "16px 22px 18px" }}>
@@ -462,7 +462,7 @@ function AnalyticsView({ stats }) {
         </Card>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr", gap: 14 }}>
         <Card>
           <CardHeader title="Usuarios por facultad" sub="Top 8 carreras / programas" />
           <div style={{ padding: "16px 22px 18px" }}>
@@ -493,7 +493,7 @@ function AnalyticsView({ stats }) {
       {/* Métricas de conexiones */}
       <Card>
         <CardHeader title="Estado de conexiones" sub="Distribución global" />
-        <div style={{ padding: "18px 22px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+        <div style={{ padding: "18px 22px", display: "grid", gridTemplateColumns: mobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16 }}>
           {[
             { label: "Aceptadas", value: o.conexionesAceptadas, color: C.green, pct: o.tasaAceptacion },
             { label: "Pendientes", value: o.conexionesPendientes, color: C.amber, pct: o.totalConexiones ? Math.round((o.conexionesPendientes / o.totalConexiones) * 100) : 0 },
@@ -570,7 +570,41 @@ const VIEWS = [
   { id: "universities",  label: "Universidades",   Icon: Building2 },
 ];
 
-function AdminSidebar({ view, setView, usuario }) {
+function AdminSidebar({ view, setView, usuario, mobile }) {
+  if (mobile) {
+    return (
+      <div style={{ background: C.sidebar, borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px" }}>
+          <Logo size={22} showText textColor="#fff" textSize=".85rem" />
+          <Link to="/feed" style={{ fontSize: 11, color: C.sidebarTxt, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+            <ChevronLeft size={12} /> App
+          </Link>
+        </div>
+        <div style={{ display: "flex", overflowX: "auto", padding: "0 8px 10px", gap: 4, scrollbarWidth: "none" }}>
+          {VIEWS.map(({ id, label, Icon }) => {
+            const active = view === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setView(id)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
+                  padding: "7px 12px", borderRadius: 20, border: "none",
+                  background: active ? C.sidebarAct : "rgba(255,255,255,0.06)",
+                  color: active ? C.sidebarActT : C.sidebarTxt,
+                  fontWeight: active ? 600 : 500, fontSize: 12, cursor: "pointer",
+                }}
+              >
+                <Icon size={13} />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <aside style={{
       width: 220, flexShrink: 0, height: "100vh", position: "sticky", top: 0,
@@ -641,6 +675,13 @@ function AdminSidebar({ view, setView, usuario }) {
 
 export default function AdminPage() {
   const usuario = useAuthStore(s => s.usuario);
+
+  const [mobile, setMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
 
   const [view, setView]                   = useState("dashboard");
   const [stats, setStats]                 = useState(null);
@@ -717,13 +758,13 @@ export default function AdminPage() {
   const viewLabel = VIEWS.find(v => v.id === view)?.label || "";
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: C.bg, fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
-      <AdminSidebar view={view} setView={setView} usuario={usuario} />
+    <div style={{ display: "flex", flexDirection: mobile ? "column" : "row", minHeight: "100vh", background: C.bg, fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
+      <AdminSidebar view={view} setView={setView} usuario={usuario} mobile={mobile} />
 
       {/* Contenido */}
       <main style={{ flex: 1, overflow: "auto" }}>
         {/* Topbar */}
-        <div style={{ padding: "20px 28px 0", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
+        <div style={{ padding: mobile ? "16px 16px 0" : "20px 28px 0", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 800, color: C.dark, margin: 0, letterSpacing: "-.02em" }}>{viewLabel}</h1>
             <p style={{ fontSize: 12, color: C.muted, margin: "2px 0 0" }}>
@@ -739,7 +780,7 @@ export default function AdminPage() {
           </button>
         </div>
 
-        <div style={{ padding: "0 28px 32px" }}>
+        <div style={{ padding: mobile ? "0 16px 32px" : "0 28px 32px" }}>
           {error && (
             <div style={{ padding: "12px 16px", background: C.redL, border: `1px solid ${C.red}30`, borderRadius: 10, color: C.red, fontSize: 13, marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
               <AlertCircle size={14} />
@@ -751,9 +792,9 @@ export default function AdminPage() {
             ? <Loading />
             : (
               <>
-                {view === "dashboard"    && <DashboardView    stats={stats} usersPreview={users} goToUsers={() => setView("users")} />}
+                {view === "dashboard"    && <DashboardView    stats={stats} usersPreview={users} goToUsers={() => setView("users")} mobile={mobile} />}
                 {view === "users"        && <UsersView        users={users} total={usersTotal} pages={usersPages} page={usersPage} search={search} onSearch={setSearch} statusFilter={statusFilter} onStatus={setStatusFilter} onToggle={handleToggle} onDelete={handleDelete} actionLoading={actionLoading} loadingUsers={loadingUsers} onPage={setUsersPage} />}
-                {view === "analytics"    && <AnalyticsView    stats={stats} />}
+                {view === "analytics"    && <AnalyticsView    stats={stats} mobile={mobile} />}
                 {view === "universities" && <UniversitiesView stats={stats} />}
               </>
             )

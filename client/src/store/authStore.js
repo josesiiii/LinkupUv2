@@ -25,6 +25,11 @@ const useAuthStore = create((set, get) => ({
   // Sesiones múltiples guardadas en este dispositivo: [{ usuario, token }]
   accounts: safeParse(localStorage.getItem("accounts"), []),
 
+  // Contadores de notificaciones por cuenta (se actualiza desde el Sidebar)
+  accountBadges: {},
+  setAccountBadges: (userId, badges) =>
+    set((s) => ({ accountBadges: { ...s.accountBadges, [userId]: badges } })),
+
   setAuth: (usuario, token) => {
     localStorage.setItem("usuario", JSON.stringify(usuario));
     localStorage.setItem("token", token);
