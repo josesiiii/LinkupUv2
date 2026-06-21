@@ -77,7 +77,7 @@ export const registrarUsuario = async (req, res) => {
     const token = jwt.sign(
       { id: nuevoUsuario._id, role: nuevoUsuario.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1d" }
     );
 
     // 7. RESPONSE
@@ -90,7 +90,7 @@ export const registrarUsuario = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -131,7 +131,7 @@ export const iniciarSesion = async (req, res) => {
     const token = jwt.sign(
       { id: usuario._id, role: usuario.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1d" }
     );
 
     const { password: _, ...usuarioSinPassword } = usuario.toObject();
@@ -143,7 +143,7 @@ export const iniciarSesion = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -210,7 +210,7 @@ export const cambiarPassword = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -252,7 +252,7 @@ export const forgotPassword = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -287,6 +287,6 @@ export const resetPassword = async (req, res) => {
     return res.status(200).json({ message: "Contraseña actualizada correctamente" });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

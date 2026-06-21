@@ -48,7 +48,7 @@ export const obtenerUsuarios = async (req, res) => {
     const usuarios = await User.find().select("-password -__v");
     res.status(200).json(usuarios);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -69,7 +69,7 @@ export const buscarUsuarios = async (req, res) => {
 
     res.status(200).json(usuarios);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -89,7 +89,7 @@ export const obtenerFacets = async (req, res) => {
 
     res.status(200).json({ campuses, faculties: faculties.sort() });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -194,7 +194,7 @@ export const feedUsuarios = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -205,7 +205,7 @@ export const obtenerUsuarioPorId = async (req, res) => {
     if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
     res.status(200).json(usuario);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -268,7 +268,7 @@ export const actualizarPerfil = async (req, res) => {
     const { password, __v, ...safeUser } = usuarioActualizado.toObject();
     res.status(200).json({ message: "Perfil actualizado", usuario: safeUser });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -302,7 +302,7 @@ export const uploadProfilePicture = async (req, res) => {
       profilePicture: usuario.profilePicture
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 };
 
@@ -326,7 +326,7 @@ export const deleteProfilePicture = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Foto de perfil eliminada" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 };
 
@@ -365,7 +365,7 @@ export const uploadPhoto = async (req, res) => {
       total:   usuario.photos.length
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 };
 
@@ -381,7 +381,7 @@ export const obtenerMisPhotos = async (req, res) => {
       total:          usuario.photos.length
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 };
 
@@ -413,7 +413,7 @@ export const deletePhoto = async (req, res) => {
       total:   usuario.photos.length
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 };
 
@@ -446,7 +446,7 @@ export const reorderPhotos = async (req, res) => {
       photos:  usuario.photos.sort((a, b) => a.order - b.order)
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 };
 
@@ -470,7 +470,7 @@ export const bloquearUsuario = async (req, res) => {
 
     res.status(200).json({ blockedUsers: usuario.blockedUsers });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -487,7 +487,7 @@ export const desbloquearUsuario = async (req, res) => {
 
     res.status(200).json({ blockedUsers: usuario.blockedUsers });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -510,7 +510,7 @@ export const uploadProfileBanner = async (req, res) => {
 
     res.status(200).json({ success: true, profileBanner: usuario.profileBanner });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 };
 
@@ -529,7 +529,7 @@ export const deleteProfileBanner = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Banner eliminado" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 };
 
@@ -547,6 +547,6 @@ export const estadisticasPublicas = async (req, res) => {
       conexiones: totalConexiones,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

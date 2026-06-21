@@ -23,9 +23,7 @@ export const obtenerConversaciones = async (req, res) => {
     res.status(200).json(conversaciones);
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -96,7 +94,7 @@ export const actualizarConversacion = async (req, res) => {
     res.status(200).json(conversation);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -122,6 +120,6 @@ export const eliminarConversacion = async (req, res) => {
     res.status(200).json({ message: "Conversación eliminada" });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

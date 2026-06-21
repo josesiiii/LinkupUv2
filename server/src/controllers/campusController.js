@@ -17,9 +17,7 @@ export const crearCampus = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
 
   }
 
@@ -38,9 +36,7 @@ export const obtenerCampus = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
 
   }
 
@@ -74,9 +70,7 @@ export const cambiarCampusActual = async (
 
   } catch (error) {
 
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
 
   }
 
@@ -114,9 +108,7 @@ export const feedCampus = async (
 
   } catch (error) {
 
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
 
   }
 

@@ -41,9 +41,7 @@ export const guardarPerfil = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
 
   }
 
@@ -68,9 +66,7 @@ export const obtenerGuardados = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
 
   }
 
@@ -102,9 +98,7 @@ export const eliminarGuardado = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
 
   }
 

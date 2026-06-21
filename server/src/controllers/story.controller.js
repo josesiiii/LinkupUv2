@@ -37,7 +37,7 @@ export const createStory = async (req, res) => {
 
     res.status(201).json({ message: "Story publicada", story });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -74,7 +74,7 @@ export const getStoriesFeed = async (req, res) => {
 
     res.status(200).json(Object.values(grouped));
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -114,7 +114,7 @@ export const getUserStories = async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -146,7 +146,7 @@ export const markStoryAsViewed = async (req, res) => {
 
     res.status(200).json({ message: "Vista registrada" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -168,7 +168,7 @@ export const getStoryViewers = async (req, res) => {
 
     res.status(200).json(story.viewers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -202,6 +202,6 @@ export const deleteStory = async (req, res) => {
 
     res.status(200).json({ message: "Story eliminada" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

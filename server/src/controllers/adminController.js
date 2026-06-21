@@ -35,7 +35,7 @@ export const obtenerTodosUsuarios = async (req, res) => {
       pages: Math.ceil(total / parseInt(limit)),
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -48,7 +48,7 @@ export const eliminarUsuario = async (req, res) => {
     await User.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Usuario eliminado" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -63,7 +63,7 @@ export const toggleActivarUsuario = async (req, res) => {
       isActive: usuario.isActive,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -232,6 +232,6 @@ export const getEstadisticas = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

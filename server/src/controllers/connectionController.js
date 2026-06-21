@@ -34,7 +34,7 @@ export const enviarConexion = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -59,9 +59,7 @@ export const aceptarConexion = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -79,9 +77,7 @@ export const obtenerPendientes = async (req, res) => {
     res.status(200).json(solicitudes);
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -99,9 +95,7 @@ export const obtenerAceptadas = async (req, res) => {
     res.status(200).json(conexiones);
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -126,9 +120,7 @@ export const rechazarConexion = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -154,9 +146,7 @@ export const misContactos = async (req, res) => {
     res.status(200).json(usuarios);
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -173,7 +163,7 @@ export const obtenerArchivadas = async (req, res) => {
 
     res.status(200).json(solicitudes);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -201,7 +191,7 @@ export const archivarConexion = async (req, res) => {
 
     res.status(200).json({ message: "Solicitud archivada", conexion });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -229,7 +219,7 @@ export const restaurarConexion = async (req, res) => {
 
     res.status(200).json({ message: "Solicitud restaurada", conexion });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -255,7 +245,7 @@ export const eliminarConexion = async (req, res) => {
 
     res.status(200).json({ message: "Conexión eliminada" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -288,6 +278,6 @@ export const socialInfo = async (req, res) => {
 
     res.status(200).json({ totalConnections, mutualFriends });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

@@ -50,7 +50,7 @@ export const enviarMensaje = async (req, res) => {
     res.status(201).json({ conversation, mensaje });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -73,7 +73,7 @@ export const obtenerMensajes = async (req, res) => {
     res.status(200).json(mensajes);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -135,7 +135,7 @@ export const reenviarMensaje = async (req, res) => {
     res.status(201).json({ results });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -161,7 +161,7 @@ export const editarMensaje = async (req, res) => {
     res.status(200).json(mensaje);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -204,7 +204,7 @@ export const buscarChat = async (req, res) => {
       messages: mensajes
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -225,6 +225,6 @@ export const obtenerConversaciones = async (req, res) => {
     res.status(200).json(conversaciones);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

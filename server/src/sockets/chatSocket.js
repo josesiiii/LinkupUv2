@@ -308,14 +308,20 @@ export default function registerChatSocket(io) {
       }
     });
 
-    socket.on("messages:read", async ({ roomId, userId }) => {
+    socket.on("messages:read", async ({ roomId }) => {
       try {
+        const userId = socket.userId;
         const conversation = await Conversation.findOne({ roomId });
         if (!conversation) return;
 
+        const isParticipant =
+          conversation.participantA.toString() === userId ||
+          conversation.participantB.toString() === userId;
+        if (!isParticipant) return;
+
         if (conversation.participantA.toString() === userId) {
           conversation.unreadCountA = 0;
-        } else if (conversation.participantB.toString() === userId) {
+        } else {
           conversation.unreadCountB = 0;
         }
         await conversation.save();
