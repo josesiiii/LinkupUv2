@@ -1,0 +1,10 @@
+**/node_modules
+**/.env
+client/dist
+**/*.log
+.git
+.gitignore
+.playwright-mcp/
+*.md
+OVERVIEW.md
+TECHNICAL.md
