@@ -27,6 +27,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Confiar en el proxy de Nginx para obtener la IP real del cliente
+app.set("trust proxy", 1);
+
 // Inicializar estrategia de Google DESPUÉS de que dotenv.config() haya corrido
 initPassport();
 app.use(passportConfig.initialize());
