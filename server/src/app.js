@@ -35,7 +35,22 @@ initPassport();
 app.use(passportConfig.initialize());
 
 // ── SEGURIDAD ─────────────────────────────────
-app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:  ["'self'"],
+      scriptSrc:   ["'self'", "https://www.google.com", "https://www.gstatic.com"],
+      frameSrc:    ["'self'", "https://www.google.com"],
+      imgSrc:      ["'self'", "data:", "https:"],
+      styleSrc:    ["'self'", "'unsafe-inline'"],
+      connectSrc:  ["'self'", "https:", "wss:"],
+      fontSrc:     ["'self'", "https:", "data:"],
+      objectSrc:   ["'none'"],
+      baseUri:     ["'self'"],
+    },
+  },
+}));
 
 // Rate limiting general — todas las rutas
 const limitadorGeneral = rateLimit({
