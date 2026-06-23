@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { useTheme } from "../../context/ThemeContext";
 
-export default function AppLayout({ children }) {
+export default function AppLayout({ children, hideMobileNav = false }) {
   const { colors } = useTheme();
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isDesktop, setIsDesktop] = useState(
@@ -20,7 +20,7 @@ export default function AppLayout({ children }) {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         width: "100%",
         background: colors.bg,
         color: colors.textDark,
@@ -28,9 +28,9 @@ export default function AppLayout({ children }) {
         transition: "background 200ms ease, color 200ms ease",
       }}
     >
-      <Sidebar onExpandChange={setSidebarExpanded} />
+      <Sidebar onExpandChange={setSidebarExpanded} hideMobileNav={hideMobileNav} />
       <main
-        className="pb-16 md:pb-0"
+        className={`${hideMobileNav ? "" : "pb-16"} md:pb-0`}
         style={{
           paddingLeft: isDesktop ? (sidebarExpanded ? 280 : 80) : 0,
           transition: "padding-left 300ms ease",

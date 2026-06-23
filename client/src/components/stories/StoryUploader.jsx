@@ -111,7 +111,7 @@ export default function StoryUploader({ open, onClose, onUpload }) {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", aspectRatio: "9/16", maxHeight: 360, background: "#000" }}>
+            <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", height: 320, background: "#000" }}>
               {isVideo ? (
                 <video src={preview} autoPlay muted playsInline loop style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (

@@ -40,7 +40,7 @@ function Badge({ count, color }) {
   );
 }
 
-export default function Sidebar({ onExpandChange }) {
+export default function Sidebar({ onExpandChange, hideMobileNav = false }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const closeMenuRef = useRef(null);
   const location = useLocation();
@@ -259,7 +259,7 @@ export default function Sidebar({ onExpandChange }) {
       </motion.aside>
 
       {/* Mobile Bottom Nav */}
-      <nav
+      {!hideMobileNav && <nav
         className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden h-16"
         style={{
           background: colors.surface,
@@ -326,7 +326,7 @@ export default function Sidebar({ onExpandChange }) {
             )}
           />
         </div>
-      </nav>
+      </nav>}
 
       <style>{`
         @keyframes badge-pop {
