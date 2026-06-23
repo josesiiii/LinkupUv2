@@ -237,7 +237,7 @@ export default function FeedPage() {
 
         <style>{`
           @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
-          .feed-fullscreen { height: 100dvh; }
+          .feed-fullscreen { height: 100dvh; overflow: hidden; }
           @media (max-width: 767px) {
             .feed-fullscreen { height: calc(100dvh - 64px); }
           }

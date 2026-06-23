@@ -190,6 +190,7 @@ export default function GalleryEditor({ readOnly = false }) {
 
         <style>{`
           .linkup-gallery-tile:hover .linkup-gallery-overlay { opacity: 1; }
+          @media (pointer: coarse) { .linkup-gallery-overlay { opacity: 1 !important; } }
         `}</style>
       </div>
     </>

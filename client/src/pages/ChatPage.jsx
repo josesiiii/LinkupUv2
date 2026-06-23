@@ -11,7 +11,7 @@ export default function ChatPage() {
       </div>
 
       <style>{`
-        .chat-page-fullscreen { height: 100dvh; }
+        .chat-page-fullscreen { height: 100dvh; overflow: hidden; }
         @media (max-width: 767px) {
           .chat-page-fullscreen { height: calc(100dvh - 64px); padding: 0; }
         }

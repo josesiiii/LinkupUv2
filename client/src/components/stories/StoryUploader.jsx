@@ -111,11 +111,11 @@ export default function StoryUploader({ open, onClose, onUpload }) {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", aspectRatio: "9/16", maxHeight: 360, background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", aspectRatio: "9/16", maxHeight: 360, background: "#000" }}>
               {isVideo ? (
-                <video src={preview} autoPlay muted playsInline loop style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <video src={preview} autoPlay muted playsInline loop style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <img src={preview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={preview} alt="preview" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
               )}
               <button
                 onClick={() => { setFile(null); if (preview) URL.revokeObjectURL(preview); setPreview(null); }}

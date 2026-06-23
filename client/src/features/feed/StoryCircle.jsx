@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Plus, ChevronDown, Eye, UploadCloud } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import PortalDropdown from "../../components/ui/PortalDropdown";
+import useStoryRingState from "../../hooks/useStoryRingState";
 
 const SIZES = {
   sm: { outer: 52, inner: 46, font: 16 },
@@ -20,7 +21,7 @@ export default function StoryCircle({
   const { colors } = useTheme();
   const { outer, inner, font } = SIZES[size] || SIZES.md;
 
-  const hasStory = user?.hasActiveStory;
+  const { hasActiveStory: hasStory } = useStoryRingState(user?._id, user?.hasActiveStory);
   const ringBg = hasStory
     ? seen
       ? colors.border
