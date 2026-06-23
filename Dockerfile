@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY client/package*.json ./client/
-RUN cd client && npm ci
+RUN cd client && npm install --legacy-peer-deps
 
 COPY client/ ./client/
 
@@ -24,7 +24,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 COPY server/package*.json ./server/
-RUN cd server && npm ci --omit=dev
+RUN cd server && npm install --omit=dev --legacy-peer-deps
 
 COPY server/ ./server/
 COPY --from=builder /app/client/dist ./client/dist
