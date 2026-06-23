@@ -601,7 +601,7 @@ export default function ChatLayout() {
 
       <style>{`
         @media (max-width: 767px) {
-          .chat-sidebar.is-hidden-mobile, .chat-panel.is-hidden-mobile { display: none; }
+          .chat-sidebar.is-hidden-mobile, .chat-panel.is-hidden-mobile { display: none !important; }
           .chat-sidebar { width: 100% !important; }
           .chat-back-btn { display: inline-flex !important; }
         }

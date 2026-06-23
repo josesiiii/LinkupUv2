@@ -37,9 +37,10 @@ export default function PhotoCarousel({ photos = [], profilePicture = "", compac
         width: "100%",
         height: "100%",
         aspectRatio,
-        overflow: "visible",
+        overflow: "hidden",
         borderRadius: RADIUS,
         perspective: "1200px",
+        touchAction: "pan-y",
       }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
@@ -52,7 +53,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "", compac
           inset: 0,
           width: "100%",
           height: "100%",
-          overflow: "visible",
+          overflow: "hidden",
           borderRadius: RADIUS,
         }}
       >
