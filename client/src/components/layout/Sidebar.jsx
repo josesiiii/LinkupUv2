@@ -106,10 +106,6 @@ export default function Sidebar({ onExpandChange }) {
       : []),
   ];
 
-  const MOBILE_ITEMS = [
-    ...NAV_ITEMS,
-    { icon: UserCircle, label: "Perfil", path: "/profile", badge: 0 },
-  ];
 
   const itemStyle = (active) => ({
     color: active ? colors.pink : colors.textMuted,
@@ -271,7 +267,7 @@ export default function Sidebar({ onExpandChange }) {
           "--badge-border": colors.surface,
         }}
       >
-        {MOBILE_ITEMS.map(({ icon: Icon, label, path, badge, badgeColor }) => {
+        {NAV_ITEMS.map(({ icon: Icon, label, path, badge, badgeColor }) => {
           const active = isActive(path);
           return (
             <Link
@@ -288,6 +284,48 @@ export default function Sidebar({ onExpandChange }) {
             </Link>
           );
         })}
+
+        {/* Menú de cuenta — sustituye el link directo a /profile */}
+        <div style={{ flex: 1, position: "relative" }}>
+          <AccountSwitcher
+            includeExtras
+            align="right"
+            panelStyle={{
+              bottom: "100%",
+              top: "auto",
+              right: 0,
+              left: "auto",
+              marginBottom: 8,
+              minWidth: 220,
+            }}
+            trigger={({ open, toggle }) => (
+              <button
+                onClick={toggle}
+                className="flex flex-col items-center justify-center gap-0.5 w-full"
+                style={{
+                  height: 64,
+                  color: (open || isActive("/profile")) ? colors.pink : colors.textMuted,
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <span className="relative" style={{ overflow: "visible" }}>
+                  {usuario?.profilePicture ? (
+                    <img
+                      src={usuario.profilePicture}
+                      alt={usuario.fullName}
+                      className="h-5 w-5 rounded-full object-cover"
+                    />
+                  ) : (
+                    <UserCircle className="h-5 w-5" />
+                  )}
+                </span>
+                <span className="text-[10px] hidden sm:block">Perfil</span>
+              </button>
+            )}
+          />
+        </div>
       </nav>
 
       <style>{`

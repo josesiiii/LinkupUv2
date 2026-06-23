@@ -127,46 +127,6 @@ export default function FeedPage() {
               perspective: "1200px",
             }}>
 
-              {activeIndex > 0 && (
-                <button
-                  onClick={goPrev}
-                  style={{
-                    position: "absolute", left: 12, zIndex: 50,
-                    width: 44, height: 44, borderRadius: "50%",
-                    background: "rgba(255,255,255,0.65)",
-                    border: "1px solid #DADADA",
-                    backdropFilter: "blur(10px)",
-                    color: "#000000",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", transition: "all 150ms",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.9)"}
-                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.65)"}
-                >
-                  <ChevronLeft size={20} />
-                </button>
-              )}
-
-              {activeIndex < usuarios.length - 1 && (
-                <button
-                  onClick={goNext}
-                  style={{
-                    position: "absolute", right: 12, zIndex: 50,
-                    width: 44, height: 44, borderRadius: "50%",
-                    background: "rgba(255,255,255,0.65)",
-                    border: "1px solid #DADADA",
-                    backdropFilter: "blur(10px)",
-                    color: "#000000",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", transition: "all 150ms",
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.9)"}
-                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.65)"}
-                >
-                  <ChevronRight size={20} />
-                </button>
-              )}
-
               <div style={{
                 position: "relative",
                 width: "100%",
