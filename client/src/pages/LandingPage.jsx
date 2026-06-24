@@ -5,7 +5,6 @@ import Navbar from '../components/landing/Navbar';
 import CampusSection from '../components/landing/CampusSection';
 import HowItWorksSection from '../components/landing/HowItWorksSection';
 import UniversitiesSection from '../components/landing/NetworkingSection';
-import CompaniesSection from '../components/landing/OpportunitiesSection';
 import Footer from '../components/landing/Footer';
 
 function FinalCTA() {
@@ -56,21 +55,6 @@ function FinalCTA() {
           >
             Crear cuenta gratis
           </button>
-          <a
-            href="mailto:hola@linkup.dev"
-            style={{
-              padding: '14px 32px', borderRadius: 100,
-              background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(241,173,194,0.35)', color: '#5e4e63',
-              fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none',
-              transition: 'all 180ms ease',
-              boxShadow: '0 2px 12px rgba(241,173,194,0.08)',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#f1adc2'; e.currentTarget.style.color = '#3c2f41'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.65)'; e.currentTarget.style.color = '#5e4e63'; }}
-          >
-            Solicitar demo
-          </a>
         </div>
 
         <p style={{ fontSize: '0.8rem', color: '#a09ab8', marginTop: 20 }}>
@@ -119,10 +103,7 @@ export default function LandingPage() {
       {/* 04 — Para Universidades */}
       <UniversitiesSection />
 
-      {/* 05 — Para Empresas */}
-      <CompaniesSection />
-
-      {/* 06 — CTA Final */}
+      {/* 05 — CTA Final */}
       <FinalCTA />
 
       {/* Footer */}
