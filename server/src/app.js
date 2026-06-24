@@ -43,7 +43,7 @@ app.use(helmet({
       scriptSrc:   ["'self'", "https://www.google.com", "https://www.gstatic.com"],
       frameSrc:    ["'self'", "https://www.google.com"],
       imgSrc:      ["'self'", "data:", "https:"],
-      styleSrc:    ["'self'", "'unsafe-inline'"],
+      styleSrc:    ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       connectSrc:  ["'self'", "https:", "wss:"],
       fontSrc:     ["'self'", "https:", "data:"],
       objectSrc:   ["'none'"],

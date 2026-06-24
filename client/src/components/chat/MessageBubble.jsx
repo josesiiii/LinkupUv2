@@ -16,7 +16,7 @@ export default function MessageBubble({
   const [hovered, setHovered] = useState(false);
   const textareaRef = useRef(null);
 
-  const isOwn = message.sender._id === currentUser._id;
+  const isOwn = message.sender?._id === currentUser._id;
   const isDeleted = message.deletedForEveryone || message.text === "DELETED";
   const isUnread = !message.readBy?.includes(currentUser._id);
   const isPinned = !!message.pinned;
@@ -73,7 +73,7 @@ export default function MessageBubble({
     >
       {!isOwn && (
         <div
-          onClick={() => onAvatarClick?.(message.sender._id)}
+          onClick={() => onAvatarClick?.(message.sender?._id)}
           style={{
             cursor: onAvatarClick ? "pointer" : "default",
             flexShrink: 0, alignSelf: "flex-end",
