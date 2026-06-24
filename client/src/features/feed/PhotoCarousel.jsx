@@ -83,7 +83,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "", compac
                 inset: 0,
                 width: "100%",
                 height: "100%",
-                zIndex: isCenter ? 10 : 5,
+                zIndex: isCenter ? 5 : 10,
                 borderRadius: RADIUS,
                 overflow: "hidden",
                 cursor: isAdjacent ? "pointer" : "default",
