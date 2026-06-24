@@ -2,23 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const CAMPUSES = [
-  { id: 'itm-bello',     abbr: 'ITM',       fullName: 'Instituto Tecnológico Metropolitano', campus: 'Campus Bello',         city: 'Medellín',  accent: '#f1adc2', emoji: '🏛️' },
-  { id: 'itm-robledo',   abbr: 'ITM',       fullName: 'Instituto Tecnológico Metropolitano', campus: 'Campus Robledo',       city: 'Medellín',  accent: '#f7c9d7', emoji: '⚗️' },
-  { id: 'unal-medellin', abbr: 'UNAL',      fullName: 'Universidad Nacional de Colombia',    campus: 'Sede Medellín',        city: 'Medellín',  accent: '#d8b4fe', emoji: '🎓' },
-  { id: 'unal-bogota',   abbr: 'UNAL',      fullName: 'Universidad Nacional de Colombia',    campus: 'Sede Bogotá',          city: 'Bogotá',    accent: '#c4b5fd', emoji: '🏙️' },
-  { id: 'udea',          abbr: 'UdeA',      fullName: 'Universidad de Antioquia',            campus: 'Ciudad Universitaria', city: 'Medellín',  accent: '#6ee7b7', emoji: '🌿' },
-  { id: 'eafit',         abbr: 'EAFIT',     fullName: 'Universidad EAFIT',                   campus: 'Campus Principal',     city: 'Medellín',  accent: '#fbbf24', emoji: '💡' },
-  { id: 'javeriana',     abbr: 'Javeriana', fullName: 'Pontificia Universidad Javeriana',    campus: 'Sede Central',         city: 'Bogotá',    accent: '#a78bfa', emoji: '⚖️' },
-  { id: 'los-andes',     abbr: 'Andes',     fullName: 'Universidad de los Andes',            campus: 'Campus Norte',         city: 'Bogotá',    accent: '#7dd3fc', emoji: '🔬' },
+  { id: 'itm-bello',   abbr: 'ITM',  fullName: 'Instituto Tecnológico Metropolitano', campus: 'Campus Bello',         city: 'Medellín', accent: '#f1adc2', emoji: '🏛️' },
+  { id: 'itm-robledo', abbr: 'ITM',  fullName: 'Instituto Tecnológico Metropolitano', campus: 'Campus Robledo',       city: 'Medellín', accent: '#f7c9d7', emoji: '⚗️' },
+  { id: 'udea',        abbr: 'UdeA', fullName: 'Universidad de Antioquia',            campus: 'Ciudad Universitaria', city: 'Medellín', accent: '#6ee7b7', emoji: '🌿' },
+  { id: 'sena',        abbr: 'SENA', fullName: 'Servicio Nacional de Aprendizaje',   campus: 'Regional Antioquia',   city: 'Medellín', accent: '#86efac', emoji: '🛠️' },
 ];
 
 const TICKER_NAMES = [
   'Instituto Tecnológico Metropolitano',
-  'Universidad Nacional de Colombia',
   'Universidad de Antioquia',
-  'Universidad EAFIT',
-  'Pontificia Universidad Javeriana',
-  'Universidad de los Andes',
+  'Servicio Nacional de Aprendizaje',
 ];
 
 function useCountUp(target, active, duration = 1800) {
