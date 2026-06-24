@@ -25,6 +25,7 @@ const STEPS = [
 export default function HowItWorksSection() {
   return (
     <section
+      id="como-funciona"
       style={{
         padding: '88px 24px',
         background: '#fff',

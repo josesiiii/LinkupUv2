@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import Logo from '../ui/Logo';
 
 const NAV_LINKS = [
-  { label: 'Inicio',        href: '#inicio' },
-  { label: 'Campus',        href: '#campus' },
-  { label: 'Networking',    href: '#networking' },
-  { label: 'Oportunidades', href: '#oportunidades' },
+  { label: 'Inicio',          href: '#inicio' },
+  { label: 'Campus',          href: '#campus' },
+  { label: 'Cómo funciona',   href: '#como-funciona' },
+  { label: 'Universidades',   href: '#networking' },
 ];
 
 export default function Navbar() {
