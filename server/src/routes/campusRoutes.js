@@ -6,7 +6,8 @@ import {
   crearCampus,
   obtenerCampus,
   cambiarCampusActual,
-  feedCampus
+  feedCampus,
+  solicitarUniversidad,
 } from "../controllers/campusController.js";
 
 const router = express.Router();
@@ -46,5 +47,8 @@ router.get(
   protegerRuta,
   feedCampus
 );
+
+// SOLICITAR REGISTRO DE UNIVERSIDAD (pública — sin auth)
+router.post("/solicitar", solicitarUniversidad);
 
 export default router;

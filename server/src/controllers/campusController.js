@@ -1,6 +1,6 @@
 import Campus from "../models/Campus.js";
-
 import User from "../models/User.js";
+import UniversityRequest from "../models/UniversityRequest.js";
 
 
 
@@ -77,6 +77,20 @@ export const cambiarCampusActual = async (
 };
 
 
+
+// SOLICITAR REGISTRO DE UNIVERSIDAD
+export const solicitarUniversidad = async (req, res) => {
+  try {
+    const { universityName, city, contactName, contactEmail, message } = req.body;
+    if (!universityName?.trim() || !city?.trim() || !contactName?.trim() || !contactEmail?.trim()) {
+      return res.status(400).json({ message: "Todos los campos obligatorios son requeridos" });
+    }
+    await UniversityRequest.create({ universityName, city, contactName, contactEmail, message });
+    res.status(201).json({ message: "Solicitud enviada correctamente" });
+  } catch (error) {
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
 
 // FEED POR CAMPUS
 export const feedCampus = async (

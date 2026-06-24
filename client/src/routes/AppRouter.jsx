@@ -6,7 +6,8 @@ import AdminRoute from "./AdminRoute";
 // ── Páginas públicas ────────────────────────────────────────────────
 const LandingPage  = lazy(() => import("../pages/LandingPage"));
 const LoginPage    = lazy(() => import("../pages/LoginPage"));
-const RegisterPage = lazy(() => import("../pages/RegisterPage"));
+const RegisterPage             = lazy(() => import("../pages/RegisterPage"));
+const RegisterUniversityPage   = lazy(() => import("../pages/RegisterUniversityPage"));
 
 // Auth secundarias (agrupadas en un mismo chunk — se usan juntas raramente)
 const ForgotPassword = lazy(() => import("../pages/ForgotPassword"));
@@ -69,7 +70,8 @@ function AppRouter() {
 
           {/* Auth */}
           <Route path="/login"          element={<LoginPage />} />
-          <Route path="/register"       element={<RegisterPage />} />
+          <Route path="/register"               element={<RegisterPage />} />
+          <Route path="/registrar-universidad" element={<RegisterUniversityPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/auth/callback"  element={<AuthCallback />} />

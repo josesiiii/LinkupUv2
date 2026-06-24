@@ -1,5 +1,6 @@
 // Para Universidades — reemplaza la sección de networking hardcodeada
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const FEATURES = [
   {
@@ -73,6 +74,7 @@ function FeatureCard({ f, index }) {
 }
 
 export default function UniversitiesSection() {
+  const navigate = useNavigate();
   return (
     <section
       id="networking"
@@ -118,14 +120,14 @@ export default function UniversitiesSection() {
                 </div>
               ))}
             </div>
-            <a
-              href="mailto:hola@linkup.dev"
+            <button
+              onClick={() => navigate('/registrar-universidad')}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 padding: '12px 28px', borderRadius: 100,
                 background: 'linear-gradient(135deg, #f1adc2 0%, #d8b4fe 100%)',
                 color: '#3c2f41', fontWeight: 700, fontSize: '0.9rem',
-                textDecoration: 'none',
+                border: 'none', cursor: 'pointer',
                 boxShadow: '0 4px 20px rgba(241,173,194,0.4)',
                 transition: 'transform 180ms ease, box-shadow 180ms ease',
               }}
@@ -133,7 +135,7 @@ export default function UniversitiesSection() {
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(241,173,194,0.4)'; }}
             >
               Registrar mi universidad →
-            </a>
+            </button>
           </div>
 
           {/* Cards de features */}
