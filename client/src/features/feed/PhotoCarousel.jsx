@@ -71,7 +71,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "", compac
             <motion.div
               key={index}
               animate={{
-                x: isCenter ? "0%" : pos < 0 ? "-92%" : "92%",
+                x: isCenter ? "0%" : pos < 0 ? "-72%" : "72%",
                 scale: isCenter ? 1 : 0.85,
                 opacity: isCenter ? 1 : 0.55,
                 rotateY: isCenter ? 0 : pos * -8,
