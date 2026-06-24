@@ -37,7 +37,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "", compac
         width: "100%",
         height: "100%",
         aspectRatio,
-        overflow: "hidden",
+        overflow: "visible",
         borderRadius: RADIUS,
         perspective: "1200px",
         touchAction: "pan-y",
@@ -53,7 +53,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "", compac
           inset: 0,
           width: "100%",
           height: "100%",
-          overflow: "hidden",
+          overflow: "visible",
           borderRadius: RADIUS,
         }}
       >
@@ -71,7 +71,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "", compac
             <motion.div
               key={index}
               animate={{
-                x: isCenter ? "0%" : pos < 0 ? "-72%" : "72%",
+                x: isCenter ? "0%" : pos < 0 ? "-92%" : "92%",
                 scale: isCenter ? 1 : 0.85,
                 opacity: isCenter ? 1 : 0.55,
                 rotateY: isCenter ? 0 : pos * -8,
@@ -83,7 +83,7 @@ export default function PhotoCarousel({ photos = [], profilePicture = "", compac
                 inset: 0,
                 width: "100%",
                 height: "100%",
-                zIndex: isCenter ? 5 : 10,
+                zIndex: isCenter ? 10 : 5,
                 borderRadius: RADIUS,
                 overflow: "hidden",
                 cursor: isAdjacent ? "pointer" : "default",
