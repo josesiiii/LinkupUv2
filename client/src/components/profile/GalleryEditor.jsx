@@ -189,7 +189,7 @@ export default function GalleryEditor({ readOnly = false }) {
         <input ref={replaceInputRef} type="file" accept="image/*" onChange={handleReplaceFileSelect} style={{ display: "none" }} />
 
         <style>{`
-          .linkup-gallery-tile:hover .linkup-gallery-overlay { opacity: 1; }
+          .linkup-gallery-tile:hover .linkup-gallery-overlay { opacity: 1 !important; }
           @media (pointer: coarse) { .linkup-gallery-overlay { opacity: 1 !important; } }
         `}</style>
       </div>

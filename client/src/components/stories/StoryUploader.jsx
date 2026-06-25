@@ -27,7 +27,7 @@ export default function StoryUploader({ open, onClose, onUpload }) {
   }, [open]);
 
   useEffect(() => {
-    return () => { if (preview) URL.revokeObjectURL(preview); };
+    return () => { if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview); };
   }, [preview]);
 
   const handleFileChange = (e) => {
@@ -37,7 +37,7 @@ export default function StoryUploader({ open, onClose, onUpload }) {
     setError("");
 
     if (selected.type.startsWith("video/")) {
-      if (preview) URL.revokeObjectURL(preview);
+      if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
       setFile(selected);
       setPreview(URL.createObjectURL(selected));
       return;
@@ -48,11 +48,15 @@ export default function StoryUploader({ open, onClose, onUpload }) {
     reader.readAsDataURL(selected);
   };
 
-  const handleCropSave = (blob) => {
-    if (preview) URL.revokeObjectURL(preview);
-    const croppedFile = new File([blob], "story.jpg", { type: "image/jpeg" });
-    setFile(croppedFile);
-    setPreview(URL.createObjectURL(blob));
+  const handleCropSave = async (blob) => {
+    const dataUrl = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+    if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
+    setFile(new File([blob], "story.jpg", { type: "image/jpeg" }));
+    setPreview(dataUrl);
     setCropSrc(null);
   };
 
@@ -118,7 +122,7 @@ export default function StoryUploader({ open, onClose, onUpload }) {
                 <img src={preview} alt="preview" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
               )}
               <button
-                onClick={() => { setFile(null); if (preview) URL.revokeObjectURL(preview); setPreview(null); }}
+                onClick={() => { setFile(null); if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview); setPreview(null); }}
                 style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.5)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}
               >
                 <X size={14} />

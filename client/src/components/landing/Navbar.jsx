@@ -25,7 +25,11 @@ export default function Navbar() {
     setMenuOpen(false);
     if (href.startsWith('#')) {
       const el = document.querySelector(href);
-      el?.scrollIntoView({ behavior: 'smooth' });
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        navigate('/' + href);
+      }
     }
   };
 
@@ -110,6 +114,7 @@ export default function Navbar() {
           {/* CTA buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <button
+              className="nav-cta-btn"
               onClick={() => navigate('/login')}
               style={{
                 padding: '7px 18px',
@@ -134,6 +139,7 @@ export default function Navbar() {
               Iniciar sesión
             </button>
             <button
+              className="nav-cta-btn"
               onClick={() => navigate('/register')}
               style={{
                 padding: '7px 18px',
@@ -217,6 +223,20 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
+            <div style={{ borderTop: '1px solid rgba(241,173,194,0.15)', marginTop: 6, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <button
+                onClick={() => { setMenuOpen(false); navigate('/login'); }}
+                style={{ padding: '10px 12px', borderRadius: 12, background: 'transparent', border: '1px solid rgba(241,173,194,0.4)', color: '#5e4e63', fontSize: '0.95rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}
+              >
+                Iniciar sesión
+              </button>
+              <button
+                onClick={() => { setMenuOpen(false); navigate('/register'); }}
+                style={{ padding: '10px 12px', borderRadius: 12, background: '#f1adc2', border: '1px solid transparent', color: '#3c2f41', fontSize: '0.95rem', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
+              >
+                Crear cuenta
+              </button>
+            </div>
           </div>
         )}
       </nav>
@@ -225,6 +245,7 @@ export default function Navbar() {
         @media (max-width: 680px) {
           .nav-links-desktop { display: none !important; }
           .nav-hamburger { display: flex !important; }
+          .nav-cta-btn { display: none !important; }
         }
       `}</style>
     </>

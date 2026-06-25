@@ -1,5 +1,6 @@
 // src/pages/LandingPage.jsx
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Hero from '../components/ui/animated-shader-hero';
 import Navbar from '../components/landing/Navbar';
 import CampusSection from '../components/landing/CampusSection';
@@ -67,6 +68,14 @@ function FinalCTA() {
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [location.hash]);
 
   return (
     <div style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", overflowX: 'hidden' }}>
